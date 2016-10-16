@@ -16,9 +16,7 @@ cache:
 matrix:
   fast_finish: true
   allow_failures:
-    - php: nightly
     - php: hhvm
-    - php: 7.1
   include:
     - php: 5.3
     - php: 5.4
