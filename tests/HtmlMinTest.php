@@ -125,7 +125,7 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
   {
     return array(
         array(
-            "<html> <body>   <h1>hoi</h1></body> </html> ",
+            '<html> <body>   <h1>hoi</h1></body> </html> ',
             '<html><body><h1>hoi</h1></body></html>',
         ),
         array(
