@@ -31,13 +31,6 @@ class HtmlMin
   );
 
   /**
-   * An random md5-hash, generated via "random_bytes()".
-   *
-   * @var string
-   */
-  protected $randomHash;
-
-  /**
    * @var array
    */
   private static $booleanAttributes = array(
@@ -85,6 +78,13 @@ class HtmlMin
   );
 
   /**
+   * An random md5-hash, generated via "random_bytes()".
+   *
+   * @var string
+   */
+  protected $randomHash;
+
+  /**
    * HtmlMin constructor.
    */
   public function __construct()
@@ -129,7 +129,7 @@ class HtmlMin
     $dom->getDocument()->normalizeDocument();
 
     $textnodes = $xpath->query('//text()');
-    $skip = array("style", "pre", "code", "script", "textarea");
+    $skip = array('style', 'pre', 'code', 'script', 'textarea');
     foreach ($textnodes as $t) {
       /* @var $t \DOMNode */
       $xp = $t->getNodePath();
@@ -146,7 +146,7 @@ class HtmlMin
         continue;
       }
 
-      $t->nodeValue = preg_replace("/\s{2,}/", " ", $t->nodeValue);
+      $t->nodeValue = preg_replace("/\s{2,}/", ' ', $t->nodeValue);
     }
 
     $dom->getDocument()->normalizeDocument();
@@ -163,11 +163,11 @@ class HtmlMin
       }
 
       foreach ($candidates as $c) {
-        if ($c == null) {
+        if ($c === null) {
           continue;
         }
 
-        if ($c->nodeType == 3) {
+        if ($c->nodeType === 3) {
           $c->nodeValue = trim($c->nodeValue);
         }
       }
@@ -191,7 +191,7 @@ class HtmlMin
     // ------------------------------------
 
     $html = UTF8::cleanup($dom->html());
-            // final clean-up
+    // final clean-up
     $html = str_replace(
         array(
             'html>' . "\n",
@@ -238,6 +238,7 @@ class HtmlMin
       return false;
     }
 
+    /*
     if (
         ($element->tag === 'script' || $element->tag === 'style')
         &&
@@ -245,9 +246,10 @@ class HtmlMin
     ) {
       // TODO: protect inline css / js
     }
+    */
 
     $attrs = array();
-    foreach ($attributs as $attrName => $attrValue) {
+    foreach ((array)$attributs as $attrName => $attrValue) {
 
       if (in_array($attrName, self::$booleanAttributes, true)) {
         $attrs[$attrName] = 'delete-this-' . $this->randomHash;
@@ -361,7 +363,7 @@ class HtmlMin
       return $attrValue;
     }
 
-    $classes = preg_split("/ /", $attrValue);
+    $classes = explode(' ', $attrValue);
     if (!$classes) {
       return '';
     }
