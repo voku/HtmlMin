@@ -1,10 +1,11 @@
 {
-  "name": "voku/HtmlMin",
-  "description": "An HTML Minifier",
+  "name": "voku/html-min",
+  "description": "HTML Compressor and Minifier",
   "keywords": [
     "html",
     "compress",
     "compression",
+    "Compressor",
     "minifier"
   ],
   "type": "library",
