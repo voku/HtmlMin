@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/voku/HtmlMin.svg?branch=master)](https://travis-ci.org/voku/HtmlMin)
-[![Coverage Status](https://coveralls.io/repos/voku/HtmlMin/badge.svg?branch=master&service=github)](https://coveralls.io/github/voku/HtmlMin?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/voku/HtmlMin/badge.svg?branch=master)](https://coveralls.io/github/voku/HtmlMin?branch=master)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/voku/HtmlMin/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/voku/HtmlMin/?branch=master)
 [![Latest Stable Version](https://poser.pugx.org/voku/HtmlMin/v/stable)](https://packagist.org/packages/voku/html-min) 
 [![Total Downloads](https://poser.pugx.org/voku/HtmlMin/downloads)](https://packagist.org/packages/voku/html-min) 
