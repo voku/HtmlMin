@@ -27,7 +27,6 @@
   "autoload": {
     "psr-4": {
       "voku\\": "src/voku/"
-    },
-    "files": [ "bootstrap.php" ]
+    }
   }
 }
