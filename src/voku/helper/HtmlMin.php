@@ -77,6 +77,16 @@ class HtmlMin
       'typemustmatch',
       'visible',
   );
+  /**
+   * @var array
+   */
+  private static $skipTagsForRemoveWhitespace = array(
+      'style',
+      'pre',
+      'code',
+      'script',
+      'textarea',
+  );
 
   /**
    * An random md5-hash, generated via "random_bytes()".
@@ -89,11 +99,6 @@ class HtmlMin
    * @var array
    */
   private $protectedChildNodes;
-
-  /**
-   * @var array
-   */
-  private static $skipTagsForRemoveWhitespace = array('style', 'pre', 'code', 'script', 'textarea');
 
   /**
    * @var string
@@ -169,7 +174,7 @@ class HtmlMin
     // -------------------------------------------------------------------------
 
     $html = preg_replace_callback(
-        '/<(?<element>'. $this->protectedChildNodesHelper . ')(?<attributes> [^>]*)?>(?<value>.*?)<\/' . $this->protectedChildNodesHelper . '>/',
+        '/<(?<element>' . $this->protectedChildNodesHelper . ')(?<attributes> [^>]*)?>(?<value>.*?)<\/' . $this->protectedChildNodesHelper . '>/',
         array($this, 'restoreProtectedHtml'),
         $html
     );
@@ -201,10 +206,10 @@ class HtmlMin
 
     $html = preg_replace(
         array(
-            '/<(?:' . $this->protectedChildNodesHelper . ')(:? [^>]*)?>/'
+            '/<(?:' . $this->protectedChildNodesHelper . ')(:? [^>]*)?>/',
         ),
         array(
-            ''
+            '',
         ),
         $html
     );
@@ -218,177 +223,6 @@ class HtmlMin
     }
 
     return $html;
-  }
-
-  /**
-   * Prevent changes of inline "styles" and "scripts".
-   *
-   * @param HtmlDomParser $dom
-   *
-   * @return HtmlDomParser
-   */
-  private function protectTagsInDom(HtmlDomParser $dom)
-  {
-    // init
-    $i = 0;
-
-    foreach ($dom->find('script, style') as $element) {
-
-      // skip external links
-      if ($element->tag === 'script' || $element->tag === 'style') {
-        $attributs = $element->getAllAttributes();
-        if (isset($attributs['src'])) {
-          continue;
-        }
-      }
-
-      $node = $element->getNode();
-      while ($node->childNodes->length > 0) {
-        $this->protectedChildNodes[$i][] = $node->firstChild->nodeValue;
-        $node->removeChild($node->firstChild);
-      }
-
-      $child = new \DOMElement($this->protectedChildNodesHelper);
-      $node = $element->getNode()->appendChild($child);
-      /* @var $node \DOMElement */
-      $node->setAttribute('data-html-min--saved-content', $i);
-
-      ++$i;
-    }
-
-    return $dom;
-  }
-
-  /**
-   * Optimize HTML-tag attributes in the dom.
-   *
-   * @param HtmlDomParser $dom
-   *
-   * @return HtmlDomParser
-   */
-  private function optimizeAttributesInDom(HtmlDomParser $dom)
-  {
-    foreach ($dom->find('*') as $element) {
-      $attributs = $element->getAllAttributes();
-
-      $this->optimizeAttributes($element, $attributs);
-    }
-
-    return $dom;
-  }
-
-  /**
-   * Remove comments in the dom.
-   *
-   * @param HtmlDomParser $dom
-   *
-   * @return HtmlDomParser
-   */
-  private function removeCommentsInDom(HtmlDomParser $dom)
-  {
-    foreach ($dom->find('//comment()') as $commentWrapper) {
-      $comment = $commentWrapper->getNode();
-      $val = $comment->nodeValue;
-      if (strpos($val, '[') !== 0) {
-        $comment->parentNode->removeChild($comment);
-      }
-    }
-
-    $dom->getDocument()->normalizeDocument();
-
-    return $dom;
-  }
-
-  /**
-   * Trim tags in the dom.
-   *
-   * @param HtmlDomParser $dom
-   *
-   * @return HtmlDomParser
-   */
-  private function trimTagsInDom(HtmlDomParser $dom) {
-    $divnodes = $dom->find('//div|//p|//nav|//footer|//article|//script|//hr|//br');
-    foreach ($divnodes as $divnodeWrapper) {
-      $divnode = $divnodeWrapper->getNode();
-
-      $candidates = array();
-      /** @noinspection PhpParamsInspection */
-      if (count($divnode->childNodes) > 0) {
-        $candidates[] = $divnode->firstChild;
-        $candidates[] = $divnode->lastChild;
-        $candidates[] = $divnode->previousSibling;
-        $candidates[] = $divnode->nextSibling;
-      }
-
-      foreach ($candidates as $candidate) {
-        if ($candidate === null) {
-          continue;
-        }
-
-        if ($candidate->nodeType === 3) {
-          $candidate->nodeValue = trim($candidate->nodeValue);
-        }
-      }
-    }
-
-    $dom->getDocument()->normalizeDocument();
-
-    return $dom;
-  }
-
-  /**
-   * Remove whitespace from dom-nodes.
-   *
-   * @param HtmlDomParser $dom
-   *
-   * @return HtmlDomParser
-   */
-  private function removeWhitespaceInDom(HtmlDomParser $dom)
-  {
-    $textnodes = $dom->find('//text()');
-    foreach ($textnodes as $textnodeWrapper) {
-      $textnode = $textnodeWrapper->getNode();
-      $xp = $textnode->getNodePath();
-
-      $doSkip = false;
-      foreach (self::$skipTagsForRemoveWhitespace as $pattern) {
-        if (strpos($xp, "/$pattern") !== false) {
-          $doSkip = true;
-          break;
-        }
-      }
-
-      if ($doSkip) {
-        continue;
-      }
-
-      $textnode->nodeValue = preg_replace("/\s{2,}/", ' ', $textnode->nodeValue);
-    }
-
-    $dom->getDocument()->normalizeDocument();
-
-    return $dom;
-  }
-
-  /**
-   * Callback function for preg_replace_callback use.
-   *
-   * @param  array $matches PREG matches
-   *
-   * @return string
-   */
-  private function restoreProtectedHtml($matches)
-  {
-    preg_match('/.*"(?<id>\d*)"/', $matches['attributes'], $matchesInner);
-
-    $htmlChild = '';
-    if (isset($this->protectedChildNodes[$matchesInner['id']])) {
-      foreach ($this->protectedChildNodes[$matchesInner['id']] as $childNode) {
-        $htmlChild .= $childNode;
-      }
-    }
-
-    return $htmlChild;
   }
 
   /**
@@ -510,6 +344,140 @@ class HtmlMin
   }
 
   /**
+   * Optimize HTML-tag attributes in the dom.
+   *
+   * @param HtmlDomParser $dom
+   *
+   * @return HtmlDomParser
+   */
+  private function optimizeAttributesInDom(HtmlDomParser $dom)
+  {
+    foreach ($dom->find('*') as $element) {
+      $attributs = $element->getAllAttributes();
+
+      $this->optimizeAttributes($element, $attributs);
+    }
+
+    return $dom;
+  }
+
+  /**
+   * Prevent changes of inline "styles" and "scripts".
+   *
+   * @param HtmlDomParser $dom
+   *
+   * @return HtmlDomParser
+   */
+  private function protectTagsInDom(HtmlDomParser $dom)
+  {
+    // init
+    $i = 0;
+
+    foreach ($dom->find('script, style') as $element) {
+
+      // skip external links
+      if ($element->tag === 'script' || $element->tag === 'style') {
+        $attributs = $element->getAllAttributes();
+        if (isset($attributs['src'])) {
+          continue;
+        }
+      }
+
+      $node = $element->getNode();
+      while ($node->childNodes->length > 0) {
+        $this->protectedChildNodes[$i][] = $node->firstChild->nodeValue;
+        $node->removeChild($node->firstChild);
+      }
+
+      $child = new \DOMElement($this->protectedChildNodesHelper);
+      $node = $element->getNode()->appendChild($child);
+      /* @var $node \DOMElement */
+      $node->setAttribute('data-html-min--saved-content', $i);
+
+      ++$i;
+    }
+
+    return $dom;
+  }
+
+  /**
+   * Remove comments in the dom.
+   *
+   * @param HtmlDomParser $dom
+   *
+   * @return HtmlDomParser
+   */
+  private function removeCommentsInDom(HtmlDomParser $dom)
+  {
+    foreach ($dom->find('//comment()') as $commentWrapper) {
+      $comment = $commentWrapper->getNode();
+      $val = $comment->nodeValue;
+      if (strpos($val, '[') !== 0) {
+        $comment->parentNode->removeChild($comment);
+      }
+    }
+
+    $dom->getDocument()->normalizeDocument();
+
+    return $dom;
+  }
+
+  /**
+   * Remove whitespace from dom-nodes.
+   *
+   * @param HtmlDomParser $dom
+   *
+   * @return HtmlDomParser
+   */
+  private function removeWhitespaceInDom(HtmlDomParser $dom)
+  {
+    $textnodes = $dom->find('//text()');
+    foreach ($textnodes as $textnodeWrapper) {
+      $textnode = $textnodeWrapper->getNode();
+      $xp = $textnode->getNodePath();
+
+      $doSkip = false;
+      foreach (self::$skipTagsForRemoveWhitespace as $pattern) {
+        if (strpos($xp, "/$pattern") !== false) {
+          $doSkip = true;
+          break;
+        }
+      }
+
+      if ($doSkip) {
+        continue;
+      }
+
+      $textnode->nodeValue = preg_replace("/\s{2,}/", ' ', $textnode->nodeValue);
+    }
+
+    $dom->getDocument()->normalizeDocument();
+
+    return $dom;
+  }
+
+  /**
+   * Callback function for preg_replace_callback use.
+   *
+   * @param  array $matches PREG matches
+   *
+   * @return string
+   */
+  private function restoreProtectedHtml($matches)
+  {
+    preg_match('/.*"(?<id>\d*)"/', $matches['attributes'], $matchesInner);
+
+    $htmlChild = '';
+    if (isset($this->protectedChildNodes[$matchesInner['id']])) {
+      foreach ($this->protectedChildNodes[$matchesInner['id']] as $childNode) {
+        $htmlChild .= $childNode;
+      }
+    }
+
+    return $htmlChild;
+  }
+
+  /**
    * @param $attrName
    * @param $attrValue
    *
@@ -537,5 +505,43 @@ class HtmlMin
     $attrValue = trim($attrValue);
 
     return $attrValue;
+  }
+
+  /**
+   * Trim tags in the dom.
+   *
+   * @param HtmlDomParser $dom
+   *
+   * @return HtmlDomParser
+   */
+  private function trimTagsInDom(HtmlDomParser $dom)
+  {
+    $divnodes = $dom->find('//div|//p|//nav|//footer|//article|//script|//hr|//br');
+    foreach ($divnodes as $divnodeWrapper) {
+      $divnode = $divnodeWrapper->getNode();
+
+      $candidates = array();
+      /** @noinspection PhpParamsInspection */
+      if (count($divnode->childNodes) > 0) {
+        $candidates[] = $divnode->firstChild;
+        $candidates[] = $divnode->lastChild;
+        $candidates[] = $divnode->previousSibling;
+        $candidates[] = $divnode->nextSibling;
+      }
+
+      foreach ($candidates as $candidate) {
+        if ($candidate === null) {
+          continue;
+        }
+
+        if ($candidate->nodeType === 3) {
+          $candidate->nodeValue = trim($candidate->nodeValue);
+        }
+      }
+    }
+
+    $dom->getDocument()->normalizeDocument();
+
+    return $dom;
   }
 }

@@ -12,170 +12,6 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
    */
   private $compressor;
 
-  public function setUp()
-  {
-    parent::setUp();
-    $this->compressor = new HtmlMin();
-  }
-
-  public function tearDown()
-  {
-    unset($this->compressor);
-  }
-
-  /**
-   * @return array
-   */
-  public function providerNewLinesTabsReturns()
-  {
-    return array(
-        array(
-            "<html>\r\t<body>\n\t\t<h1>hoi</h1>\r\n\t</body>\r\n</html>",
-            '<html><body><h1>hoi</h1></body>' . "\n" . '</html>',
-        ),
-        array(
-            "<html>\r\t<h1>hoi</h1>\r\n\t\r\n</html>",
-            '<html><h1>hoi</h1></html>',
-        ),
-        array(
-            "<html><p>abc\r\ndef</p></html>",
-            "<html><p>abc\ndef</p></html>",
-        ),
-    );
-  }
-
-  /**
-   * @dataProvider providerNewLinesTabsReturns
-   *
-   * @param $input
-   * @param $expected
-   */
-  public function testNewLinesTabsReturns($input, $expected)
-  {
-    $actual = $this->compressor->minify($input);
-    self::assertSame($expected, $actual);
-  }
-
-  /**
-   * @return array
-   */
-  public function providerMultipleSpaces()
-  {
-    return array(
-        array(
-            '<html>  <body>          <h1>h  oi</h1>                         </body></html>',
-            '<html><body><h1>h oi</h1></body></html>',
-        ),
-        array(
-            '<html>   </html>',
-            '<html></html>',
-        ),
-        array(
-            "<html><body>  pre \r\n  suf\r\n  </body>",
-            "<html><body>  pre \r\n  suf\r\n  </body>",
-        ),
-    );
-  }
-
-  /**
-   * @dataProvider providerMultipleSpaces
-   *
-   * @param $input
-   * @param $expected
-   */
-  public function testMultipleSpaces($input, $expected)
-  {
-    $actual = $this->compressor->minify($input);
-    self::assertSame($expected, $actual);
-  }
-
-  /**
-   * @return array
-   */
-  public function providerSpaceAfterGt()
-  {
-    return array(
-        array(
-            '<html> <body> <h1>hoi</h1>   </body> </html>',
-            '<html><body><h1>hoi</h1></body></html>',
-        ),
-        array(
-            '<html>  a',
-            '<html>  a',
-        ),
-    );
-  }
-
-  /**
-   * @dataProvider providerSpaceAfterGt
-   *
-   * @param $input
-   * @param $expected
-   */
-  public function testSpaceAfterGt($input, $expected)
-  {
-    $actual = $this->compressor->minify($input);
-    self::assertSame($expected, $actual);
-  }
-
-  /**
-   * @return array
-   */
-  public function providerSpaceBeforeLt()
-  {
-    return array(
-        array(
-            '<html> <body>   <h1>hoi</h1></body> </html> ',
-            '<html><body><h1>hoi</h1></body></html>',
-        ),
-        array(
-            'a     <html>',
-            'a     <html>',
-        ),
-    );
-  }
-
-  /**
-   * @dataProvider providerSpaceBeforeLt
-   *
-   * @param $input
-   * @param $expected
-   */
-  public function testSpaceBeforeLt($input, $expected)
-  {
-    $actual = $this->compressor->minify($input);
-    self::assertSame($expected, $actual);
-  }
-
-  /**
-   * @return array
-   */
-  public function providerTrim()
-  {
-    return array(
-        array(
-            '              ',
-            '',
-        ),
-        array(
-            ' ',
-            '',
-        ),
-    );
-  }
-
-  /**
-   * @dataProvider providerBoolAttr
-   *
-   * @param $input
-   * @param $expected
-   */
-  public function testBoolAttr($input, $expected)
-  {
-    $actual = $this->compressor->minify('<!doctype html><html><body><form>' . $input . '</form></body></html>');
-    self::assertSame('<!DOCTYPE html><html><body><form>' . $expected . '</form></body></html>', $actual);
-  }
-
   /**
    * @return array
    */
@@ -202,15 +38,79 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
   }
 
   /**
-   * @dataProvider providerTrim
-   *
-   * @param $input
-   * @param $expected
+   * @return array
    */
-  public function testTrim($input, $expected)
+  public function providerMultipleSpaces()
   {
-    $actual = $this->compressor->minify($input);
-    self::assertSame($expected, $actual);
+    return array(
+        array(
+            '<html>  <body>          <h1>h  oi</h1>                         </body></html>',
+            '<html><body><h1>h oi</h1></body></html>',
+        ),
+        array(
+            '<html>   </html>',
+            '<html></html>',
+        ),
+        array(
+            "<html><body>  pre \r\n  suf\r\n  </body>",
+            "<html><body>  pre \r\n  suf\r\n  </body>",
+        ),
+    );
+  }
+
+  /**
+   * @return array
+   */
+  public function providerNewLinesTabsReturns()
+  {
+    return array(
+        array(
+            "<html>\r\t<body>\n\t\t<h1>hoi</h1>\r\n\t</body>\r\n</html>",
+            '<html><body><h1>hoi</h1></body>' . "\n" . '</html>',
+        ),
+        array(
+            "<html>\r\t<h1>hoi</h1>\r\n\t\r\n</html>",
+            '<html><h1>hoi</h1></html>',
+        ),
+        array(
+            "<html><p>abc\r\ndef</p></html>",
+            "<html><p>abc\ndef</p></html>",
+        ),
+    );
+  }
+
+  /**
+   * @return array
+   */
+  public function providerSpaceAfterGt()
+  {
+    return array(
+        array(
+            '<html> <body> <h1>hoi</h1>   </body> </html>',
+            '<html><body><h1>hoi</h1></body></html>',
+        ),
+        array(
+            '<html>  a',
+            '<html>  a',
+        ),
+    );
+  }
+
+  /**
+   * @return array
+   */
+  public function providerSpaceBeforeLt()
+  {
+    return array(
+        array(
+            '<html> <body>   <h1>hoi</h1></body> </html> ',
+            '<html><body><h1>hoi</h1></body></html>',
+        ),
+        array(
+            'a     <html>',
+            'a     <html>',
+        ),
+    );
   }
 
   /**
@@ -227,32 +127,63 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
   }
 
   /**
-   * @dataProvider providerSpecialCharacterEncoding
+   * @return array
+   */
+  public function providerTrim()
+  {
+    return array(
+        array(
+            '              ',
+            '',
+        ),
+        array(
+            ' ',
+            '',
+        ),
+    );
+  }
+
+  public function setUp()
+  {
+    parent::setUp();
+    $this->compressor = new HtmlMin();
+  }
+
+  public function tearDown()
+  {
+    unset($this->compressor);
+  }
+
+  /**
+   * @dataProvider providerBoolAttr
    *
    * @param $input
    * @param $expected
    */
-  public function testSpecialCharacterEncoding($input, $expected)
+  public function testBoolAttr($input, $expected)
   {
-    $actual = $this->compressor->minify($input);
-    self::assertSame($expected, $actual);
+    $actual = $this->compressor->minify('<!doctype html><html><body><form>' . $input . '</form></body></html>');
+    self::assertSame('<!DOCTYPE html><html><body><form>' . $expected . '</form></body></html>', $actual);
   }
 
-  public function testMinifySimple()
+  public function testMinifyBase()
   {
     // init
     $htmlMin = new HtmlMin();
 
-    $html = '
-    <html>
-    <head>     </head>
-    <body>
-      <p id="text" class="foo">foo</p>  <br />  <ul > <li> <p class="foo">lall</p> </li></ul>
-    </body>
-    </html>
-    ';
+    $html = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/base.html'));
+    $expected = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/base_result.html'));
 
-    $expected = '<html><head></head><body><p class="foo" id="text">foo</p><br><ul><li><p class="foo">lall</p></li></ul></body></html>';
+    self::assertSame($expected, $htmlMin->minify($html));
+  }
+
+  public function testMinifyCodeTag()
+  {
+    // init
+    $htmlMin = new HtmlMin();
+
+    $html = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/code.html'));
+    $expected = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/code_result.html'));
 
     self::assertSame($expected, $htmlMin->minify($html));
   }
@@ -274,25 +205,94 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
     self::assertSame($expected, $htmlMin->minify($html));
   }
 
-  public function testMinifyCodeTag()
+  public function testMinifySimple()
   {
     // init
     $htmlMin = new HtmlMin();
 
-    $html = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/code.html'));
-    $expected = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/code_result.html'));
+    $html = '
+    <html>
+    <head>     </head>
+    <body>
+      <p id="text" class="foo">foo</p>  <br />  <ul > <li> <p class="foo">lall</p> </li></ul>
+    </body>
+    </html>
+    ';
+
+    $expected = '<html><head></head><body><p class="foo" id="text">foo</p><br><ul><li><p class="foo">lall</p></li></ul></body></html>';
 
     self::assertSame($expected, $htmlMin->minify($html));
   }
 
-  public function testMinifyBase()
+  /**
+   * @dataProvider providerMultipleSpaces
+   *
+   * @param $input
+   * @param $expected
+   */
+  public function testMultipleSpaces($input, $expected)
   {
-    // init
-    $htmlMin = new HtmlMin();
+    $actual = $this->compressor->minify($input);
+    self::assertSame($expected, $actual);
+  }
 
-    $html = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/base.html'));
-    $expected = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/base_result.html'));
+  /**
+   * @dataProvider providerNewLinesTabsReturns
+   *
+   * @param $input
+   * @param $expected
+   */
+  public function testNewLinesTabsReturns($input, $expected)
+  {
+    $actual = $this->compressor->minify($input);
+    self::assertSame($expected, $actual);
+  }
 
-    self::assertSame($expected, $htmlMin->minify($html));
+  /**
+   * @dataProvider providerSpaceAfterGt
+   *
+   * @param $input
+   * @param $expected
+   */
+  public function testSpaceAfterGt($input, $expected)
+  {
+    $actual = $this->compressor->minify($input);
+    self::assertSame($expected, $actual);
+  }
+
+  /**
+   * @dataProvider providerSpaceBeforeLt
+   *
+   * @param $input
+   * @param $expected
+   */
+  public function testSpaceBeforeLt($input, $expected)
+  {
+    $actual = $this->compressor->minify($input);
+    self::assertSame($expected, $actual);
+  }
+
+  /**
+   * @dataProvider providerSpecialCharacterEncoding
+   *
+   * @param $input
+   * @param $expected
+   */
+  public function testSpecialCharacterEncoding($input, $expected)
+  {
+    $actual = $this->compressor->minify($input);
+    self::assertSame($expected, $actual);
+  }
+
+  /**
+   * @dataProvider providerTrim
+   *
+   * @param $input
+   * @param $expected
+   */
+  public function testTrim($input, $expected)
+  {
+    $actual = $this->compressor->minify($input);
+    self::assertSame($expected, $actual);
   }
 }
