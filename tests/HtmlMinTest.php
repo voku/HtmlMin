@@ -178,8 +178,22 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
     // init
     $htmlMin = new HtmlMin();
 
-    $html = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/base.html'));
-    $expected = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/base_result.html'));
+    $html = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/base1.html'));
+    $expected = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/base1_result.html'));
+
+    self::assertSame($expected, $htmlMin->minify($html));
+
+    // ---
+
+    $html = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/base2.html'));
+    $expected = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/base2_result.html'));
+
+    self::assertSame($expected, $htmlMin->minify($html));
+
+    // ---
+
+    $html = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/base3.html'));
+    $expected = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/base3_result.html'));
 
     self::assertSame($expected, $htmlMin->minify($html));
   }
