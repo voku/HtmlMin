@@ -12,6 +12,13 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
    */
   private $compressor;
 
+  public function testEmpryResult()
+  {
+    self::assertSame('', $this->compressor->minify(null));
+    self::assertSame('', $this->compressor->minify(' '));
+    self::assertSame('', $this->compressor->minify(''));
+  }
+
   /**
    * @return array
    */
