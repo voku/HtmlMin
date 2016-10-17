@@ -23,59 +23,79 @@ class HtmlMin
    * @var array
    */
   private static $executableScriptsMimeTypes = array(
-      'text/javascript',
-      'text/ecmascript',
-      'text/jscript',
-      'application/javascript',
-      'application/x-javascript',
-      'application/ecmascript',
+      'text/javascript'          => '',
+      'text/ecmascript'          => '',
+      'text/jscript'             => '',
+      'application/javascript'   => '',
+      'application/x-javascript' => '',
+      'application/ecmascript'   => '',
   );
+
+  private static $selfClosingTags = array(
+      'area',
+      'base',
+      'br',
+      'col',
+      'command',
+      'embed',
+      'hr',
+      'img',
+      'input',
+      'keygen',
+      'link',
+      'meta',
+      'param',
+      'source',
+      'track',
+      'wbr',
+  );
+
 
   /**
    * @var array
    */
   private static $booleanAttributes = array(
-      'allowfullscreen',
-      'async',
-      'autofocus',
-      'autoplay',
-      'checked',
-      'compact',
-      'controls',
-      'declare',
-      'default',
-      'defaultchecked',
-      'defaultmuted',
-      'defaultselected',
-      'defer',
-      'disabled',
-      'enabled',
-      'formnovalidate',
-      'hidden',
-      'indeterminate',
-      'inert',
-      'ismap',
-      'itemscope',
-      'loop',
-      'multiple',
-      'muted',
-      'nohref',
-      'noresize',
-      'noshade',
-      'novalidate',
-      'nowrap',
-      'open',
-      'pauseonexit',
-      'readonly',
-      'required',
-      'reversed',
-      'scoped',
-      'seamless',
-      'selected',
-      'sortable',
-      'truespeed',
-      'typemustmatch',
-      'visible',
+      'allowfullscreen' => '',
+      'async'           => '',
+      'autofocus'       => '',
+      'autoplay'        => '',
+      'checked'         => '',
+      'compact'         => '',
+      'controls'        => '',
+      'declare'         => '',
+      'default'         => '',
+      'defaultchecked'  => '',
+      'defaultmuted'    => '',
+      'defaultselected' => '',
+      'defer'           => '',
+      'disabled'        => '',
+      'enabled'         => '',
+      'formnovalidate'  => '',
+      'hidden'          => '',
+      'indeterminate'   => '',
+      'inert'           => '',
+      'ismap'           => '',
+      'itemscope'       => '',
+      'loop'            => '',
+      'multiple'        => '',
+      'muted'           => '',
+      'nohref'          => '',
+      'noresize'        => '',
+      'noshade'         => '',
+      'novalidate'      => '',
+      'nowrap'          => '',
+      'open'            => '',
+      'pauseonexit'     => '',
+      'readonly'        => '',
+      'required'        => '',
+      'reversed'        => '',
+      'scoped'          => '',
+      'seamless'        => '',
+      'selected'        => '',
+      'sortable'        => '',
+      'truespeed'       => '',
+      'typemustmatch'   => '',
+      'visible'         => '',
   );
   /**
    * @var array
@@ -214,6 +234,12 @@ class HtmlMin
         $html
     );
 
+    static $cacheSelfClosingTags = null;
+    if ($cacheSelfClosingTags === null) {
+      $cacheSelfClosingTags = implode('|', self::$selfClosingTags);
+    }
+    $html = preg_replace('#<\b(' . $cacheSelfClosingTags . ')([^>]+)><\/\b\1>#', '<\\1\\2/>', $html);
+
     // ------------------------------------
     // check if compression worked
     // ------------------------------------
@@ -230,20 +256,20 @@ class HtmlMin
    *  and remove some default attributes.
    *
    * @param SimpleHtmlDom $element
-   * @param array         $attributs
    *
    * @return bool
    */
-  private function optimizeAttributes(SimpleHtmlDom $element, &$attributs)
+  private function optimizeAttributes(SimpleHtmlDom $element)
   {
-    if (!$attributs) {
+    $attributs = $element->getAllAttributes();
+    if ($attributs === null) {
       return false;
     }
 
     $attrs = array();
-    foreach ($attributs as $attrName => $attrValue) {
+    foreach ((array)$attributs as $attrName => $attrValue) {
 
-      if (in_array($attrName, self::$booleanAttributes, true)) {
+      if (isset(self::$booleanAttributes[$attrName])) {
         $attrs[$attrName] = $this->booleanAttributesHelper;
         $element->{$attrName} = null;
         continue;
@@ -272,6 +298,7 @@ class HtmlMin
 
     ksort($attrs);
     foreach ($attrs as $attrName => $attrValue) {
+      $attrValue = HtmlDomParser::replaceToPreserveHtmlEntities($attrValue);
       $element->setAttribute($attrName, $attrValue, true);
     }
 
@@ -326,7 +353,7 @@ class HtmlMin
     }
 
     // remove deprecated script-mime-types
-    if ($tag === 'script' && $attrName === 'type' && isset($allAttr['src']) && in_array($attrValue, self::$executableScriptsMimeTypes, true)) {
+    if ($tag === 'script' && $attrName === 'type' && isset($allAttr['src'], self::$executableScriptsMimeTypes[$attrValue])) {
       return true;
     }
 
@@ -353,9 +380,7 @@ class HtmlMin
   private function optimizeAttributesInDom(HtmlDomParser $dom)
   {
     foreach ($dom->find('*') as $element) {
-      $attributs = $element->getAllAttributes();
-
-      $this->optimizeAttributes($element, $attributs);
+      $this->optimizeAttributes($element);
     }
 
     return $dom;

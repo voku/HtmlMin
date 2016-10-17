@@ -195,19 +195,24 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
     self::assertSame($expected, $htmlMin->minify($html));
   }
 
+  public function testMinifyTheGuardian()
+  {
+    // init
+    $htmlMin = new HtmlMin();
+
+    $html = str_replace(array("\r\n", "\r", "\n"), "\n", UTF8::file_get_contents(__DIR__ . '/fixtures/theguardian.html'));
+    $expected = str_replace(array("\r\n", "\r", "\n",), "\n", UTF8::file_get_contents(__DIR__ . '/fixtures/theguardian_result.html'));
+
+    self::assertSame($expected, $htmlMin->minify($html));
+  }
+
   public function testMinifyHlt()
   {
     // init
     $htmlMin = new HtmlMin();
 
     $html = str_replace(array("\r\n", "\r", "\n"), "\n", UTF8::file_get_contents(__DIR__ . '/fixtures/hlt.html'));
-    $expected = str_replace(
-        array(
-            "\r\n",
-            "\r",
-            "\n",
-        ), "\n", UTF8::file_get_contents(__DIR__ . '/fixtures/hlt_result.html')
-    );
+    $expected = str_replace(array("\r\n", "\r", "\n",), "\n", UTF8::file_get_contents(__DIR__ . '/fixtures/hlt_result.html'));
 
     self::assertSame($expected, $htmlMin->minify($html));
   }
