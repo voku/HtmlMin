@@ -8,6 +8,7 @@ namespace voku\helper;
  * Inspired by:
  * - JS: https://github.com/kangax/html-minifier/blob/gh-pages/src/htmlminifier.js
  * - PHP: https://github.com/searchturbine/phpwee-php-minifier
+ * - PHP: https://github.com/WyriHaximus/HtmlCompress
  * - PHP: https://github.com/zaininnari/html-minifier
  * - Java: https://code.google.com/archive/p/htmlcompressor/
  *
@@ -82,14 +83,38 @@ class HtmlMin
    *
    * @var string
    */
-  protected $randomHash;
+  private $randomHash;
+
+  /**
+   * @var array
+   */
+  private $protectedChildNodes;
+
+  /**
+   * @var array
+   */
+  private static $skipTagsForRemoveWhitespace = array('style', 'pre', 'code', 'script', 'textarea');
+
+  /**
+   * @var string
+   */
+  private $protectedChildNodesHelper;
+
+  /**
+   * @var string
+   */
+  private $booleanAttributesHelper;
 
   /**
    * HtmlMin constructor.
    */
   public function __construct()
   {
+    $this->protectedChildNodes = array();
     $this->randomHash = md5(Bootup::get_random_bytes(16));
+
+    $this->protectedChildNodesHelper = 'html-min--saved-content-' . $this->randomHash;
+    $this->booleanAttributesHelper = 'html-min--delete-this-' . $this->randomHash;
   }
 
   /**
@@ -109,6 +134,8 @@ class HtmlMin
       return '';
     }
 
+    // init
+    $this->protectedChildNodes = array();
     $origHtml = $html;
     $origHtmlLength = UTF8::strlen($html);
 
@@ -118,44 +145,147 @@ class HtmlMin
 
     $dom->loadHtml($html);
 
+    $dom = $this->protectTagsInDom($dom);
+    $dom = $this->optimizeAttributesInDom($dom);
+    $dom = $this->removeCommentsInDom($dom);
+    $dom = $this->removeWhitespaceInDom($dom);
+    $dom = $this->trimTagsInDom($dom);
+
+    $html = $dom->html();
+
+    // -------------------------------------------------------------------------
+    // Trim whitespace from html-string. [protected html is still protected]
+    // -------------------------------------------------------------------------
+
+    // Remove spaces that are followed by either > or <
+    $html = preg_replace('/ (>)/', '$1', $html);
+    // Remove spaces that are preceded by either > or <
+    $html = preg_replace('/(<) /', '$1', $html);
+    // Remove spaces that are between > and <
+    $html = preg_replace('/(>) (<)/', '>$2', $html);
+
+    // -------------------------------------------------------------------------
+    // Restore protected HTML-code.
+    // -------------------------------------------------------------------------
+
+    $html = preg_replace_callback(
+        '/<(?<element>'. $this->protectedChildNodesHelper . ')(?<attributes> [^>]*)?>(?<value>.*?)<\/' . $this->protectedChildNodesHelper . '>/',
+        array($this, 'restoreProtectedHtml'),
+        $html
+    );
+    $html = $dom::putReplacedBackToPreserveHtmlEntities($html);
+
+    // ------------------------------------
+    // final clean-up
+    // ------------------------------------
+
+    $html = UTF8::cleanup($html);
+
+    $html = str_replace(
+        array(
+            'html>' . "\n",
+            "\n" . '<html',
+            '<!doctype',
+            '="' . $this->booleanAttributesHelper . '"',
+            '</' . $this->protectedChildNodesHelper . '>',
+        ),
+        array(
+            'html>',
+            '<html',
+            '<!DOCTYPE',
+            '',
+            '',
+        ),
+        $html
+    );
+
+    $html = preg_replace(
+        array(
+            '/<(?:' . $this->protectedChildNodesHelper . ')(:? [^>]*)?>/'
+        ),
+        array(
+            ''
+        ),
+        $html
+    );
+
+    // ------------------------------------
+    // check if compression worked
+    // ------------------------------------
+
+    if ($origHtmlLength < UTF8::strlen($html)) {
+      $html = $origHtml;
+    }
+
+    return $html;
+  }
+
+  /**
+   * Prevent changes of inline "styles" and "scripts".
+   *
+   * @param HtmlDomParser $dom
+   *
+   * @return HtmlDomParser
+   */
+  private function protectTagsInDom(HtmlDomParser $dom)
+  {
+    // init
     $i = 0;
-    $protectedChildNodes = array();
-    foreach ($dom->find('*') as $element) {
 
-      // -------------------------------------------------------------------------
-      // Prevent changes of inline "styles" and "scripts", first.
-      // -------------------------------------------------------------------------
-      if (
-        ($element->tag === 'script' || $element->tag === 'style')
-        &&
-        !isset($attributs['src'])
-      ) {
+    foreach ($dom->find('script, style') as $element) {
 
-        $y = 0;
-        $node = $element->getNode();
-        while ($node->childNodes->length > 0) {
-          $protectedChildNodes[$i][$y] = $node->firstChild;
-          $node->removeChild($protectedChildNodes[$i][$y]);
-          ++$y;
+      // skip external links
+      if ($element->tag === 'script' || $element->tag === 'style') {
+        $attributs = $element->getAllAttributes();
+        if (isset($attributs['src'])) {
+          continue;
         }
-
-        $child = new \DOMElement('html-min--saved-content-' . $this->randomHash);
-        $node = $element->getNode()->appendChild($child);
-        /* @var $node \DOMElement */
-        $node->setAttribute('data-html-min--saved-content', $i);
       }
 
-      // -------------------------------------------------------------------------
-      // Optimize HTML-tag attributes.
-      // -------------------------------------------------------------------------
-      $this->optimizeAttributes($element);
+      $node = $element->getNode();
+      while ($node->childNodes->length > 0) {
+        $this->protectedChildNodes[$i][] = $node->firstChild->nodeValue;
+        $node->removeChild($node->firstChild);
+      }
+
+      $child = new \DOMElement($this->protectedChildNodesHelper);
+      $node = $element->getNode()->appendChild($child);
+      /* @var $node \DOMElement */
+      $node->setAttribute('data-html-min--saved-content', $i);
 
       ++$i;
     }
 
-    // -------------------------------------------------------------------------
-    // Remove comments that doesn'textnode contains "["-chars.
-    // -------------------------------------------------------------------------
+    return $dom;
+  }
+
+  /**
+   * Optimize HTML-tag attributes in the dom.
+   *
+   * @param HtmlDomParser $dom
+   *
+   * @return HtmlDomParser
+   */
+  private function optimizeAttributesInDom(HtmlDomParser $dom)
+  {
+    foreach ($dom->find('*') as $element) {
+      $attributs = $element->getAllAttributes();
+
+      $this->optimizeAttributes($element, $attributs);
+    }
+
+    return $dom;
+  }
+
+  /**
+   * Remove comments in the dom.
+   *
+   * @param HtmlDomParser $dom
+   *
+   * @return HtmlDomParser
+   */
+  private function removeCommentsInDom(HtmlDomParser $dom)
+  {
     foreach ($dom->find('//comment()') as $commentWrapper) {
       $comment = $commentWrapper->getNode();
       $val = $comment->nodeValue;
@@ -166,29 +296,17 @@ class HtmlMin
 
     $dom->getDocument()->normalizeDocument();
 
-    $textnodes = $dom->find('//text()');
-    $skip = array('style', 'pre', 'code', 'script', 'textarea');
-    foreach ($textnodes as $textnodeWrapper) {
-      $textnode = $textnodeWrapper->getNode();
-      $xp = $textnode->getNodePath();
+    return $dom;
+  }
 
-      $doSkip = false;
-      foreach ($skip as $pattern) {
-        if (strpos($xp, "/$pattern") !== false) {
-          $doSkip = true;
-          break;
-        }
-      }
-
-      if ($doSkip) {
-        continue;
-      }
-
-      $textnode->nodeValue = preg_replace("/\s{2,}/", ' ', $textnode->nodeValue);
-    }
-
-    $dom->getDocument()->normalizeDocument();
-
+  /**
+   * Trim tags in the dom.
+   *
+   * @param HtmlDomParser $dom
+   *
+   * @return HtmlDomParser
+   */
+  private function trimTagsInDom(HtmlDomParser $dom) {
     $divnodes = $dom->find('//div|//p|//nav|//footer|//article|//script|//hr|//br');
     foreach ($divnodes as $divnodeWrapper) {
       $divnode = $divnodeWrapper->getNode();
@@ -215,75 +333,62 @@ class HtmlMin
 
     $dom->getDocument()->normalizeDocument();
 
-    // -------------------------------------------------------------------------
-    // Restore protected HTML-code.
-    // -------------------------------------------------------------------------
-    foreach ($dom->find('html-min--saved-content-' . $this->randomHash) as $element) {
-      $i = $element->getAttribute('data-html-min--saved-content');
+    return $dom;
+  }
 
-      if (isset($protectedChildNodes[$i])) {
-        $node = $element->getNode();
-        foreach ($protectedChildNodes[$i] as $childDataElement) {
-          $node->appendChild($childDataElement);
+  /**
+   * Remove whitespace from dom-nodes.
+   *
+   * @param HtmlDomParser $dom
+   *
+   * @return HtmlDomParser
+   */
+  private function removeWhitespaceInDom(HtmlDomParser $dom)
+  {
+    $textnodes = $dom->find('//text()');
+    foreach ($textnodes as $textnodeWrapper) {
+      $textnode = $textnodeWrapper->getNode();
+      $xp = $textnode->getNodePath();
+
+      $doSkip = false;
+      foreach (self::$skipTagsForRemoveWhitespace as $pattern) {
+        if (strpos($xp, "/$pattern") !== false) {
+          $doSkip = true;
+          break;
         }
       }
+
+      if ($doSkip) {
+        continue;
+      }
+
+      $textnode->nodeValue = preg_replace("/\s{2,}/", ' ', $textnode->nodeValue);
     }
 
     $dom->getDocument()->normalizeDocument();
 
-    // ------------------------------------
-    // free memory
-    // ------------------------------------
+    return $dom;
+  }
 
-    unset($protectedChildNodes);
+  /**
+   * Callback function for preg_replace_callback use.
+   *
+   * @param  array $matches PREG matches
+   *
+   * @return string
+   */
+  private function restoreProtectedHtml($matches)
+  {
+    preg_match('/.*"(?<id>\d*)"/', $matches['attributes'], $matchesInner);
 
-    // ------------------------------------
-    // clean-up
-    // ------------------------------------
-
-    $html = UTF8::cleanup($dom->html());
-
-    $html = str_replace(
-        array(
-            'html>' . "\n",
-            "\n" . '<html',
-            '<!doctype',
-            '="html-min--delete-this-' . $this->randomHash . '"',
-            '</html-min--saved-content-' . $this->randomHash . '>',
-        ),
-        array(
-            'html>',
-            '<html',
-            '<!DOCTYPE',
-            '',
-            '',
-        ),
-        $html
-    );
-
-    $html = preg_replace(
-        array(
-            '/<(?:html-min--saved-content-' . $this->randomHash . ')(:? [^>]*)?>/'
-        ),
-        array(
-            ''
-        ),
-        $html
-    );
-
-    // check if compression worked
-    if ($origHtmlLength < UTF8::strlen($html)) {
-      $html = $origHtml;
+    $htmlChild = '';
+    if (isset($this->protectedChildNodes[$matchesInner['id']])) {
+      foreach ($this->protectedChildNodes[$matchesInner['id']] as $childNode) {
+        $htmlChild .= $childNode;
+      }
     }
 
-    // Remove spaces that are followed by either > or <
-    $html = preg_replace('/ (>)/', '$1', $html);
-    // Remove spaces that are preceded by either > or <
-    $html = preg_replace('/(<) /', '$1', $html);
-    // Remove spaces that are between > and <
-    $html = preg_replace('/(>) (<)/', '>$2', $html);
-
-    return $html;
+    return $htmlChild;
   }
 
   /**
@@ -291,22 +396,21 @@ class HtmlMin
    *  and remove some default attributes.
    *
    * @param SimpleHtmlDom $element
+   * @param array         $attributs
    *
    * @return bool
    */
-  private function optimizeAttributes(SimpleHtmlDom $element)
+  private function optimizeAttributes(SimpleHtmlDom $element, &$attributs)
   {
-    $attributs = $element->getAllAttributes();
-
     if (!$attributs) {
       return false;
     }
 
     $attrs = array();
-    foreach ((array)$attributs as $attrName => $attrValue) {
+    foreach ($attributs as $attrName => $attrValue) {
 
       if (in_array($attrName, self::$booleanAttributes, true)) {
-        $attrs[$attrName] = 'html-min--delete-this-' . $this->randomHash;
+        $attrs[$attrName] = $this->booleanAttributesHelper;
         $element->{$attrName} = null;
         continue;
       }

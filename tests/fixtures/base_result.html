@@ -9,19 +9,19 @@
              parseFloat(navigator.appVersion),
     win:     navigator.platform == 'Win32'
   }
-  is.mac = is.ua.indexOf('mac')>= 0;
-  if (is.ua.indexOf('opera')>= 0) {
+  is.mac = is.ua.indexOf('mac') >= 0;
+  if (is.ua.indexOf('opera') >= 0) {
     is.ie = is.ns = false;
     is.opera = true;
   }
-  if (is.ua.indexOf('gecko')>= 0) {
+  if (is.ua.indexOf('gecko') >= 0) {
     is.ie = is.ns = false;
     is.gecko = true;
   }
   // --></script><script type="text/javascript">
     //<![CDATA[
     var i = 0;
-    while  (++i <10)
+    while  (++i < 10)
     {
       // ...
     }
@@ -29,7 +29,7 @@
   </script><script type="text/javascript">
     /* <![CDATA[ */ i = 1;  /* ]]> */
   </script><script type="text/javascript">
-    (i <1); /* CDATA needed */
+    (i < 1); /* CDATA needed */
   </script><!--[if IE 6]>
   <style type="text/css">
     /*! copyright: you'll need CDATA for this <& */
