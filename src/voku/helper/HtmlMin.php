@@ -113,13 +113,51 @@ class HtmlMin
     $origHtmlLength = UTF8::strlen($html);
 
     $dom = new HtmlDomParser();
-    $dom->getDocument()->preserveWhiteSpace = false;
-    $dom->getDocument()->formatOutput = false;
+    $dom->getDocument()->preserveWhiteSpace = false; // remove redundant white space
+    $dom->getDocument()->formatOutput = false; // do not formats output with indentation
 
     $dom->loadHtml($html);
-    $xpath = new \DOMXPath($dom->getDocument());
 
-    foreach ($xpath->query('//comment()') as $comment) {
+    $i = 0;
+    $protectedChildNodes = array();
+    foreach ($dom->find('*') as $element) {
+
+      // -------------------------------------------------------------------------
+      // Prevent changes of inline "styles" and "scripts", first.
+      // -------------------------------------------------------------------------
+      if (
+        ($element->tag === 'script' || $element->tag === 'style')
+        &&
+        !isset($attributs['src'])
+      ) {
+
+        $y = 0;
+        $node = $element->getNode();
+        while ($node->childNodes->length > 0) {
+          $protectedChildNodes[$i][$y] = $node->firstChild;
+          $node->removeChild($protectedChildNodes[$i][$y]);
+          ++$y;
+        }
+
+        $child = new \DOMElement('html-min--saved-content-' . $this->randomHash);
+        $node = $element->getNode()->appendChild($child);
+        /* @var $node \DOMElement */
+        $node->setAttribute('data-html-min--saved-content', $i);
+      }
+
+      // -------------------------------------------------------------------------
+      // Optimize HTML-tag attributes.
+      // -------------------------------------------------------------------------
+      $this->optimizeAttributes($element);
+
+      ++$i;
+    }
+
+    // -------------------------------------------------------------------------
+    // Remove comments that doesn'textnode contains "["-chars.
+    // -------------------------------------------------------------------------
+    foreach ($dom->find('//comment()') as $commentWrapper) {
+      $comment = $commentWrapper->getNode();
       $val = $comment->nodeValue;
       if (strpos($val, '[') !== 0) {
         $comment->parentNode->removeChild($comment);
@@ -128,11 +166,11 @@ class HtmlMin
 
     $dom->getDocument()->normalizeDocument();
 
-    $textnodes = $xpath->query('//text()');
+    $textnodes = $dom->find('//text()');
     $skip = array('style', 'pre', 'code', 'script', 'textarea');
-    foreach ($textnodes as $t) {
-      /* @var $t \DOMNode */
-      $xp = $t->getNodePath();
+    foreach ($textnodes as $textnodeWrapper) {
+      $textnode = $textnodeWrapper->getNode();
+      $xp = $textnode->getNodePath();
 
       $doSkip = false;
       foreach ($skip as $pattern) {
@@ -146,68 +184,94 @@ class HtmlMin
         continue;
       }
 
-      $t->nodeValue = preg_replace("/\s{2,}/", ' ', $t->nodeValue);
+      $textnode->nodeValue = preg_replace("/\s{2,}/", ' ', $textnode->nodeValue);
     }
 
     $dom->getDocument()->normalizeDocument();
 
-    $divnodes = $xpath->query('//div|//p|//nav|//footer|//article|//script|//hr|//br');
-    foreach ($divnodes as $d) {
-      $candidates = array();
+    $divnodes = $dom->find('//div|//p|//nav|//footer|//article|//script|//hr|//br');
+    foreach ($divnodes as $divnodeWrapper) {
+      $divnode = $divnodeWrapper->getNode();
 
-      if (count($d->childNodes)) {
-        $candidates[] = $d->firstChild;
-        $candidates[] = $d->lastChild;
-        $candidates[] = $d->previousSibling;
-        $candidates[] = $d->nextSibling;
+      $candidates = array();
+      /** @noinspection PhpParamsInspection */
+      if (count($divnode->childNodes) > 0) {
+        $candidates[] = $divnode->firstChild;
+        $candidates[] = $divnode->lastChild;
+        $candidates[] = $divnode->previousSibling;
+        $candidates[] = $divnode->nextSibling;
       }
 
-      foreach ($candidates as $c) {
-        if ($c === null) {
+      foreach ($candidates as $candidate) {
+        if ($candidate === null) {
           continue;
         }
 
-        if ($c->nodeType === 3) {
-          $c->nodeValue = trim($c->nodeValue);
+        if ($candidate->nodeType === 3) {
+          $candidate->nodeValue = trim($candidate->nodeValue);
         }
       }
     }
 
     $dom->getDocument()->normalizeDocument();
 
-    $elements = $dom->find('*');
-    foreach ($elements as $element) {
-      if (count($element) > 1) {
-        foreach ($element as $e) {
-          $this->optimizeAttributes($e);
+    // -------------------------------------------------------------------------
+    // Restore protected HTML-code.
+    // -------------------------------------------------------------------------
+    foreach ($dom->find('html-min--saved-content-' . $this->randomHash) as $element) {
+      $i = $element->getAttribute('data-html-min--saved-content');
+
+      if (isset($protectedChildNodes[$i])) {
+        $node = $element->getNode();
+        foreach ($protectedChildNodes[$i] as $childDataElement) {
+          $node->appendChild($childDataElement);
         }
-      } else {
-        $this->optimizeAttributes($element);
       }
     }
 
     $dom->getDocument()->normalizeDocument();
 
     // ------------------------------------
+    // free memory
+    // ------------------------------------
+
+    unset($protectedChildNodes);
+
+    // ------------------------------------
+    // clean-up
+    // ------------------------------------
 
     $html = UTF8::cleanup($dom->html());
-    // final clean-up
+
     $html = str_replace(
         array(
             'html>' . "\n",
             "\n" . '<html',
             '<!doctype',
-            '="delete-this-' . $this->randomHash . '"',
+            '="html-min--delete-this-' . $this->randomHash . '"',
+            '</html-min--saved-content-' . $this->randomHash . '>',
         ),
         array(
             'html>',
             '<html',
             '<!DOCTYPE',
             '',
+            '',
         ),
         $html
     );
 
+    $html = preg_replace(
+        array(
+            '/<(?:html-min--saved-content-' . $this->randomHash . ')(:? [^>]*)?>/'
+        ),
+        array(
+            ''
+        ),
+        $html
+    );
+
+    // check if compression worked
     if ($origHtmlLength < UTF8::strlen($html)) {
       $html = $origHtml;
     }
@@ -238,21 +302,11 @@ class HtmlMin
       return false;
     }
 
-    /*
-    if (
-        ($element->tag === 'script' || $element->tag === 'style')
-        &&
-        !isset($attributs['src'])
-    ) {
-      // TODO: protect inline css / js
-    }
-    */
-
     $attrs = array();
     foreach ((array)$attributs as $attrName => $attrValue) {
 
       if (in_array($attrName, self::$booleanAttributes, true)) {
-        $attrs[$attrName] = 'delete-this-' . $this->randomHash;
+        $attrs[$attrName] = 'html-min--delete-this-' . $this->randomHash;
         $element->{$attrName} = null;
         continue;
       }
