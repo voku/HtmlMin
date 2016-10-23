@@ -73,7 +73,7 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
     return array(
         array(
             "<html>\r\t<body>\n\t\t<h1>hoi</h1>\r\n\t</body>\r\n</html>",
-            '<html><body><h1>hoi</h1></body>' . "\n" . '</html>',
+            '<html><body><h1>hoi</h1></body></html>',
         ),
         array(
             "<html>\r\t<h1>hoi</h1>\r\n\t\r\n</html>",
