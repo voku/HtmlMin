@@ -12,9 +12,20 @@
 
 HtmlMin is a fast and very easy to use PHP5.3+ library that minifies given HTML5 source by removing extra whitespaces, comments and other unneeded characters without breaking the content structure. As a result pages become smaller in size and load faster. It will also prepare the HTML for better gzip results, by re-ranging (sort alphabetical) attributes and css-class-names.
 
-## Usage
+
+## Install via "composer require"
+
+```shell
+composer require voku/html-min
+```
+
+## Quick Start
 
 ```php
+use voku\helper\HtmlMin;
+
+require_once 'composer/autoload.php';
+
 $html = '<html>\r\n\t<body>\xc3\xa0</body>\r\n\t</html>';
 $htmlMin = new HtmlMin();
 echo $htmlMin->minify($html); // '<html><body>à</body></html>'
