@@ -20,6 +20,32 @@ $htmlMin = new HtmlMin();
 echo $htmlMin->minify($html); // '<html><body>à</body></html>'
 ```
 
+## Options
+
+```php
+$htmlMin = new HtmlMin();
+
+/* 
+ * Protected HTML (inlince css / inline js / conditional comments) are still protected,
+ *    no matter what settings you use.
+ */
+
+$htmlMin->doOptimizeAttributes();                     // optimize html attributes 
+$htmlMin->doRemoveComments();                         // remove default HTML comments
+$htmlMin->doRemoveDefaultAttributes();                // remove defaults
+$htmlMin->doRemoveDeprecatedAnchorName();             // remove deprecated anchor-jump
+$htmlMin->doRemoveDeprecatedScriptCharsetAttribute(); // remove deprecated charset-attribute (the browser will use the charset from the HTTP-Header, anyway)
+$htmlMin->doRemoveDeprecatedTypeFromScriptTag();      // remove deprecated script-mime-types
+$htmlMin->doRemoveDeprecatedTypeFromStylesheetLink(); // remove "type=text/css" for css links
+$htmlMin->doRemoveEmptyAttributes();                  // remove some empty attributes
+$htmlMin->doRemoveHttpPrefixFromAttributes();         // remove optional "http:"-prefix from attributes
+$htmlMin->doRemoveValueFromEmptyInput();              // remove 'value=""' from empty <input>
+$htmlMin->doRemoveWhitespaceAroundTags();             // remove whitespace around tags
+$htmlMin->doSortCssClassNames();                      // sort css-class-names, for better gzip results
+$htmlMin->doSortHtmlAttributes();                     // sort html-attributes, for better gzip results
+$htmlMin->doSumUpWhitespace();                        // sum-up extra whitespace from the Dom
+```
+
 ## Unit Test
 
 1) [Composer](https://getcomposer.org) is a prerequisite for running the tests.

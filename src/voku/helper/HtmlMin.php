@@ -291,7 +291,7 @@ class HtmlMin
     }
 
     // -------------------------------------------------------------------------
-    // Remove whitespace from the Dom. [protected html is still protected]
+    // Sum-Up extra whitespace from the Dom. [protected html is still protected]
     // -------------------------------------------------------------------------
 
     if ($this->doSumUpWhitespace === true) {
@@ -307,6 +307,10 @@ class HtmlMin
       if ($this->doOptimizeAttributes === true) {
         $this->optimizeAttributes($element);
       }
+
+      // -------------------------------------------------------------------------
+      // Remove whitespace around tags. [protected html is still protected]
+      // -------------------------------------------------------------------------
 
       if ($this->doRemoveWhitespaceAroundTags === true) {
         $this->removeWhitespaceAroundTags($element);
@@ -387,8 +391,7 @@ class HtmlMin
   }
 
   /**
-   * Sort HTML-Attributes, so that gzip can do better work
-   *  and remove some default attributes.
+   * Sort HTML-Attributes, so that gzip can do better work and remove some default attributes...
    *
    * @param SimpleHtmlDom $element
    *
@@ -414,6 +417,10 @@ class HtmlMin
         continue;
       }
 
+      // -------------------------------------------------------------------------
+      // Remove optional "http:"-prefix from attributes.
+      // -------------------------------------------------------------------------
+
       if ($this->doRemoveHttpPrefixFromAttributes === true) {
         if (
             ($attrName === 'href' || $attrName === 'src' || $attrName === 'action')
@@ -431,6 +438,10 @@ class HtmlMin
         continue;
       }
 
+      // -------------------------------------------------------------------------
+      // Sort css-class-names, for better gzip results.
+      // -------------------------------------------------------------------------
+
       if ($this->doSortCssClassNames === true) {
         $attrValue = $this->sortCssClassNames($attrName, $attrValue);
       }
@@ -440,6 +451,10 @@ class HtmlMin
         $element->{$attrName} = null;
       }
     }
+
+    // -------------------------------------------------------------------------
+    // Sort html-attributes, for better gzip results.
+    // -------------------------------------------------------------------------
 
     if ($this->doSortHtmlAttributes === true) {
       ksort($attrs);
@@ -537,7 +552,7 @@ class HtmlMin
       }
     }
 
-    // remove deprecated charset-attribute (the Browser will use the charset from the HTTP-Header, anyway)
+    // remove deprecated charset-attribute (the browser will use the charset from the HTTP-Header, anyway)
     if ($this->doRemoveDeprecatedScriptCharsetAttribute === true) {
       if ($tag === 'script' && $attrName === 'charset' && !isset($allAttr['src'])) {
         return true;
@@ -565,8 +580,8 @@ class HtmlMin
       }
     }
 
+    // remove 'value=""' from empty <input>
     if ($this->doRemoveValueFromEmptyInput === true) {
-      // remove "value" from empty <input>
       if ($tag === 'input' && $attrName === 'value' && $attrValue === '') {
         return true;
       }
@@ -659,7 +674,7 @@ class HtmlMin
   /**
    * @param boolean $doOptimizeAttributes
    */
-  public function setDoOptimizeAttributes($doOptimizeAttributes)
+  public function doOptimizeAttributes($doOptimizeAttributes = true)
   {
     $this->doOptimizeAttributes = $doOptimizeAttributes;
   }
@@ -667,7 +682,7 @@ class HtmlMin
   /**
    * @param boolean $doRemoveComments
    */
-  public function setDoRemoveComments($doRemoveComments)
+  public function doRemoveComments($doRemoveComments = true)
   {
     $this->doRemoveComments = $doRemoveComments;
   }
@@ -675,7 +690,7 @@ class HtmlMin
   /**
    * @param boolean $doRemoveDefaultAttributes
    */
-  public function setDoRemoveDefaultAttributes($doRemoveDefaultAttributes)
+  public function doRemoveDefaultAttributes($doRemoveDefaultAttributes = true)
   {
     $this->doRemoveDefaultAttributes = $doRemoveDefaultAttributes;
   }
@@ -683,7 +698,7 @@ class HtmlMin
   /**
    * @param boolean $doRemoveDeprecatedAnchorName
    */
-  public function setDoRemoveDeprecatedAnchorName($doRemoveDeprecatedAnchorName)
+  public function doRemoveDeprecatedAnchorName($doRemoveDeprecatedAnchorName = true)
   {
     $this->doRemoveDeprecatedAnchorName = $doRemoveDeprecatedAnchorName;
   }
@@ -691,7 +706,7 @@ class HtmlMin
   /**
    * @param boolean $doRemoveDeprecatedScriptCharsetAttribute
    */
-  public function setDoRemoveDeprecatedScriptCharsetAttribute($doRemoveDeprecatedScriptCharsetAttribute)
+  public function doRemoveDeprecatedScriptCharsetAttribute($doRemoveDeprecatedScriptCharsetAttribute = true)
   {
     $this->doRemoveDeprecatedScriptCharsetAttribute = $doRemoveDeprecatedScriptCharsetAttribute;
   }
@@ -699,7 +714,7 @@ class HtmlMin
   /**
    * @param boolean $doRemoveDeprecatedTypeFromScriptTag
    */
-  public function setDoRemoveDeprecatedTypeFromScriptTag($doRemoveDeprecatedTypeFromScriptTag)
+  public function doRemoveDeprecatedTypeFromScriptTag($doRemoveDeprecatedTypeFromScriptTag = true)
   {
     $this->doRemoveDeprecatedTypeFromScriptTag = $doRemoveDeprecatedTypeFromScriptTag;
   }
@@ -707,7 +722,7 @@ class HtmlMin
   /**
    * @param boolean $doRemoveDeprecatedTypeFromStylesheetLink
    */
-  public function setDoRemoveDeprecatedTypeFromStylesheetLink($doRemoveDeprecatedTypeFromStylesheetLink)
+  public function doRemoveDeprecatedTypeFromStylesheetLink($doRemoveDeprecatedTypeFromStylesheetLink = true)
   {
     $this->doRemoveDeprecatedTypeFromStylesheetLink = $doRemoveDeprecatedTypeFromStylesheetLink;
   }
@@ -715,7 +730,7 @@ class HtmlMin
   /**
    * @param boolean $doRemoveEmptyAttributes
    */
-  public function setDoRemoveEmptyAttributes($doRemoveEmptyAttributes)
+  public function doRemoveEmptyAttributes($doRemoveEmptyAttributes = true)
   {
     $this->doRemoveEmptyAttributes = $doRemoveEmptyAttributes;
   }
@@ -723,7 +738,7 @@ class HtmlMin
   /**
    * @param boolean $doRemoveHttpPrefixFromAttributes
    */
-  public function setDoRemoveHttpPrefixFromAttributes($doRemoveHttpPrefixFromAttributes)
+  public function doRemoveHttpPrefixFromAttributes($doRemoveHttpPrefixFromAttributes = true)
   {
     $this->doRemoveHttpPrefixFromAttributes = $doRemoveHttpPrefixFromAttributes;
   }
@@ -731,7 +746,7 @@ class HtmlMin
   /**
    * @param boolean $doRemoveValueFromEmptyInput
    */
-  public function setDoRemoveValueFromEmptyInput($doRemoveValueFromEmptyInput)
+  public function doRemoveValueFromEmptyInput($doRemoveValueFromEmptyInput = true)
   {
     $this->doRemoveValueFromEmptyInput = $doRemoveValueFromEmptyInput;
   }
@@ -739,7 +754,7 @@ class HtmlMin
   /**
    * @param boolean $doRemoveWhitespaceAroundTags
    */
-  public function setDoRemoveWhitespaceAroundTags($doRemoveWhitespaceAroundTags)
+  public function doRemoveWhitespaceAroundTags($doRemoveWhitespaceAroundTags = true)
   {
     $this->doRemoveWhitespaceAroundTags = $doRemoveWhitespaceAroundTags;
   }
@@ -747,7 +762,7 @@ class HtmlMin
   /**
    * @param boolean $doSortCssClassNames
    */
-  public function setDoSortCssClassNames($doSortCssClassNames)
+  public function doSortCssClassNames($doSortCssClassNames = true)
   {
     $this->doSortCssClassNames = $doSortCssClassNames;
   }
@@ -755,7 +770,7 @@ class HtmlMin
   /**
    * @param boolean $doSortHtmlAttributes
    */
-  public function setDoSortHtmlAttributes($doSortHtmlAttributes)
+  public function doSortHtmlAttributes($doSortHtmlAttributes = true)
   {
     $this->doSortHtmlAttributes = $doSortHtmlAttributes;
   }
@@ -763,7 +778,7 @@ class HtmlMin
   /**
    * @param boolean $doSumUpWhitespace
    */
-  public function setDoSumUpWhitespace($doSumUpWhitespace)
+  public function doSumUpWhitespace($doSumUpWhitespace = true)
   {
     $this->doSumUpWhitespace = $doSumUpWhitespace;
   }
