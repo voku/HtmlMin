@@ -220,6 +220,75 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
     self::assertSame($expected, $htmlMin->minify($html));
   }
 
+  public function testOptionsFalse()
+  {
+    // init
+    $htmlMin = new HtmlMin();
+    $htmlMin->doOptimizeAttributes(false);                     // optimize html attributes
+    $htmlMin->doRemoveComments(false);                         // remove default HTML comments
+    $htmlMin->doRemoveDefaultAttributes(false);                // remove defaults
+    $htmlMin->doRemoveDeprecatedAnchorName(false);             // remove deprecated anchor-jump
+    $htmlMin->doRemoveDeprecatedScriptCharsetAttribute(false); // remove deprecated charset-attribute (the browser will use the charset from the HTTP-Header, anyway)
+    $htmlMin->doRemoveDeprecatedTypeFromScriptTag(false);      // remove deprecated script-mime-types
+    $htmlMin->doRemoveDeprecatedTypeFromStylesheetLink(false); // remove "type=text/css" for css links
+    $htmlMin->doRemoveEmptyAttributes(false);                  // remove some empty attributes
+    $htmlMin->doRemoveHttpPrefixFromAttributes(false);         // remove optional "http:"-prefix from attributes
+    $htmlMin->doRemoveValueFromEmptyInput(false);              // remove 'value=""' from empty <input>
+    $htmlMin->doRemoveWhitespaceAroundTags(false);             // remove whitespace around tags
+    $htmlMin->doSortCssClassNames(false);                      // sort css-class-names, for better gzip results
+    $htmlMin->doSortHtmlAttributes(false);                     // sort html-attributes, for better gzip results
+    $htmlMin->doSumUpWhitespace(false);                        // sum-up extra whitespace from the Dom
+
+    $html = '
+    <html>
+    <head>     </head>
+    <body>
+      <p id="text" class="foo">foo</p>  <br />  <ul > <li> <p class="foo">lall</p> </li></ul>
+    </body>
+    </html>
+    ';
+
+    $expected = '<html>    <head>     </head>    <body>
+      <p id="text" class="foo">foo</p>  <br>  <ul><li><p class="foo">lall</p></li></ul>
+    </body>
+    </html>';
+
+    self::assertSame($expected, $htmlMin->minify($html));
+  }
+
+  public function testOptionsTrue()
+  {
+    // init
+    $htmlMin = new HtmlMin();
+    $htmlMin->doOptimizeAttributes();                     // optimize html attributes
+    $htmlMin->doRemoveComments();                         // remove default HTML comments
+    $htmlMin->doRemoveDefaultAttributes();                // remove defaults
+    $htmlMin->doRemoveDeprecatedAnchorName();             // remove deprecated anchor-jump
+    $htmlMin->doRemoveDeprecatedScriptCharsetAttribute(); // remove deprecated charset-attribute (the browser will use the charset from the HTTP-Header, anyway)
+    $htmlMin->doRemoveDeprecatedTypeFromScriptTag();      // remove deprecated script-mime-types
+    $htmlMin->doRemoveDeprecatedTypeFromStylesheetLink(); // remove "type=text/css" for css links
+    $htmlMin->doRemoveEmptyAttributes();                  // remove some empty attributes
+    $htmlMin->doRemoveHttpPrefixFromAttributes();         // remove optional "http:"-prefix from attributes
+    $htmlMin->doRemoveValueFromEmptyInput();              // remove 'value=""' from empty <input>
+    $htmlMin->doRemoveWhitespaceAroundTags();             // remove whitespace around tags
+    $htmlMin->doSortCssClassNames();                      // sort css-class-names, for better gzip results
+    $htmlMin->doSortHtmlAttributes();                     // sort html-attributes, for better gzip results
+    $htmlMin->doSumUpWhitespace();                        // sum-up extra whitespace from the Dom
+
+    $html = '
+    <html>
+    <head>     </head>
+    <body>
+      <p id="text" class="foo">foo</p>  <br />  <ul > <li> <p class="foo">lall</p> </li></ul>
+    </body>
+    </html>
+    ';
+
+    $expected = '<html><head></head><body><p class="foo" id="text">foo</p><br><ul><li><p class="foo">lall</p></li></ul></body></html>';
+
+    self::assertSame($expected, $htmlMin->minify($html));
+  }
+
   public function testMinifySimple()
   {
     // init
