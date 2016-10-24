@@ -220,17 +220,6 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
     self::assertSame($expected, $htmlMin->minify($html));
   }
 
-  public function testMinifyTagesschau()
-  {
-    // init
-    $htmlMin = new HtmlMin();
-
-    $html = str_replace(array("\r\n", "\r", "\n"), "\n", UTF8::file_get_contents(__DIR__ . '/fixtures/tagesschau.html'));
-    $expected = str_replace(array("\r\n", "\r", "\n",), "\n", UTF8::file_get_contents(__DIR__ . '/fixtures/tagesschau_result.html'));
-
-    self::assertSame($expected, $htmlMin->minify($html));
-  }
-
   public function testMinifySimple()
   {
     // init
