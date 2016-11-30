@@ -589,7 +589,7 @@ class HtmlMin
 
     // remove some empty attributes
     if ($this->doRemoveEmptyAttributes === true) {
-      if ($attrValue === '' && preg_match('/^(?:class|id|style|title|lang|dir|on(?:focus|blur|change|click|dblclick|mouse(?:down|up|over|move|out)|key(?:press|down|up)))$/', $attrName)) {
+      if (trim($attrValue) === '' && preg_match('/^(?:class|id|style|title|lang|dir|on(?:focus|blur|change|click|dblclick|mouse(?:down|up|over|move|out)|key(?:press|down|up)))$/', $attrName)) {
         return true;
       }
     }
@@ -795,17 +795,18 @@ class HtmlMin
       return $attrValue;
     }
 
-    $classes = explode(' ', $attrValue);
-    if (!$classes) {
-      return '';
-    }
+    $classes = array_unique(
+        explode(' ', $attrValue),
+        SORT_REGULAR
+    );
 
-    sort($classes);
     $attrValue = '';
     foreach ($classes as $class) {
+
       if (!$class) {
         continue;
       }
+
       $attrValue .= trim($class) . ' ';
     }
     $attrValue = trim($attrValue);
