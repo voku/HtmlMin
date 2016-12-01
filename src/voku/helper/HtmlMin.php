@@ -796,9 +796,9 @@ class HtmlMin
     }
 
     $classes = array_unique(
-        explode(' ', $attrValue),
-        SORT_REGULAR
+        explode(' ', $attrValue)
     );
+    sort($classes);
 
     $attrValue = '';
     foreach ($classes as $class) {
