@@ -632,8 +632,7 @@ class HtmlMin
       $node = $element->getNode();
 
       $candidates = array();
-      /** @noinspection PhpParamsInspection */
-      if (count($node->childNodes) > 0) {
+      if ($node->childNodes->length > 0) {
         $candidates[] = $node->firstChild;
         $candidates[] = $node->lastChild;
         $candidates[] = $node->previousSibling;
