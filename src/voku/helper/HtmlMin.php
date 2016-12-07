@@ -580,9 +580,9 @@ class HtmlMin
       }
     }
 
-    // remove 'value=""' from empty <input>
+    // remove 'value=""' from <input type="text">
     if ($this->doRemoveValueFromEmptyInput === true) {
-      if ($tag === 'input' && $attrName === 'value' && $attrValue === '') {
+      if ($tag === 'input' && $attrName === 'value' && $attrValue === '' && isset($allAttr['type']) && $allAttr['type'] === 'text') {
         return true;
       }
     }
