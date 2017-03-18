@@ -824,6 +824,7 @@ class HtmlMin
   {
     $textnodes = $dom->find('//text()');
     foreach ($textnodes as $textnodeWrapper) {
+      /* @var $textnode \DOMNode */
       $textnode = $textnodeWrapper->getNode();
       $xp = $textnode->getNodePath();
 
