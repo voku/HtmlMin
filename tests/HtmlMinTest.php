@@ -217,7 +217,7 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
     $html = str_replace(array("\r\n", "\r", "\n"), "\n", UTF8::file_get_contents(__DIR__ . '/fixtures/hlt.html'));
     $expected = str_replace(array("\r\n", "\r", "\n",), "\n", UTF8::file_get_contents(__DIR__ . '/fixtures/hlt_result.html'));
 
-    self::assertSame($expected, $htmlMin->minify($html));
+    self::assertSame($expected, $htmlMin->minify($html, true));
   }
 
   public function testOptionsFalse()
@@ -364,7 +364,7 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
    */
   public function testSpecialCharacterEncoding($input, $expected)
   {
-    $actual = $this->compressor->minify($input);
+    $actual = $this->compressor->minify($input, true);
     self::assertSame($expected, $actual);
   }
 

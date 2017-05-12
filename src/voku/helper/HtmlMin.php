@@ -240,10 +240,11 @@ class HtmlMin
 
   /**
    * @param string $html
+   * @param bool   $decodeUtf8Specials <p>Use this only in special cases, e.g. for PHP 5.3</p>
    *
    * @return string
    */
-  public function minify($html)
+  public function minify($html, $decodeUtf8Specials = false)
   {
     $html = (string)$html;
     if (!isset($html[0])) {
@@ -321,7 +322,7 @@ class HtmlMin
     // Convert the Dom into a string.
     // -------------------------------------------------------------------------
 
-    $html = $dom->html();
+    $html = $dom->html($decodeUtf8Specials);
 
     // -------------------------------------------------------------------------
     // Trim whitespace from html-string. [protected html is still protected]
