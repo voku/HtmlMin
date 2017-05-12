@@ -526,7 +526,7 @@ class HtmlMin
    * @param string $tag
    * @param string $attrName
    * @param string $attrValue
-   * @param string $allAttr
+   * @param array  $allAttr
    *
    * @return bool
    */
