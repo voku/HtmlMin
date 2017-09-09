@@ -382,9 +382,9 @@ class HtmlMin
     }
 
     // init
-    static $cacheSelfClosingTags = null;
-    if ($cacheSelfClosingTags === null) {
-      $cacheSelfClosingTags = implode('|', self::$selfClosingTags);
+    static $CACHE_SELF_CLOSING_TAGS = null;
+    if ($CACHE_SELF_CLOSING_TAGS === null) {
+      $CACHE_SELF_CLOSING_TAGS = implode('|', self::$selfClosingTags);
     }
 
     // reset
@@ -468,7 +468,7 @@ class HtmlMin
         $html
     );
 
-    $html = preg_replace('#<\b(' . $cacheSelfClosingTags . ')([^>]+)><\/\b\1>#', '<\\1\\2/>', $html);
+    $html = preg_replace('#<\b(' . $CACHE_SELF_CLOSING_TAGS . ')([^>]+)><\/\b\1>#', '<\\1\\2/>', $html);
 
     // ------------------------------------
     // check if compression worked

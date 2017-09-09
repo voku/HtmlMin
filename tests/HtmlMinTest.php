@@ -227,24 +227,14 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
     $htmlMin->doOptimizeViaHtmlDomParser(false);
 
     $html = '
-    <html>
-    <head>     </head>
-    <body>
       <p id="text" class="foo">
         foo
       </p>  <br />  <ul > <li> <p class="foo">lall</p> </li></ul>
-    </body>
-    </html>
     ';
 
-    $expected = '<html>
-    <head>     </head>
-    <body>
-      <p id="text" class="foo">
+    $expected = '<p id="text" class="foo">
         foo
-      </p>  <br/>  <ul><li><p class="foo">lall</p></li></ul>
-    </body>
-    </html>';
+      </p>  <br/>  <ul><li><p class="foo">lall</p></li></ul>';
 
     self::assertSame(
         str_replace(array("\r\n", "\r", "\n"), "\n", $expected),
