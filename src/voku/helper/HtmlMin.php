@@ -139,6 +139,11 @@ class HtmlMin
   /**
    * @var bool
    */
+  private $doOptimizeViaHtmlDomParser = true;
+
+  /**
+   * @var bool
+   */
   private $doOptimizeAttributes = true;
 
   /**
@@ -214,6 +219,126 @@ class HtmlMin
   }
 
   /**
+   * @param boolean $doOptimizeAttributes
+   */
+  public function doOptimizeAttributes($doOptimizeAttributes = true)
+  {
+    $this->doOptimizeAttributes = $doOptimizeAttributes;
+  }
+
+  /**
+   * @param boolean $doOptimizeViaHtmlDomParser
+   */
+  public function doOptimizeViaHtmlDomParser($doOptimizeViaHtmlDomParser = true)
+  {
+    $this->doOptimizeViaHtmlDomParser = $doOptimizeViaHtmlDomParser;
+  }
+
+  /**
+   * @param boolean $doRemoveComments
+   */
+  public function doRemoveComments($doRemoveComments = true)
+  {
+    $this->doRemoveComments = $doRemoveComments;
+  }
+
+  /**
+   * @param boolean $doRemoveDefaultAttributes
+   */
+  public function doRemoveDefaultAttributes($doRemoveDefaultAttributes = true)
+  {
+    $this->doRemoveDefaultAttributes = $doRemoveDefaultAttributes;
+  }
+
+  /**
+   * @param boolean $doRemoveDeprecatedAnchorName
+   */
+  public function doRemoveDeprecatedAnchorName($doRemoveDeprecatedAnchorName = true)
+  {
+    $this->doRemoveDeprecatedAnchorName = $doRemoveDeprecatedAnchorName;
+  }
+
+  /**
+   * @param boolean $doRemoveDeprecatedScriptCharsetAttribute
+   */
+  public function doRemoveDeprecatedScriptCharsetAttribute($doRemoveDeprecatedScriptCharsetAttribute = true)
+  {
+    $this->doRemoveDeprecatedScriptCharsetAttribute = $doRemoveDeprecatedScriptCharsetAttribute;
+  }
+
+  /**
+   * @param boolean $doRemoveDeprecatedTypeFromScriptTag
+   */
+  public function doRemoveDeprecatedTypeFromScriptTag($doRemoveDeprecatedTypeFromScriptTag = true)
+  {
+    $this->doRemoveDeprecatedTypeFromScriptTag = $doRemoveDeprecatedTypeFromScriptTag;
+  }
+
+  /**
+   * @param boolean $doRemoveDeprecatedTypeFromStylesheetLink
+   */
+  public function doRemoveDeprecatedTypeFromStylesheetLink($doRemoveDeprecatedTypeFromStylesheetLink = true)
+  {
+    $this->doRemoveDeprecatedTypeFromStylesheetLink = $doRemoveDeprecatedTypeFromStylesheetLink;
+  }
+
+  /**
+   * @param boolean $doRemoveEmptyAttributes
+   */
+  public function doRemoveEmptyAttributes($doRemoveEmptyAttributes = true)
+  {
+    $this->doRemoveEmptyAttributes = $doRemoveEmptyAttributes;
+  }
+
+  /**
+   * @param boolean $doRemoveHttpPrefixFromAttributes
+   */
+  public function doRemoveHttpPrefixFromAttributes($doRemoveHttpPrefixFromAttributes = true)
+  {
+    $this->doRemoveHttpPrefixFromAttributes = $doRemoveHttpPrefixFromAttributes;
+  }
+
+  /**
+   * @param boolean $doRemoveValueFromEmptyInput
+   */
+  public function doRemoveValueFromEmptyInput($doRemoveValueFromEmptyInput = true)
+  {
+    $this->doRemoveValueFromEmptyInput = $doRemoveValueFromEmptyInput;
+  }
+
+  /**
+   * @param boolean $doRemoveWhitespaceAroundTags
+   */
+  public function doRemoveWhitespaceAroundTags($doRemoveWhitespaceAroundTags = true)
+  {
+    $this->doRemoveWhitespaceAroundTags = $doRemoveWhitespaceAroundTags;
+  }
+
+  /**
+   * @param boolean $doSortCssClassNames
+   */
+  public function doSortCssClassNames($doSortCssClassNames = true)
+  {
+    $this->doSortCssClassNames = $doSortCssClassNames;
+  }
+
+  /**
+   * @param boolean $doSortHtmlAttributes
+   */
+  public function doSortHtmlAttributes($doSortHtmlAttributes = true)
+  {
+    $this->doSortHtmlAttributes = $doSortHtmlAttributes;
+  }
+
+  /**
+   * @param boolean $doSumUpWhitespace
+   */
+  public function doSumUpWhitespace($doSumUpWhitespace = true)
+  {
+    $this->doSumUpWhitespace = $doSumUpWhitespace;
+  }
+
+  /**
    * Check if the current string is an conditional comment.
    *
    * INFO: since IE >= 10 conditional comment are not working anymore
@@ -269,6 +394,101 @@ class HtmlMin
     $origHtml = $html;
     $origHtmlLength = UTF8::strlen($html);
 
+    // -------------------------------------------------------------------------
+    // Minify the HTML via "HtmlDomParser"
+    // -------------------------------------------------------------------------
+
+    if ($this->doOptimizeViaHtmlDomParser === true) {
+      $html = $this->minifyHtmlDom($html, $decodeUtf8Specials);
+    }
+
+    // -------------------------------------------------------------------------
+    // Trim whitespace from html-string. [protected html is still protected]
+    // -------------------------------------------------------------------------
+
+    // Remove extra white-space(s) between HTML attribute(s)
+    $html = preg_replace_callback(
+        '#<([^\/\s<>!]+)(?:\s+([^<>]*?)\s*|\s*)(\/?)>#',
+        function ($matches) {
+          return '<' . $matches[1] . preg_replace('#([^\s=]+)(\=([\'"]?)(.*?)\3)?(\s+|$)#s', ' $1$2', $matches[2]) . $matches[3] . '>';
+        },
+        $html
+    );
+
+    // Remove spaces that are between > and <
+    $html = preg_replace('/(>) (<)/', '>$2', $html);
+
+    // -------------------------------------------------------------------------
+    // Restore protected HTML-code.
+    // -------------------------------------------------------------------------
+
+    $html = preg_replace_callback(
+        '/<(?<element>' . $this->protectedChildNodesHelper . ')(?<attributes> [^>]*)?>(?<value>.*?)<\/' . $this->protectedChildNodesHelper . '>/',
+        array($this, 'restoreProtectedHtml'),
+        $html
+    );
+
+    // -------------------------------------------------------------------------
+    // Restore protected HTML-entities.
+    // -------------------------------------------------------------------------
+
+    if ($this->doOptimizeViaHtmlDomParser === true) {
+      $html = HtmlDomParser::putReplacedBackToPreserveHtmlEntities($html);
+    }
+
+    // ------------------------------------
+    // Final clean-up
+    // ------------------------------------
+
+    $html = UTF8::cleanup($html);
+
+    $html = str_replace(
+        array(
+            'html>' . "\n",
+            "\n" . '<html',
+            'html/>' . "\n",
+            "\n" . '</html',
+            'head>' . "\n",
+            "\n" . '<head',
+            'head/>' . "\n",
+            "\n" . '</head',
+            '="' . $this->booleanAttributesHelper . '"',
+        ),
+        array(
+            'html>',
+            '<html',
+            'html/>',
+            '</html',
+            'head>',
+            '<head',
+            'head/>',
+            '</head',
+            '',
+        ),
+        $html
+    );
+
+    $html = preg_replace('#<\b(' . $cacheSelfClosingTags . ')([^>]+)><\/\b\1>#', '<\\1\\2/>', $html);
+
+    // ------------------------------------
+    // check if compression worked
+    // ------------------------------------
+
+    if ($origHtmlLength < UTF8::strlen($html)) {
+      $html = $origHtml;
+    }
+
+    return $html;
+  }
+
+  /**
+   * @param $html
+   * @param $decodeUtf8Specials
+   *
+   * @return string
+   */
+  public function minifyHtmlDom($html, $decodeUtf8Specials)
+  {
     // init dom
     $dom = new HtmlDomParser();
     $dom->getDocument()->preserveWhiteSpace = false; // remove redundant white space
@@ -323,70 +543,6 @@ class HtmlMin
     // -------------------------------------------------------------------------
 
     $html = $dom->html($decodeUtf8Specials);
-
-    // -------------------------------------------------------------------------
-    // Trim whitespace from html-string. [protected html is still protected]
-    // -------------------------------------------------------------------------
-
-    // Remove spaces that are followed by either > or <
-    $html = preg_replace('/ (>)/', '$1', $html);
-    // Remove spaces that are preceded by either > or <
-    $html = preg_replace('/(<) /', '$1', $html);
-    // Remove spaces that are between > and <
-    $html = preg_replace('/(>) (<)/', '>$2', $html);
-
-    // -------------------------------------------------------------------------
-    // Restore protected HTML-code.
-    // -------------------------------------------------------------------------
-
-    $html = preg_replace_callback(
-        '/<(?<element>' . $this->protectedChildNodesHelper . ')(?<attributes> [^>]*)?>(?<value>.*?)<\/' . $this->protectedChildNodesHelper . '>/',
-        array($this, 'restoreProtectedHtml'),
-        $html
-    );
-    $html = $dom::putReplacedBackToPreserveHtmlEntities($html);
-
-    // ------------------------------------
-    // Final clean-up
-    // ------------------------------------
-
-    $html = UTF8::cleanup($html);
-
-    $html = str_replace(
-        array(
-            'html>' . "\n",
-            "\n" . '<html',
-            'html/>' . "\n",
-            "\n" . '</html',
-            'head>' . "\n",
-            "\n" . '<head',
-            'head/>' . "\n",
-            "\n" . '</head',
-            '="' . $this->booleanAttributesHelper . '"',
-        ),
-        array(
-            'html>',
-            '<html',
-            'html/>',
-            '</html',
-            'head>',
-            '<head',
-            'head/>',
-            '</head',
-            '',
-        ),
-        $html
-    );
-
-    $html = preg_replace('#<\b(' . $cacheSelfClosingTags . ')([^>]+)><\/\b\1>#', '<\\1\\2/>', $html);
-
-    // ------------------------------------
-    // check if compression worked
-    // ------------------------------------
-
-    if ($origHtmlLength < UTF8::strlen($html)) {
-      $html = $origHtml;
-    }
 
     return $html;
   }
@@ -669,118 +825,6 @@ class HtmlMin
     }
 
     return $html;
-  }
-
-  /**
-   * @param boolean $doOptimizeAttributes
-   */
-  public function doOptimizeAttributes($doOptimizeAttributes = true)
-  {
-    $this->doOptimizeAttributes = $doOptimizeAttributes;
-  }
-
-  /**
-   * @param boolean $doRemoveComments
-   */
-  public function doRemoveComments($doRemoveComments = true)
-  {
-    $this->doRemoveComments = $doRemoveComments;
-  }
-
-  /**
-   * @param boolean $doRemoveDefaultAttributes
-   */
-  public function doRemoveDefaultAttributes($doRemoveDefaultAttributes = true)
-  {
-    $this->doRemoveDefaultAttributes = $doRemoveDefaultAttributes;
-  }
-
-  /**
-   * @param boolean $doRemoveDeprecatedAnchorName
-   */
-  public function doRemoveDeprecatedAnchorName($doRemoveDeprecatedAnchorName = true)
-  {
-    $this->doRemoveDeprecatedAnchorName = $doRemoveDeprecatedAnchorName;
-  }
-
-  /**
-   * @param boolean $doRemoveDeprecatedScriptCharsetAttribute
-   */
-  public function doRemoveDeprecatedScriptCharsetAttribute($doRemoveDeprecatedScriptCharsetAttribute = true)
-  {
-    $this->doRemoveDeprecatedScriptCharsetAttribute = $doRemoveDeprecatedScriptCharsetAttribute;
-  }
-
-  /**
-   * @param boolean $doRemoveDeprecatedTypeFromScriptTag
-   */
-  public function doRemoveDeprecatedTypeFromScriptTag($doRemoveDeprecatedTypeFromScriptTag = true)
-  {
-    $this->doRemoveDeprecatedTypeFromScriptTag = $doRemoveDeprecatedTypeFromScriptTag;
-  }
-
-  /**
-   * @param boolean $doRemoveDeprecatedTypeFromStylesheetLink
-   */
-  public function doRemoveDeprecatedTypeFromStylesheetLink($doRemoveDeprecatedTypeFromStylesheetLink = true)
-  {
-    $this->doRemoveDeprecatedTypeFromStylesheetLink = $doRemoveDeprecatedTypeFromStylesheetLink;
-  }
-
-  /**
-   * @param boolean $doRemoveEmptyAttributes
-   */
-  public function doRemoveEmptyAttributes($doRemoveEmptyAttributes = true)
-  {
-    $this->doRemoveEmptyAttributes = $doRemoveEmptyAttributes;
-  }
-
-  /**
-   * @param boolean $doRemoveHttpPrefixFromAttributes
-   */
-  public function doRemoveHttpPrefixFromAttributes($doRemoveHttpPrefixFromAttributes = true)
-  {
-    $this->doRemoveHttpPrefixFromAttributes = $doRemoveHttpPrefixFromAttributes;
-  }
-
-  /**
-   * @param boolean $doRemoveValueFromEmptyInput
-   */
-  public function doRemoveValueFromEmptyInput($doRemoveValueFromEmptyInput = true)
-  {
-    $this->doRemoveValueFromEmptyInput = $doRemoveValueFromEmptyInput;
-  }
-
-  /**
-   * @param boolean $doRemoveWhitespaceAroundTags
-   */
-  public function doRemoveWhitespaceAroundTags($doRemoveWhitespaceAroundTags = true)
-  {
-    $this->doRemoveWhitespaceAroundTags = $doRemoveWhitespaceAroundTags;
-  }
-
-  /**
-   * @param boolean $doSortCssClassNames
-   */
-  public function doSortCssClassNames($doSortCssClassNames = true)
-  {
-    $this->doSortCssClassNames = $doSortCssClassNames;
-  }
-
-  /**
-   * @param boolean $doSortHtmlAttributes
-   */
-  public function doSortHtmlAttributes($doSortHtmlAttributes = true)
-  {
-    $this->doSortHtmlAttributes = $doSortHtmlAttributes;
-  }
-
-  /**
-   * @param boolean $doSumUpWhitespace
-   */
-  public function doSumUpWhitespace($doSumUpWhitespace = true)
-  {
-    $this->doSumUpWhitespace = $doSumUpWhitespace;
   }
 
   /**

@@ -220,6 +220,38 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
     self::assertSame($expected, $htmlMin->minify($html, true));
   }
 
+  public function testOptionsDomFalse()
+  {
+    // init
+    $htmlMin = new HtmlMin();
+    $htmlMin->doOptimizeViaHtmlDomParser(false);
+
+    $html = '
+    <html>
+    <head>     </head>
+    <body>
+      <p id="text" class="foo">
+        foo
+      </p>  <br />  <ul > <li> <p class="foo">lall</p> </li></ul>
+    </body>
+    </html>
+    ';
+
+    $expected = '<html>
+    <head>     </head>
+    <body>
+      <p id="text" class="foo">
+        foo
+      </p>  <br/>  <ul><li><p class="foo">lall</p></li></ul>
+    </body>
+    </html>';
+
+    self::assertSame(
+        str_replace(array("\r\n", "\r", "\n"), "\n", $expected),
+        str_replace(array("\r\n", "\r", "\n"), "\n", $htmlMin->minify($html))
+    );
+  }
+
   public function testOptionsFalse()
   {
     // init
@@ -243,17 +275,24 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
     <html>
     <head>     </head>
     <body>
-      <p id="text" class="foo">foo</p>  <br />  <ul > <li> <p class="foo">lall</p> </li></ul>
+      <p id="text" class="foo">
+        foo
+      </p>  <br />  <ul > <li> <p class="foo">lall</p> </li></ul>
     </body>
     </html>
     ';
 
     $expected = '<html>    <head>     </head>    <body>
-      <p id="text" class="foo">foo</p>  <br>  <ul><li><p class="foo">lall</p></li></ul>
+      <p id="text" class="foo">
+        foo
+      </p>  <br>  <ul><li><p class="foo">lall</p></li></ul>
     </body>
     </html>';
 
-    self::assertSame($expected, $htmlMin->minify($html));
+    self::assertSame(
+        str_replace(array("\r\n", "\r", "\n"), "\n", $expected),
+        str_replace(array("\r\n", "\r", "\n"), "\n", $htmlMin->minify($html))
+    );
   }
 
   public function testOptionsTrue()
@@ -279,7 +318,9 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
     <html>
     <head>     </head>
     <body>
-      <p id="text" class="foo">foo</p>  <br />  <ul class="    " > <li> <p class=" foo  foo foo2 ">lall</p> </li></ul>
+      <p id="text" class="foo">
+        foo
+      </p>  <br />  <ul class="    " > <li> <p class=" foo  foo foo2 ">lall</p> </li></ul>
     </body>
     </html>
     ';
