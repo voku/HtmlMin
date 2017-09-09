@@ -43,20 +43,21 @@ $htmlMin = new HtmlMin();
  *    no matter what settings you use.
  */
 
-$htmlMin->doOptimizeAttributes();                     // optimize html attributes 
-$htmlMin->doRemoveComments();                         // remove default HTML comments
-$htmlMin->doRemoveDefaultAttributes();                // remove defaults
-$htmlMin->doRemoveDeprecatedAnchorName();             // remove deprecated anchor-jump
-$htmlMin->doRemoveDeprecatedScriptCharsetAttribute(); // remove deprecated charset-attribute (the browser will use the charset from the HTTP-Header, anyway)
-$htmlMin->doRemoveDeprecatedTypeFromScriptTag();      // remove deprecated script-mime-types
-$htmlMin->doRemoveDeprecatedTypeFromStylesheetLink(); // remove "type=text/css" for css links
-$htmlMin->doRemoveEmptyAttributes();                  // remove some empty attributes
-$htmlMin->doRemoveHttpPrefixFromAttributes();         // remove optional "http:"-prefix from attributes
-$htmlMin->doRemoveValueFromEmptyInput();              // remove 'value=""' from empty <input>
-$htmlMin->doRemoveWhitespaceAroundTags();             // remove whitespace around tags
-$htmlMin->doSortCssClassNames();                      // sort css-class-names, for better gzip results
-$htmlMin->doSortHtmlAttributes();                     // sort html-attributes, for better gzip results
-$htmlMin->doSumUpWhitespace();                        // sum-up extra whitespace from the Dom
+$htmlMin->doOptimizeViaHtmlDomParser();               // optimize html via "HtmlDomParser()"
+$htmlMin->doRemoveComments();                         // remove default HTML comments (depends on "doOptimizeViaHtmlDomParser(true)")
+$htmlMin->doSumUpWhitespace();                        // sum-up extra whitespace from the Dom (depends on "doOptimizeViaHtmlDomParser(true)")
+$htmlMin->doRemoveWhitespaceAroundTags();             // remove whitespace around tags (depends on "doOptimizeViaHtmlDomParser(true)")
+$htmlMin->doOptimizeAttributes();                     // optimize html attributes (depends on "doOptimizeViaHtmlDomParser(true)")
+$htmlMin->doRemoveHttpPrefixFromAttributes();         // remove optional "http:"-prefix from attributes (depends on "doOptimizeAttributes(true)")
+$htmlMin->doRemoveDefaultAttributes();                // remove defaults (depends on "doOptimizeAttributes(true)")
+$htmlMin->doRemoveDeprecatedAnchorName();             // remove deprecated anchor-jump (depends on "doOptimizeAttributes(true)")
+$htmlMin->doRemoveDeprecatedScriptCharsetAttribute(); // remove deprecated charset-attribute - the browser will use the charset from the HTTP-Header, anyway (depends on "doOptimizeAttributes(true)")
+$htmlMin->doRemoveDeprecatedTypeFromScriptTag();      // remove deprecated script-mime-types (depends on "doOptimizeAttributes(true)")
+$htmlMin->doRemoveDeprecatedTypeFromStylesheetLink(); // remove "type=text/css" for css links (depends on "doOptimizeAttributes(true)")
+$htmlMin->doRemoveEmptyAttributes();                  // remove some empty attributes (depends on "doOptimizeAttributes(true)")
+$htmlMin->doRemoveValueFromEmptyInput();              // remove 'value=""' from empty <input> (depends on "doOptimizeAttributes(true)")
+$htmlMin->doSortCssClassNames();                      // sort css-class-names, for better gzip results (depends on "doOptimizeAttributes(true)")
+$htmlMin->doSortHtmlAttributes();                     // sort html-attributes, for better gzip results (depends on "doOptimizeAttributes(true)")
 ```
 
 ## Unit Test
