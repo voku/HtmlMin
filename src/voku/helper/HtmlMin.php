@@ -487,7 +487,7 @@ class HtmlMin
    *
    * @return string
    */
-  public function minifyHtmlDom($html, $decodeUtf8Specials)
+  private function minifyHtmlDom($html, $decodeUtf8Specials)
   {
     // init dom
     $dom = new HtmlDomParser();
