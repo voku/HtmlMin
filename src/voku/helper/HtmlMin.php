@@ -214,7 +214,7 @@ class HtmlMin
   /**
    * @var bool
    */
-  private $doRemoveSpacesBetweenTags;
+  private $doRemoveSpacesBetweenTags = true;
 
   /**
    * HtmlMin constructor.
