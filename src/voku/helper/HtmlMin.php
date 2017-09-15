@@ -346,7 +346,7 @@ class HtmlMin
   /**
    * @param boolean $doRemoveSpacesBetweenTags
    */
-  public function setDoRemoveSpacesBetweenTags($doRemoveSpacesBetweenTags = true)
+  public function doRemoveSpacesBetweenTags($doRemoveSpacesBetweenTags = true)
   {
     $this->doRemoveSpacesBetweenTags = $doRemoveSpacesBetweenTags;
   }
