@@ -212,6 +212,11 @@ class HtmlMin
   private $doSumUpWhitespace = true;
 
   /**
+   * @var bool
+   */
+  private $doRemoveSpacesBetweenTags = true;
+
+  /**
    * HtmlMin constructor.
    */
   public function __construct()
@@ -339,6 +344,14 @@ class HtmlMin
   }
 
   /**
+   * @param boolean $doRemoveSpacesBetweenTags
+   */
+  public function doRemoveSpacesBetweenTags($doRemoveSpacesBetweenTags = true)
+  {
+    $this->doRemoveSpacesBetweenTags = $doRemoveSpacesBetweenTags;
+  }
+
+  /**
    * Check if the current string is an conditional comment.
    *
    * INFO: since IE >= 10 conditional comment are not working anymore
@@ -415,9 +428,11 @@ class HtmlMin
         $html
     );
 
-    // Remove spaces that are between > and <
-    $html = preg_replace('/(>) (<)/', '>$2', $html);
 
+    if($this->doRemoveSpacesBetweenTags === true){
+      // Remove spaces that are between > and <
+      $html = preg_replace('/(>) (<)/', '>$2', $html);
+    }
     // -------------------------------------------------------------------------
     // Restore protected HTML-code.
     // -------------------------------------------------------------------------
