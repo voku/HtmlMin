@@ -179,7 +179,7 @@ class HtmlMin
   /**
    * @var bool
    */
-  private $doRemoveDefaultAttributes = true;
+  private $doRemoveDefaultAttributes = false;
 
   /**
    * @var bool
@@ -214,7 +214,7 @@ class HtmlMin
   /**
    * @var bool
    */
-  private $doRemoveSpacesBetweenTags = true;
+  private $doRemoveSpacesBetweenTags = false;
 
   /**
    * HtmlMin constructor.

@@ -28,9 +28,9 @@ use voku\helper\HtmlMin;
 
 require_once 'composer/autoload.php';
 
-$html = '<html>\r\n\t<body>\xc3\xa0</body>\r\n\t</html>';
+$html = "<html>\r\n\t<body>\xc3\xa0</body>\r\n\t</html>";
 $htmlMin = new HtmlMin();
-echo $htmlMin->minify($html); // '<html><body>à</body></html>'
+echo $htmlMin->minify($html); // '<html> <body>à</body> </html>'
 ```
 
 ## Options
@@ -49,7 +49,7 @@ $htmlMin->doSumUpWhitespace();                        // sum-up extra whitespace
 $htmlMin->doRemoveWhitespaceAroundTags();             // remove whitespace around tags (depends on "doOptimizeViaHtmlDomParser(true)")
 $htmlMin->doOptimizeAttributes();                     // optimize html attributes (depends on "doOptimizeViaHtmlDomParser(true)")
 $htmlMin->doRemoveHttpPrefixFromAttributes();         // remove optional "http:"-prefix from attributes (depends on "doOptimizeAttributes(true)")
-$htmlMin->doRemoveDefaultAttributes();                // remove defaults (depends on "doOptimizeAttributes(true)")
+$htmlMin->doRemoveDefaultAttributes();                // remove defaults (depends on "doOptimizeAttributes(true)" | disabled by default)
 $htmlMin->doRemoveDeprecatedAnchorName();             // remove deprecated anchor-jump (depends on "doOptimizeAttributes(true)")
 $htmlMin->doRemoveDeprecatedScriptCharsetAttribute(); // remove deprecated charset-attribute - the browser will use the charset from the HTTP-Header, anyway (depends on "doOptimizeAttributes(true)")
 $htmlMin->doRemoveDeprecatedTypeFromScriptTag();      // remove deprecated script-mime-types (depends on "doOptimizeAttributes(true)")
@@ -58,6 +58,7 @@ $htmlMin->doRemoveEmptyAttributes();                  // remove some empty attri
 $htmlMin->doRemoveValueFromEmptyInput();              // remove 'value=""' from empty <input> (depends on "doOptimizeAttributes(true)")
 $htmlMin->doSortCssClassNames();                      // sort css-class-names, for better gzip results (depends on "doOptimizeAttributes(true)")
 $htmlMin->doSortHtmlAttributes();                     // sort html-attributes, for better gzip results (depends on "doOptimizeAttributes(true)")
+$htmlMin->doRemoveSpacesBetweenTags();                // remove more (aggressive) spaces in the dom (disabled by default)
 ```
 
 ## Unit Test
