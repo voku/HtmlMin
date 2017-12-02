@@ -164,7 +164,16 @@ class HtmlMin
   /**
    * @var bool
    */
-  private $doRemoveHttpPrefixFromAttributes = true;
+  private $doRemoveHttpPrefixFromAttributes = false;
+
+
+  /**
+   * @var array
+   */
+  private $domainsToRemoveHttpPrefixFromAttributes = array(
+      'google.com',
+      'google.de',
+  );
 
   /**
    * @var bool
@@ -230,130 +239,194 @@ class HtmlMin
 
   /**
    * @param boolean $doOptimizeAttributes
+   *
+   * @return $this
    */
   public function doOptimizeAttributes($doOptimizeAttributes = true)
   {
     $this->doOptimizeAttributes = $doOptimizeAttributes;
+
+    return $this;
   }
 
   /**
    * @param boolean $doOptimizeViaHtmlDomParser
+   *
+   * @return $this
    */
   public function doOptimizeViaHtmlDomParser($doOptimizeViaHtmlDomParser = true)
   {
     $this->doOptimizeViaHtmlDomParser = $doOptimizeViaHtmlDomParser;
+
+    return $this;
   }
 
   /**
    * @param boolean $doRemoveComments
+   *
+   * @return $this
    */
   public function doRemoveComments($doRemoveComments = true)
   {
     $this->doRemoveComments = $doRemoveComments;
+
+    return $this;
   }
 
   /**
    * @param boolean $doRemoveDefaultAttributes
+   *
+   * @return $this
    */
   public function doRemoveDefaultAttributes($doRemoveDefaultAttributes = true)
   {
     $this->doRemoveDefaultAttributes = $doRemoveDefaultAttributes;
+
+    return $this;
   }
 
   /**
    * @param boolean $doRemoveDeprecatedAnchorName
+   *
+   * @return $this
    */
   public function doRemoveDeprecatedAnchorName($doRemoveDeprecatedAnchorName = true)
   {
     $this->doRemoveDeprecatedAnchorName = $doRemoveDeprecatedAnchorName;
+
+    return $this;
   }
 
   /**
    * @param boolean $doRemoveDeprecatedScriptCharsetAttribute
+   *
+   * @return $this
    */
   public function doRemoveDeprecatedScriptCharsetAttribute($doRemoveDeprecatedScriptCharsetAttribute = true)
   {
     $this->doRemoveDeprecatedScriptCharsetAttribute = $doRemoveDeprecatedScriptCharsetAttribute;
+
+    return $this;
   }
 
   /**
    * @param boolean $doRemoveDeprecatedTypeFromScriptTag
+   *
+   * @return $this
    */
   public function doRemoveDeprecatedTypeFromScriptTag($doRemoveDeprecatedTypeFromScriptTag = true)
   {
     $this->doRemoveDeprecatedTypeFromScriptTag = $doRemoveDeprecatedTypeFromScriptTag;
+
+    return $this;
   }
 
   /**
    * @param boolean $doRemoveDeprecatedTypeFromStylesheetLink
+   *
+   * @return $this
    */
   public function doRemoveDeprecatedTypeFromStylesheetLink($doRemoveDeprecatedTypeFromStylesheetLink = true)
   {
     $this->doRemoveDeprecatedTypeFromStylesheetLink = $doRemoveDeprecatedTypeFromStylesheetLink;
+
+    return $this;
   }
 
   /**
    * @param boolean $doRemoveEmptyAttributes
+   *
+   * @return $this
    */
   public function doRemoveEmptyAttributes($doRemoveEmptyAttributes = true)
   {
     $this->doRemoveEmptyAttributes = $doRemoveEmptyAttributes;
+
+    return $this;
   }
 
   /**
    * @param boolean $doRemoveHttpPrefixFromAttributes
+   *
+   * @return $this
    */
   public function doRemoveHttpPrefixFromAttributes($doRemoveHttpPrefixFromAttributes = true)
   {
     $this->doRemoveHttpPrefixFromAttributes = $doRemoveHttpPrefixFromAttributes;
+
+    return $this;
   }
 
   /**
    * @param boolean $doRemoveValueFromEmptyInput
+   *
+   * @return $this
    */
   public function doRemoveValueFromEmptyInput($doRemoveValueFromEmptyInput = true)
   {
     $this->doRemoveValueFromEmptyInput = $doRemoveValueFromEmptyInput;
+
+    return $this;
   }
 
   /**
    * @param boolean $doRemoveWhitespaceAroundTags
+   *
+   * @return $this
    */
   public function doRemoveWhitespaceAroundTags($doRemoveWhitespaceAroundTags = true)
   {
     $this->doRemoveWhitespaceAroundTags = $doRemoveWhitespaceAroundTags;
+
+    return $this;
   }
 
   /**
    * @param boolean $doSortCssClassNames
+   *
+   * @return $this
    */
   public function doSortCssClassNames($doSortCssClassNames = true)
   {
     $this->doSortCssClassNames = $doSortCssClassNames;
+
+    return $this;
   }
 
   /**
    * @param boolean $doSortHtmlAttributes
+   *
+   * @return $this
    */
   public function doSortHtmlAttributes($doSortHtmlAttributes = true)
   {
     $this->doSortHtmlAttributes = $doSortHtmlAttributes;
+
+    return $this;
   }
 
   /**
    * @param boolean $doSumUpWhitespace
+   *
+   * @return $this
    */
   public function doSumUpWhitespace($doSumUpWhitespace = true)
   {
     $this->doSumUpWhitespace = $doSumUpWhitespace;
+
+    return $this;
   }
 
   /**
    * @param boolean $doRemoveSpacesBetweenTags
+   *
+   * @return $this
    */
   public function doRemoveSpacesBetweenTags($doRemoveSpacesBetweenTags = true)
   {
     $this->doRemoveSpacesBetweenTags = $doRemoveSpacesBetweenTags;
+
+    return $this;
   }
 
   /**
@@ -845,6 +918,18 @@ class HtmlMin
     }
 
     return $html;
+  }
+
+  /**
+   * @param array $domainsToRemoveHttpPrefixFromAttributes
+   *
+   * @return $this
+   */
+  public function setDomainsToRemoveHttpPrefixFromAttributes($domainsToRemoveHttpPrefixFromAttributes)
+  {
+    $this->domainsToRemoveHttpPrefixFromAttributes = $domainsToRemoveHttpPrefixFromAttributes;
+
+    return $this;
   }
 
   /**

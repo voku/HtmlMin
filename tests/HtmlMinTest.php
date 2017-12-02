@@ -177,6 +177,8 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
   {
     // init
     $htmlMin = new HtmlMin();
+    $htmlMin->doRemoveHttpPrefixFromAttributes()
+            ->setDomainsToRemoveHttpPrefixFromAttributes(array('csszengarden.com'));
 
     $html = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/base1.html'));
     $expected = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/base1_result.html'));
@@ -213,6 +215,8 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
   {
     // init
     $htmlMin = new HtmlMin();
+    $htmlMin->doRemoveHttpPrefixFromAttributes()
+            ->setDomainsToRemoveHttpPrefixFromAttributes(array('henkel-lifetimes.de'));
 
     $html = str_replace(array("\r\n", "\r", "\n"), "\n", UTF8::file_get_contents(__DIR__ . '/fixtures/hlt.html'));
     $expected = str_replace(array("\r\n", "\r", "\n",), "\n", UTF8::file_get_contents(__DIR__ . '/fixtures/hlt_result.html'));
