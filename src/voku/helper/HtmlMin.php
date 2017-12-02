@@ -613,7 +613,12 @@ class HtmlMin
     return $htmlstr;
   }
 
-  protected function getNextSiblingOfTypeDOMElement(\DOMNode $node): \DOMNode
+  /**
+   * @param \DOMNode $node
+   *
+   * @return \DOMNode|null
+   */
+  protected function getNextSiblingOfTypeDOMElement(\DOMNode $node)
   {
     do {
       $node = $node->nextSibling;

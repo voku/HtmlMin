@@ -1,11 +1,12 @@
 <?php
+
 use voku\helper\HtmlMin;
 use voku\helper\UTF8;
 
 /**
  * Class HtmlMinTest
  */
-class HtmlMinTest extends \PHPUnit_Framework_TestCase
+class HtmlMinTest extends \PHPUnit\Framework\TestCase
 {
   /**
    * @var HtmlMin
@@ -24,24 +25,24 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
    */
   public function providerBoolAttr()
   {
-    return array(
-        array(
+    return [
+        [
             '<input type="checkbox" autofocus="autofocus" checked="true" />',
             '<input autofocus checked type="checkbox">',
-        ),
-        array(
+        ],
+        [
             '<input type="checkbox" autofocus="autofocus" checked="checked">',
             '<input autofocus checked type="checkbox">',
-        ),
-        array(
+        ],
+        [
             '<input type="checkbox" autofocus="" checked="">',
             '<input autofocus checked type="checkbox">',
-        ),
-        array(
+        ],
+        [
             '<input type="checkbox" autofocus="" checked>',
             '<input autofocus checked type="checkbox">',
-        ),
-    );
+        ],
+    ];
   }
 
   /**
@@ -49,20 +50,20 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
    */
   public function providerMultipleSpaces()
   {
-    return array(
-        array(
+    return [
+        [
             '<html>  <body>          <h1>h  oi</h1>                         </body></html>',
             '<html><body><h1>h oi</h1>',
-        ),
-        array(
+        ],
+        [
             '<html>   </html>',
             '<html>',
-        ),
-        array(
+        ],
+        [
             "<html><body>  pre \r\n  suf\r\n  </body>",
             "<html><body> pre suf",
-        ),
-    );
+        ],
+    ];
   }
 
   /**
@@ -70,20 +71,20 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
    */
   public function providerNewLinesTabsReturns()
   {
-    return array(
-        array(
+    return [
+        [
             "<html>\r\t<body>\n\t\t<h1>hoi</h1>\r\n\t</body>\r\n</html>",
             '<html><body><h1>hoi</h1>',
-        ),
-        array(
+        ],
+        [
             "<html>\r\t<h1>hoi</h1>\r\n\t\r\n</html>",
             '<html><h1>hoi</h1>',
-        ),
-        array(
+        ],
+        [
             "<html><p>abc\r\ndef</p></html>",
             "<html><p>abc def",
-        ),
-    );
+        ],
+    ];
   }
 
   /**
@@ -91,16 +92,16 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
    */
   public function providerSpaceAfterGt()
   {
-    return array(
-        array(
+    return [
+        [
             '<html> <body> <h1>hoi</h1>   </body> </html>',
             '<html><body><h1>hoi</h1>',
-        ),
-        array(
+        ],
+        [
             '<html>  a',
             '<html>  a',
-        ),
-    );
+        ],
+    ];
   }
 
   /**
@@ -108,16 +109,16 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
    */
   public function providerSpaceBeforeLt()
   {
-    return array(
-        array(
+    return [
+        [
             '<html> <body>   <h1>hoi</h1></body> </html> ',
             '<html><body><h1>hoi</h1>',
-        ),
-        array(
+        ],
+        [
             'a     <html>',
             'a     <html>',
-        ),
-    );
+        ],
+    ];
   }
 
   /**
@@ -125,12 +126,12 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
    */
   public function providerSpecialCharacterEncoding()
   {
-    return array(
-        array(
+    return [
+        [
             "<html>\r\n\t<body>\xc3\xa0</body>\r\n\t</html>",
             '<html><body>à',
-        ),
-    );
+        ],
+    ];
   }
 
   /**
@@ -138,16 +139,16 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
    */
   public function providerTrim()
   {
-    return array(
-        array(
+    return [
+        [
             '              ',
             '',
-        ),
-        array(
+        ],
+        [
             ' ',
             '',
-        ),
-    );
+        ],
+    ];
   }
 
   public function setUp()
@@ -179,24 +180,24 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
     // init
     $htmlMin = new HtmlMin();
     $htmlMin->doRemoveHttpPrefixFromAttributes()
-            ->setDomainsToRemoveHttpPrefixFromAttributes(array('csszengarden.com'));
+            ->setDomainsToRemoveHttpPrefixFromAttributes(['csszengarden.com']);
 
-    $html = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/base1.html'));
-    $expected = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/base1_result.html'));
-
-    self::assertSame(trim($expected), $htmlMin->minify($html));
-
-    // ---
-
-    $html = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/base2.html'));
-    $expected = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/base2_result.html'));
+    $html = str_replace(["\r\n", "\r", "\n"], "\n", file_get_contents(__DIR__ . '/fixtures/base1.html'));
+    $expected = str_replace(["\r\n", "\r", "\n"], "\n", file_get_contents(__DIR__ . '/fixtures/base1_result.html'));
 
     self::assertSame(trim($expected), $htmlMin->minify($html));
 
     // ---
 
-    $html = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/base3.html'));
-    $expected = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/base3_result.html'));
+    $html = str_replace(["\r\n", "\r", "\n"], "\n", file_get_contents(__DIR__ . '/fixtures/base2.html'));
+    $expected = str_replace(["\r\n", "\r", "\n"], "\n", file_get_contents(__DIR__ . '/fixtures/base2_result.html'));
+
+    self::assertSame(trim($expected), $htmlMin->minify($html));
+
+    // ---
+
+    $html = str_replace(["\r\n", "\r", "\n"], "\n", file_get_contents(__DIR__ . '/fixtures/base3.html'));
+    $expected = str_replace(["\r\n", "\r", "\n"], "\n", file_get_contents(__DIR__ . '/fixtures/base3_result.html'));
 
     self::assertSame(trim($expected), $htmlMin->minify($html));
   }
@@ -206,8 +207,8 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
     // init
     $htmlMin = new HtmlMin();
 
-    $html = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/code.html'));
-    $expected = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/code_result.html'));
+    $html = str_replace(["\r\n", "\r", "\n"], "\n", file_get_contents(__DIR__ . '/fixtures/code.html'));
+    $expected = str_replace(["\r\n", "\r", "\n"], "\n", file_get_contents(__DIR__ . '/fixtures/code_result.html'));
 
     self::assertSame(trim($expected), $htmlMin->minify($html));
   }
@@ -217,10 +218,16 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
     // init
     $htmlMin = new HtmlMin();
     $htmlMin->doRemoveHttpPrefixFromAttributes()
-            ->setDomainsToRemoveHttpPrefixFromAttributes(array('henkel-lifetimes.de'));
+            ->setDomainsToRemoveHttpPrefixFromAttributes(['henkel-lifetimes.de']);
 
-    $html = str_replace(array("\r\n", "\r", "\n"), "\n", UTF8::file_get_contents(__DIR__ . '/fixtures/hlt.html'));
-    $expected = str_replace(array("\r\n", "\r", "\n",), "\n", UTF8::file_get_contents(__DIR__ . '/fixtures/hlt_result.html'));
+    $html = str_replace(["\r\n", "\r", "\n"], "\n", UTF8::file_get_contents(__DIR__ . '/fixtures/hlt.html'));
+    $expected = str_replace(
+        [
+            "\r\n",
+            "\r",
+            "\n",
+        ], "\n", UTF8::file_get_contents(__DIR__ . '/fixtures/hlt_result.html')
+    );
 
     self::assertSame(trim($expected), $htmlMin->minify($html, true));
   }
@@ -241,8 +248,8 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
       </p>  <br>  <ul> <li> <p class="foo">lall</p> </li></ul>';
 
     self::assertSame(
-        str_replace(array("\r\n", "\r", "\n"), "\n", $expected),
-        str_replace(array("\r\n", "\r", "\n"), "\n", $htmlMin->minify($html))
+        str_replace(["\r\n", "\r", "\n"], "\n", $expected),
+        str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
     );
   }
 
@@ -281,8 +288,8 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
       </p> <br> <ul><li><p class=foo>lall</ul>';
 
     self::assertSame(
-        str_replace(array("\r\n", "\r", "\n"), "\n", $expected),
-        str_replace(array("\r\n", "\r", "\n"), "\n", $htmlMin->minify($html))
+        str_replace(["\r\n", "\r", "\n"], "\n", $expected),
+        str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
     );
   }
 
