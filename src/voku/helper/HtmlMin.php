@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace voku\helper;
 
 /**
@@ -24,11 +26,11 @@ class HtmlMin
   /**
    * @var array
    */
-  private static $optional_end_tags = array(
+  private static $optional_end_tags = [
       'html',
       'head',
       'body',
-  );
+  ];
 
   /**
    * // https://mathiasbynens.be/demo/javascript-mime-type
@@ -36,16 +38,16 @@ class HtmlMin
    *
    * @var array
    */
-  private static $executableScriptsMimeTypes = array(
+  private static $executableScriptsMimeTypes = [
       'text/javascript'          => '',
       'text/ecmascript'          => '',
       'text/jscript'             => '',
       'application/javascript'   => '',
       'application/x-javascript' => '',
       'application/ecmascript'   => '',
-  );
+  ];
 
-  private static $selfClosingTags = array(
+  private static $selfClosingTags = [
       'area',
       'base',
       'basefont',
@@ -65,9 +67,9 @@ class HtmlMin
       'source',
       'track',
       'wbr',
-  );
+  ];
 
-  private static $trimWhitespaceFromTags = array(
+  private static $trimWhitespaceFromTags = [
       'article' => '',
       'br'      => '',
       'div'     => '',
@@ -76,12 +78,12 @@ class HtmlMin
       'nav'     => '',
       'p'       => '',
       'script'  => '',
-  );
+  ];
 
   /**
    * @var array
    */
-  private static $booleanAttributes = array(
+  private static $booleanAttributes = [
       'allowfullscreen' => '',
       'async'           => '',
       'autofocus'       => '',
@@ -123,22 +125,22 @@ class HtmlMin
       'truespeed'       => '',
       'typemustmatch'   => '',
       'visible'         => '',
-  );
+  ];
   /**
    * @var array
    */
-  private static $skipTagsForRemoveWhitespace = array(
+  private static $skipTagsForRemoveWhitespace = [
       'code',
       'pre',
       'script',
       'style',
       'textarea',
-  );
+  ];
 
   /**
    * @var array
    */
-  private $protectedChildNodes = array();
+  private $protectedChildNodes = [];
 
   /**
    * @var string
@@ -174,10 +176,10 @@ class HtmlMin
   /**
    * @var array
    */
-  private $domainsToRemoveHttpPrefixFromAttributes = array(
+  private $domainsToRemoveHttpPrefixFromAttributes = [
       'google.com',
       'google.de',
-  );
+  ];
 
   /**
    * @var bool
@@ -246,7 +248,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doOptimizeAttributes($doOptimizeAttributes = true)
+  public function doOptimizeAttributes(bool $doOptimizeAttributes = true)
   {
     $this->doOptimizeAttributes = $doOptimizeAttributes;
 
@@ -258,7 +260,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doOptimizeViaHtmlDomParser($doOptimizeViaHtmlDomParser = true)
+  public function doOptimizeViaHtmlDomParser(bool $doOptimizeViaHtmlDomParser = true)
   {
     $this->doOptimizeViaHtmlDomParser = $doOptimizeViaHtmlDomParser;
 
@@ -270,7 +272,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doRemoveComments($doRemoveComments = true)
+  public function doRemoveComments(bool $doRemoveComments = true)
   {
     $this->doRemoveComments = $doRemoveComments;
 
@@ -282,7 +284,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doRemoveDefaultAttributes($doRemoveDefaultAttributes = true)
+  public function doRemoveDefaultAttributes(bool $doRemoveDefaultAttributes = true)
   {
     $this->doRemoveDefaultAttributes = $doRemoveDefaultAttributes;
 
@@ -294,7 +296,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doRemoveDeprecatedAnchorName($doRemoveDeprecatedAnchorName = true)
+  public function doRemoveDeprecatedAnchorName(bool $doRemoveDeprecatedAnchorName = true)
   {
     $this->doRemoveDeprecatedAnchorName = $doRemoveDeprecatedAnchorName;
 
@@ -306,7 +308,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doRemoveDeprecatedScriptCharsetAttribute($doRemoveDeprecatedScriptCharsetAttribute = true)
+  public function doRemoveDeprecatedScriptCharsetAttribute(bool $doRemoveDeprecatedScriptCharsetAttribute = true)
   {
     $this->doRemoveDeprecatedScriptCharsetAttribute = $doRemoveDeprecatedScriptCharsetAttribute;
 
@@ -318,7 +320,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doRemoveDeprecatedTypeFromScriptTag($doRemoveDeprecatedTypeFromScriptTag = true)
+  public function doRemoveDeprecatedTypeFromScriptTag(bool $doRemoveDeprecatedTypeFromScriptTag = true)
   {
     $this->doRemoveDeprecatedTypeFromScriptTag = $doRemoveDeprecatedTypeFromScriptTag;
 
@@ -330,7 +332,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doRemoveDeprecatedTypeFromStylesheetLink($doRemoveDeprecatedTypeFromStylesheetLink = true)
+  public function doRemoveDeprecatedTypeFromStylesheetLink(bool $doRemoveDeprecatedTypeFromStylesheetLink = true)
   {
     $this->doRemoveDeprecatedTypeFromStylesheetLink = $doRemoveDeprecatedTypeFromStylesheetLink;
 
@@ -342,7 +344,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doRemoveEmptyAttributes($doRemoveEmptyAttributes = true)
+  public function doRemoveEmptyAttributes(bool $doRemoveEmptyAttributes = true)
   {
     $this->doRemoveEmptyAttributes = $doRemoveEmptyAttributes;
 
@@ -354,7 +356,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doRemoveHttpPrefixFromAttributes($doRemoveHttpPrefixFromAttributes = true)
+  public function doRemoveHttpPrefixFromAttributes(bool $doRemoveHttpPrefixFromAttributes = true)
   {
     $this->doRemoveHttpPrefixFromAttributes = $doRemoveHttpPrefixFromAttributes;
 
@@ -366,7 +368,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doRemoveSpacesBetweenTags($doRemoveSpacesBetweenTags = true)
+  public function doRemoveSpacesBetweenTags(bool $doRemoveSpacesBetweenTags = true)
   {
     $this->doRemoveSpacesBetweenTags = $doRemoveSpacesBetweenTags;
 
@@ -378,7 +380,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doRemoveValueFromEmptyInput($doRemoveValueFromEmptyInput = true)
+  public function doRemoveValueFromEmptyInput(bool $doRemoveValueFromEmptyInput = true)
   {
     $this->doRemoveValueFromEmptyInput = $doRemoveValueFromEmptyInput;
 
@@ -390,7 +392,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doRemoveWhitespaceAroundTags($doRemoveWhitespaceAroundTags = true)
+  public function doRemoveWhitespaceAroundTags(bool $doRemoveWhitespaceAroundTags = true)
   {
     $this->doRemoveWhitespaceAroundTags = $doRemoveWhitespaceAroundTags;
 
@@ -402,7 +404,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doSortCssClassNames($doSortCssClassNames = true)
+  public function doSortCssClassNames(bool $doSortCssClassNames = true)
   {
     $this->doSortCssClassNames = $doSortCssClassNames;
 
@@ -414,7 +416,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doSortHtmlAttributes($doSortHtmlAttributes = true)
+  public function doSortHtmlAttributes(bool $doSortHtmlAttributes = true)
   {
     $this->doSortHtmlAttributes = $doSortHtmlAttributes;
 
@@ -426,14 +428,14 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doSumUpWhitespace($doSumUpWhitespace = true)
+  public function doSumUpWhitespace(bool $doSumUpWhitespace = true)
   {
     $this->doSumUpWhitespace = $doSumUpWhitespace;
 
     return $this;
   }
 
-  private function domNodeAttributesToString(\DOMNode $node)
+  private function domNodeAttributesToString(\DOMNode $node): string
   {
     # Remove quotes around attribute values, when allowed (<p class="foo"> → <p class=foo>)
     $attrstr = '';
@@ -458,7 +460,7 @@ class HtmlMin
     return \trim($attrstr);
   }
 
-  private function domNodeClosingTagOptional(\DOMNode $node)
+  private function domNodeClosingTagOptional(\DOMNode $node): bool
   {
     $tag_name = $node->tagName;
     $nextSibling = $this->getNextSiblingOfTypeDOMElement($node);
@@ -492,7 +494,7 @@ class HtmlMin
     //
     // <-- However, a start tag must never be omitted if it has any attributes.
 
-    return in_array($tag_name, self::$optional_end_tags)
+    return \in_array($tag_name, self::$optional_end_tags, true)
            ||
            (
                $tag_name == 'li'
@@ -525,9 +527,9 @@ class HtmlMin
                    (
                        $nextSibling instanceof \DOMElement
                        &&
-                       in_array(
+                       \in_array(
                            $nextSibling->tagName,
-                           array(
+                           [
                                'address',
                                'article',
                                'aside',
@@ -555,7 +557,7 @@ class HtmlMin
                                'section',
                                'table',
                                'ul',
-                           ),
+                           ],
                            true
                        )
                    )
@@ -563,7 +565,7 @@ class HtmlMin
            );
   }
 
-  protected function domNodeToString(\DOMNode $node)
+  protected function domNodeToString(\DOMNode $node): string
   {
     // init
     $htmlstr = '';
@@ -611,7 +613,7 @@ class HtmlMin
     return $htmlstr;
   }
 
-  protected function getNextSiblingOfTypeDOMElement(\DOMNode $node)
+  protected function getNextSiblingOfTypeDOMElement(\DOMNode $node): \DOMNode
   {
     do {
       $node = $node->nextSibling;
@@ -632,7 +634,7 @@ class HtmlMin
    *
    * @return bool
    */
-  private function isConditionalComment($comment)
+  private function isConditionalComment($comment): bool
   {
     if (preg_match('/^\[if [^\]]+\]/', $comment)) {
       return true;
@@ -651,7 +653,7 @@ class HtmlMin
    *
    * @return string
    */
-  public function minify($html, $decodeUtf8Specials = false)
+  public function minify($html, $decodeUtf8Specials = false): string
   {
     $html = (string)$html;
     if (!isset($html[0])) {
@@ -670,7 +672,7 @@ class HtmlMin
     }
 
     // reset
-    $this->protectedChildNodes = array();
+    $this->protectedChildNodes = [];
 
     // save old content
     $origHtml = $html;
@@ -709,7 +711,7 @@ class HtmlMin
 
     $html = (string)\preg_replace_callback(
         '/<(?<element>' . $this->protectedChildNodesHelper . ')(?<attributes> [^>]*)?>(?<value>.*?)<\/' . $this->protectedChildNodesHelper . '>/',
-        array($this, 'restoreProtectedHtml'),
+        [$this, 'restoreProtectedHtml'],
         $html
     );
 
@@ -728,7 +730,7 @@ class HtmlMin
     $html = UTF8::cleanup($html);
 
     $html = \str_replace(
-        array(
+        [
             'html>' . "\n",
             "\n" . '<html',
             'html/>' . "\n",
@@ -737,8 +739,8 @@ class HtmlMin
             "\n" . '<head',
             'head/>' . "\n",
             "\n" . '</head',
-        ),
-        array(
+        ],
+        [
             'html>',
             '<html',
             'html/>',
@@ -747,13 +749,13 @@ class HtmlMin
             '<head',
             'head/>',
             '</head',
-        ),
+        ],
         $html
     );
 
     // self closing tags, don't need a trailing slash ...
-    $replace = array();
-    $replacement = array();
+    $replace = [];
+    $replacement = [];
     foreach (self::$selfClosingTags as $selfClosingTag) {
       $replace[] = '<' . $selfClosingTag . '/>';
       $replacement[] = '<' . $selfClosingTag . '>';
@@ -783,7 +785,7 @@ class HtmlMin
    *
    * @return string
    */
-  private function minifyHtmlDom($html, $decodeUtf8Specials)
+  private function minifyHtmlDom($html, $decodeUtf8Specials): string
   {
     // init dom
     $dom = new HtmlDomParser();
@@ -853,14 +855,14 @@ class HtmlMin
    *
    * @return bool
    */
-  private function optimizeAttributes(SimpleHtmlDom $element)
+  private function optimizeAttributes(SimpleHtmlDom $element): bool
   {
     $attributes = $element->getAllAttributes();
     if ($attributes === null) {
       return false;
     }
 
-    $attrs = array();
+    $attrs = [];
     foreach ((array)$attributes as $attrName => $attrValue) {
 
       if (isset(self::$booleanAttributes[$attrName])) {
@@ -924,7 +926,7 @@ class HtmlMin
    *
    * @return HtmlDomParser
    */
-  private function protectTags(HtmlDomParser $dom)
+  private function protectTags(HtmlDomParser $dom): HtmlDomParser
   {
     // init
     $counter = 0;
@@ -980,7 +982,7 @@ class HtmlMin
    *
    * @return bool
    */
-  private function removeAttributeHelper($tag, $attrName, $attrValue, $allAttr)
+  private function removeAttributeHelper($tag, $attrName, $attrValue, $allAttr): bool
   {
     // remove defaults
     if ($this->doRemoveDefaultAttributes === true) {
@@ -1054,7 +1056,7 @@ class HtmlMin
    *
    * @return HtmlDomParser
    */
-  private function removeComments(HtmlDomParser $dom)
+  private function removeComments(HtmlDomParser $dom): HtmlDomParser
   {
     foreach ($dom->find('//comment()') as $commentWrapper) {
       $comment = $commentWrapper->getNode();
@@ -1081,7 +1083,7 @@ class HtmlMin
     if (isset(self::$trimWhitespaceFromTags[$element->tag])) {
       $node = $element->getNode();
 
-      $candidates = array();
+      $candidates = [];
       if ($node->childNodes->length > 0) {
         $candidates[] = $node->firstChild;
         $candidates[] = $node->lastChild;
@@ -1108,7 +1110,7 @@ class HtmlMin
    *
    * @return string
    */
-  private function restoreProtectedHtml($matches)
+  private function restoreProtectedHtml($matches): string
   {
     \preg_match('/.*"(?<id>\d*)"/', $matches['attributes'], $matchesInner);
 
@@ -1138,7 +1140,7 @@ class HtmlMin
    *
    * @return string
    */
-  private function sortCssClassNames($attrName, $attrValue)
+  private function sortCssClassNames($attrName, $attrValue): string
   {
     if ($attrName !== 'class' || !$attrValue) {
       return $attrValue;
@@ -1170,7 +1172,7 @@ class HtmlMin
    *
    * @return HtmlDomParser
    */
-  private function sumUpWhitespace(HtmlDomParser $dom)
+  private function sumUpWhitespace(HtmlDomParser $dom): HtmlDomParser
   {
     $textnodes = $dom->find('//text()');
     foreach ($textnodes as $textnodeWrapper) {
