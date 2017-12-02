@@ -17,6 +17,11 @@ namespace voku\helper;
 class HtmlMin
 {
   /**
+   * @var string
+   */
+  private static $regExSpace = "/[[:space:]]{2,}|[\r\n]+/u";
+
+  /**
    * // https://mathiasbynens.be/demo/javascript-mime-type
    * // https://developer.mozilla.org/en/docs/Web/HTML/Element/script#attr-type
    *
@@ -420,10 +425,10 @@ class HtmlMin
     // -------------------------------------------------------------------------
 
     // Remove extra white-space(s) between HTML attribute(s)
-    $html = preg_replace_callback(
+    $html = (string)\preg_replace_callback(
         '#<([^\/\s<>!]+)(?:\s+([^<>]*?)\s*|\s*)(\/?)>#',
         function ($matches) {
-          return '<' . $matches[1] . preg_replace('#([^\s=]+)(\=([\'"]?)(.*?)\3)?(\s+|$)#s', ' $1$2', $matches[2]) . $matches[3] . '>';
+          return '<' . $matches[1] . (string)\preg_replace('#([^\s=]+)(\=([\'"]?)(.*?)\3)?(\s+|$)#s', ' $1$2', $matches[2]) . $matches[3] . '>';
         },
         $html
     );
@@ -431,13 +436,13 @@ class HtmlMin
 
     if($this->doRemoveSpacesBetweenTags === true){
       // Remove spaces that are between > and <
-      $html = preg_replace('/(>) (<)/', '>$2', $html);
+      $html = (string)\preg_replace('/(>) (<)/', '>$2', $html);
     }
     // -------------------------------------------------------------------------
     // Restore protected HTML-code.
     // -------------------------------------------------------------------------
 
-    $html = preg_replace_callback(
+    $html = (string)\preg_replace_callback(
         '/<(?<element>' . $this->protectedChildNodesHelper . ')(?<attributes> [^>]*)?>(?<value>.*?)<\/' . $this->protectedChildNodesHelper . '>/',
         array($this, 'restoreProtectedHtml'),
         $html
@@ -457,7 +462,7 @@ class HtmlMin
 
     $html = UTF8::cleanup($html);
 
-    $html = str_replace(
+    $html = \str_replace(
         array(
             'html>' . "\n",
             "\n" . '<html',
@@ -483,7 +488,7 @@ class HtmlMin
         $html
     );
 
-    $html = preg_replace('#<\b(' . $CACHE_SELF_CLOSING_TAGS . ')([^>]+)><\/\b\1>#', '<\\1\\2/>', $html);
+    $html = (string)\preg_replace('#<\b(' . $CACHE_SELF_CLOSING_TAGS . ')([^>]+)><\/\b\1>#', '<\\1\\2/>', $html);
 
     // ------------------------------------
     // check if compression worked
@@ -601,7 +606,7 @@ class HtmlMin
             &&
             !(isset($attributes['target']) && $attributes['target'] === '_blank')
         ) {
-          $attrValue = str_replace('http://', '//', $attrValue);
+          $attrValue = \str_replace('http://', '//', $attrValue);
         }
       }
 
@@ -629,7 +634,7 @@ class HtmlMin
     // -------------------------------------------------------------------------
 
     if ($this->doSortHtmlAttributes === true) {
-      ksort($attrs);
+      \ksort($attrs);
       foreach ($attrs as $attrName => $attrValue) {
         $attrValue = HtmlDomParser::replaceToPreserveHtmlEntities($attrValue);
         $element->setAttribute($attrName, $attrValue, true);
@@ -761,7 +766,7 @@ class HtmlMin
 
     // remove some empty attributes
     if ($this->doRemoveEmptyAttributes === true) {
-      if (trim($attrValue) === '' && preg_match('/^(?:class|id|style|title|lang|dir|on(?:focus|blur|change|click|dblclick|mouse(?:down|up|over|move|out)|key(?:press|down|up)))$/', $attrName)) {
+      if (\trim($attrValue) === '' && \preg_match('/^(?:class|id|style|title|lang|dir|on(?:focus|blur|change|click|dblclick|mouse(?:down|up|over|move|out)|key(?:press|down|up)))$/', $attrName)) {
         return true;
       }
     }
@@ -781,7 +786,7 @@ class HtmlMin
     foreach ($dom->find('//comment()') as $commentWrapper) {
       $comment = $commentWrapper->getNode();
       $val = $comment->nodeValue;
-      if (strpos($val, '[') === false) {
+      if (\strpos($val, '[') === false) {
         $comment->parentNode->removeChild($comment);
       }
     }
@@ -817,7 +822,7 @@ class HtmlMin
         }
 
         if ($candidate->nodeType === 3) {
-          $candidate->nodeValue = trim($candidate->nodeValue);
+          $candidate->nodeValue = \preg_replace(self::$regExSpace, ' ', $candidate->nodeValue);
         }
       }
     }
@@ -832,7 +837,7 @@ class HtmlMin
    */
   private function restoreProtectedHtml($matches)
   {
-    preg_match('/.*"(?<id>\d*)"/', $matches['attributes'], $matchesInner);
+    \preg_match('/.*"(?<id>\d*)"/', $matches['attributes'], $matchesInner);
 
     $html = '';
     if (isset($this->protectedChildNodes[$matchesInner['id']])) {
@@ -854,10 +859,10 @@ class HtmlMin
       return $attrValue;
     }
 
-    $classes = array_unique(
-        explode(' ', $attrValue)
+    $classes = \array_unique(
+        \explode(' ', $attrValue)
     );
-    sort($classes);
+    \sort($classes);
 
     $attrValue = '';
     foreach ($classes as $class) {
@@ -866,9 +871,9 @@ class HtmlMin
         continue;
       }
 
-      $attrValue .= trim($class) . ' ';
+      $attrValue .= \trim($class) . ' ';
     }
-    $attrValue = trim($attrValue);
+    $attrValue = \trim($attrValue);
 
     return $attrValue;
   }
@@ -890,7 +895,7 @@ class HtmlMin
 
       $doSkip = false;
       foreach (self::$skipTagsForRemoveWhitespace as $pattern) {
-        if (strpos($xp, "/$pattern") !== false) {
+        if (\strpos($xp, "/$pattern") !== false) {
           $doSkip = true;
           break;
         }
@@ -899,7 +904,7 @@ class HtmlMin
         continue;
       }
 
-      $textnode->nodeValue = preg_replace("/\s{2,}/", ' ', $textnode->nodeValue);
+      $textnode->nodeValue = \preg_replace(self::$regExSpace, ' ', $textnode->nodeValue);
     }
 
     $dom->getDocument()->normalizeDocument();

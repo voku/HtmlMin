@@ -73,7 +73,7 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
     return array(
         array(
             "<html>\r\t<body>\n\t\t<h1>hoi</h1>\r\n\t</body>\r\n</html>",
-            '<html> <body> <h1>hoi</h1> </body></html>',
+            '<html> <body> <h1>hoi</h1> </body> </html>',
         ),
         array(
             "<html>\r\t<h1>hoi</h1>\r\n\t\r\n</html>",
@@ -81,7 +81,7 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
         ),
         array(
             "<html><p>abc\r\ndef</p></html>",
-            "<html><p>abc\ndef</p></html>",
+            "<html><p>abc def</p></html>",
         ),
     );
   }
@@ -181,21 +181,21 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
     $html = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/base1.html'));
     $expected = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/base1_result.html'));
 
-    self::assertSame($expected, $htmlMin->minify($html));
+    self::assertSame(trim($expected), $htmlMin->minify($html));
 
     // ---
 
     $html = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/base2.html'));
     $expected = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/base2_result.html'));
 
-    self::assertSame($expected, $htmlMin->minify($html));
+    self::assertSame(trim($expected), $htmlMin->minify($html));
 
     // ---
 
     $html = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/base3.html'));
     $expected = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/base3_result.html'));
 
-    self::assertSame($expected, $htmlMin->minify($html));
+    self::assertSame(trim($expected), $htmlMin->minify($html));
   }
 
   public function testMinifyCodeTag()
@@ -206,7 +206,7 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
     $html = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/code.html'));
     $expected = str_replace(array("\r\n", "\r", "\n"), "\n", file_get_contents(__DIR__ . '/fixtures/code_result.html'));
 
-    self::assertSame($expected, $htmlMin->minify($html));
+    self::assertSame(trim($expected), $htmlMin->minify($html));
   }
 
   public function testMinifyHlt()
@@ -217,7 +217,7 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
     $html = str_replace(array("\r\n", "\r", "\n"), "\n", UTF8::file_get_contents(__DIR__ . '/fixtures/hlt.html'));
     $expected = str_replace(array("\r\n", "\r", "\n",), "\n", UTF8::file_get_contents(__DIR__ . '/fixtures/hlt_result.html'));
 
-    self::assertSame($expected, $htmlMin->minify($html, true));
+    self::assertSame(trim($expected), $htmlMin->minify($html, true));
   }
 
   public function testOptionsDomFalse()
@@ -315,7 +315,7 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
     </html>
     ';
 
-    $expected = '<html> <head> </head> <body><p class="foo" id="text">foo</p><br> <ul> <li><p class="foo foo2">lall</p></li></ul> </body> </html>';
+    $expected = '<html> <head> </head> <body> <p class="foo" id="text"> foo </p> <br> <ul> <li> <p class="foo foo2">lall</p> </li></ul> </body> </html>';
 
     self::assertSame($expected, $htmlMin->minify($html));
   }
@@ -334,7 +334,7 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
     </html>
     ';
 
-    $expected = '<html> <head> </head> <body><p class="foo" id="text">foo</p><br> <ul> <li><p class="foo">lall</p></li></ul> </body> </html>';
+    $expected = '<html> <head> </head> <body> <p class="foo" id="text">foo</p> <br> <ul> <li> <p class="foo">lall</p> </li></ul> </body> </html>';
 
     self::assertSame($expected, $htmlMin->minify($html));
   }
