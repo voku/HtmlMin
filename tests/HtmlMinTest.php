@@ -345,11 +345,21 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
         <li>2</li>
         <li>3</li>
       </ul>
+      <table>
+        <tr>
+          <th>1</th>
+          <th>2</th>
+        </tr>
+        <tr>
+          <td>foo</td>
+          <td>bar</td>
+        </tr>
+      </table>
     </body>
     </html>
     ';
 
-    $expected = '<html><head> <body><p class=foo id=text>foo</p> <br> <ul><li><p class=foo>lall</ul> <ul><li>1 <li>2 <li>3</ul>';
+    $expected = '<html><head> <body><p class=foo id=text>foo</p> <br> <ul><li><p class=foo>lall</ul> <ul><li>1 <li>2 <li>3</ul> <table><tr><th>1</th> <th>2</th></tr> <tr><td>foo <td>bar</tr></table>';
 
     self::assertSame($expected, $htmlMin->minify($html));
   }

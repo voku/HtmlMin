@@ -465,19 +465,23 @@ class HtmlMin
     $tag_name = $node->tagName;
     $nextSibling = $this->getNextSiblingOfTypeDOMElement($node);
 
-    // TODO: check the spec
-    //
     // https://html.spec.whatwg.org/multipage/syntax.html#syntax-tag-omission
+
+    // Implemented:
+    //
+    // A <p> element's end tag may be omitted if the p element is immediately followed by an address, article, aside, blockquote, details, div, dl, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, hr, main, menu, nav, ol, p, pre, section, table, or ul element, or if there is no more content in the parent element and the parent element is an HTML element that is not an a, audio, del, ins, map, noscript, or video element, or an autonomous custom element.
+    // An <li> element's end tag may be omitted if the li element is immediately followed by another li element or if there is no more content in the parent element.
+    // A <td> element's end tag may be omitted if the td element is immediately followed by a td or th element, or if there is no more content in the parent element.
+
+    // TODO:
     //
     // <html> may be omitted if first thing inside is not comment
     // <head> may be omitted if first thing inside is an element
     // <body> may be omitted if first thing inside is not space, comment, <meta>, <link>, <script>, <style> or <template>
     // <colgroup> may be omitted if first thing inside is <col>
     // <tbody> may be omitted if first thing inside is <tr>
-    // An <li> element's end tag may be omitted if the li element is immediately followed by another li element or if there is no more content in the parent element.
     // A <dt> element's end tag may be omitted if the dt element is immediately followed by another dt element or a dd element.
     // A <dd> element's end tag may be omitted if the dd element is immediately followed by another dd element or a dt element, or if there is no more content in the parent element.
-    // A <p> element's end tag may be omitted if the p element is immediately followed by an address, article, aside, blockquote, details, div, dl, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, hr, main, menu, nav, ol, p, pre, section, table, or ul element, or if there is no more content in the parent element and the parent element is an HTML element that is not an a, audio, del, ins, map, noscript, or video element, or an autonomous custom element.
     // An <rp> element's end tag may be omitted if the rp element is immediately followed by an rt or rp element, or if there is no more content in the parent element.
     // An <optgroup> element's end tag may be omitted if the optgroup element is immediately followed by another optgroup element, or if there is no more content in the parent element.
     // An <option> element's end tag may be omitted if the option element is immediately followed by another option element, or if it is immediately followed by an optgroup element, or if there is no more content in the parent element.
@@ -489,7 +493,6 @@ class HtmlMin
     // A <tbody> element's end tag may be omitted if the tbody element is immediately followed by a tbody or tfoot element, or if there is no more content in the parent element.
     // A <tfoot> element's end tag may be omitted if there is no more content in the parent element.
     // A <tr> element's end tag may be omitted if the tr element is immediately followed by another tr element, or if there is no more content in the parent element.
-    // A <td> element's end tag may be omitted if the td element is immediately followed by a td or th element, or if there is no more content in the parent element.
     // A <th> element's end tag may be omitted if the th element is immediately followed by a td or th element, or if there is no more content in the parent element.
     //
     // <-- However, a start tag must never be omitted if it has any attributes.
@@ -505,7 +508,25 @@ class HtmlMin
                    (
                        $nextSibling instanceof \DOMElement
                        &&
-                       $nextSibling->tagName == $tag_name
+                       $nextSibling->tagName == 'li'
+                   )
+               )
+           )
+           ||
+           (
+               $tag_name == 'td'
+               &&
+               (
+                   $nextSibling === null
+                   ||
+                   (
+                       $nextSibling instanceof \DOMElement
+                       &&
+                       (
+                           $nextSibling->tagName == 'td'
+                           ||
+                           $nextSibling->tagName == 'th'
+                       )
                    )
                )
            )
@@ -520,7 +541,19 @@ class HtmlMin
                        (
                            $node->parentNode !== null
                            &&
-                           $node->parentNode->tagName != 'a'
+                           !\in_array(
+                               $node->parentNode->tagName,
+                               [
+                                   'a',
+                                   'audio',
+                                   'del',
+                                   'ins',
+                                   'map',
+                                   'noscript',
+                                   'video'
+                               ],
+                               true
+                           )
                        )
                    )
                    ||
