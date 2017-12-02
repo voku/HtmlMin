@@ -474,6 +474,10 @@ class HtmlMin
     // A <td> element's end tag may be omitted if the td element is immediately followed by a td or th element, or if there is no more content in the parent element.
     // An <option> element's end tag may be omitted if the option element is immediately followed by another option element, or if it is immediately followed by an optgroup element, or if there is no more content in the parent element.
     // A <tr> element's end tag may be omitted if the tr element is immediately followed by another tr element, or if there is no more content in the parent element.
+    // A <th> element's end tag may be omitted if the th element is immediately followed by a td or th element, or if there is no more content in the parent element.
+    // A <dt> element's end tag may be omitted if the dt element is immediately followed by another dt element or a dd element.
+    // A <dd> element's end tag may be omitted if the dd element is immediately followed by another dd element or a dt element, or if there is no more content in the parent element.
+    // An <rp> element's end tag may be omitted if the rp element is immediately followed by an rt or rp element, or if there is no more content in the parent element.
 
     // TODO:
     //
@@ -482,9 +486,6 @@ class HtmlMin
     // <body> may be omitted if first thing inside is not space, comment, <meta>, <link>, <script>, <style> or <template>
     // <colgroup> may be omitted if first thing inside is <col>
     // <tbody> may be omitted if first thing inside is <tr>
-    // A <dt> element's end tag may be omitted if the dt element is immediately followed by another dt element or a dd element.
-    // A <dd> element's end tag may be omitted if the dd element is immediately followed by another dd element or a dt element, or if there is no more content in the parent element.
-    // An <rp> element's end tag may be omitted if the rp element is immediately followed by an rt or rp element, or if there is no more content in the parent element.
     // An <optgroup> element's end tag may be omitted if the optgroup element is immediately followed by another optgroup element, or if there is no more content in the parent element.
     // A <colgroup> element's start tag may be omitted if the first thing inside the colgroup element is a col element, and if the element is not immediately preceded by another colgroup element whose end tag has been omitted. (It can't be omitted if the element is empty.)
     // A <colgroup> element's end tag may be omitted if the colgroup element is not immediately followed by ASCII whitespace or a comment.
@@ -493,7 +494,6 @@ class HtmlMin
     // A <tbody> element's start tag may be omitted if the first thing inside the tbody element is a tr element, and if the element is not immediately preceded by a tbody, thead, or tfoot element whose end tag has been omitted. (It can't be omitted if the element is empty.)
     // A <tbody> element's end tag may be omitted if the tbody element is immediately followed by a tbody or tfoot element, or if there is no more content in the parent element.
     // A <tfoot> element's end tag may be omitted if there is no more content in the parent element.
-    // A <th> element's end tag may be omitted if the th element is immediately followed by a td or th element, or if there is no more content in the parent element.
     //
     // <-- However, a start tag must never be omitted if it has any attributes.
 
@@ -514,6 +514,26 @@ class HtmlMin
            )
            ||
            (
+               (
+                   $tag_name == 'rp'
+               )
+               &&
+               (
+                   $nextSibling === null
+                   ||
+                   (
+                       $nextSibling instanceof \DOMElement
+                       &&
+                       (
+                           $nextSibling->tagName == 'rp'
+                           ||
+                           $nextSibling->tagName == 'rt'
+                       )
+                   )
+               )
+           )
+           ||
+           (
                $tag_name == 'tr'
                &&
                (
@@ -528,7 +548,11 @@ class HtmlMin
            )
            ||
            (
-               $tag_name == 'td'
+               (
+                   $tag_name == 'td'
+                   ||
+                   $tag_name == 'th'
+               )
                &&
                (
                    $nextSibling === null
@@ -540,6 +564,32 @@ class HtmlMin
                            $nextSibling->tagName == 'td'
                            ||
                            $nextSibling->tagName == 'th'
+                       )
+                   )
+               )
+           )
+           ||
+           (
+               (
+                   $tag_name == 'dd'
+                   ||
+                   $tag_name == 'dt'
+               )
+               &&
+               (
+                   (
+                       $nextSibling === null
+                       &&
+                       $tag_name == 'dd'
+                   )
+                   ||
+                   (
+                       $nextSibling instanceof \DOMElement
+                       &&
+                       (
+                           $nextSibling->tagName == 'dd'
+                           ||
+                           $nextSibling->tagName == 'dt'
                        )
                    )
                )

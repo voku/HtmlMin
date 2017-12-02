@@ -352,14 +352,21 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
         </tr>
         <tr>
           <td>foo</td>
-          <td>bar</td>
+          <td>
+            <dl>
+              <dt>Coffee</dt>
+              <dd>Black hot drink</dd>
+              <dt>Milk</dt>
+              <dd>White cold drink</dd>
+            </dl>
+          </td>
         </tr>
       </table>
     </body>
     </html>
     ';
 
-    $expected = '<html><head> <body><p class=foo id=text>foo</p> <br> <ul><li><p class=foo>lall</ul> <ul><li>1 <li>2 <li>3</ul> <table><tr><th>1</th> <th>2</th> <tr><td>foo <td>bar</table>';
+    $expected = '<html><head> <body><p class=foo id=text>foo</p> <br> <ul><li><p class=foo>lall</ul> <ul><li>1 <li>2 <li>3</ul> <table><tr><th>1 <th>2 <tr><td>foo <td><dl><dt>Coffee <dd>Black hot drink <dt>Milk <dd>White cold drink</dl></table>';
 
     self::assertSame($expected, $htmlMin->minify($html));
   }
