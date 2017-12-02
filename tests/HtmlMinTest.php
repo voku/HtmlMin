@@ -61,7 +61,7 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
         ],
         [
             "<html><body>  pre \r\n  suf\r\n  </body>",
-            "<html><body> pre suf",
+            '<html><body> pre suf',
         ],
     ];
   }
@@ -82,7 +82,7 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
         ],
         [
             "<html><p>abc\r\ndef</p></html>",
-            "<html><p>abc def",
+            '<html><p>abc def',
         ],
     ];
   }
