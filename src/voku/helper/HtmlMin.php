@@ -576,7 +576,7 @@ class HtmlMin
 
         // needed?
 
-      } else if ($child instanceof \DOMElement) {
+      } elseif ($child instanceof \DOMElement) {
 
         $htmlstr .= trim('<' . $child->tagName . ' ' . $this->domNodeAttributesToString($child));
         $htmlstr .= '>' . $this->domNodeToString($child);
@@ -585,7 +585,7 @@ class HtmlMin
           $htmlstr .= '</' . $child->tagName . '>';
         }
 
-      } else if ($child instanceof \DOMText) {
+      } elseif ($child instanceof \DOMText) {
 
         if ($child->isWhitespaceInElementContent()) {
           if (
@@ -599,7 +599,7 @@ class HtmlMin
           $htmlstr .= $child->wholeText;
         }
 
-      } else if ($child instanceof \DOMComment) {
+      } elseif ($child instanceof \DOMComment) {
 
         $htmlstr .= $child->wholeText;
 
