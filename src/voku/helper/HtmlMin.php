@@ -22,6 +22,15 @@ class HtmlMin
   private static $regExSpace = "/[[:space:]]{2,}|[\r\n]+/u";
 
   /**
+   * @var array
+   */
+  private static $optional_end_tags = array(
+      'html',
+      'head',
+      'body',
+  );
+
+  /**
    * // https://mathiasbynens.be/demo/javascript-mime-type
    * // https://developer.mozilla.org/en/docs/Web/HTML/Element/script#attr-type
    *
@@ -135,11 +144,6 @@ class HtmlMin
    * @var string
    */
   private $protectedChildNodesHelper = 'html-min--voku--saved-content';
-
-  /**
-   * @var string
-   */
-  private $booleanAttributesHelper = 'html-min--voku--delete-this';
 
   /**
    * @var bool
@@ -358,6 +362,18 @@ class HtmlMin
   }
 
   /**
+   * @param boolean $doRemoveSpacesBetweenTags
+   *
+   * @return $this
+   */
+  public function doRemoveSpacesBetweenTags($doRemoveSpacesBetweenTags = true)
+  {
+    $this->doRemoveSpacesBetweenTags = $doRemoveSpacesBetweenTags;
+
+    return $this;
+  }
+
+  /**
    * @param boolean $doRemoveValueFromEmptyInput
    *
    * @return $this
@@ -417,16 +433,191 @@ class HtmlMin
     return $this;
   }
 
-  /**
-   * @param boolean $doRemoveSpacesBetweenTags
-   *
-   * @return $this
-   */
-  public function doRemoveSpacesBetweenTags($doRemoveSpacesBetweenTags = true)
+  private function domNodeAttributesToString(\DOMNode $node)
   {
-    $this->doRemoveSpacesBetweenTags = $doRemoveSpacesBetweenTags;
+    # Remove quotes around attribute values, when allowed (<p class="foo"> → <p class=foo>)
+    $attrstr = '';
+    if ($node->attributes != null) {
+      foreach ($node->attributes as $attribute) {
+        $attrstr .= $attribute->name;
 
-    return $this;
+        if (isset(self::$booleanAttributes[$attribute->name])) {
+          $attrstr .= ' ';
+          continue;
+        }
+
+        $attrstr .= '=';
+        # http://www.whatwg.org/specs/web-apps/current-work/multipage/syntax.html#attributes-0
+        $omitquotes = $attribute->value != '' && 0 == \preg_match('/["\'=<>` \t\r\n\f]+/', $attribute->value);
+        $attr_val = $attribute->value;
+        $attrstr .= ($omitquotes ? '' : '"') . $attr_val . ($omitquotes ? '' : '"');
+        $attrstr .= ' ';
+      }
+    }
+
+    return \trim($attrstr);
+  }
+
+  private function domNodeClosingTagOptional(\DOMNode $node)
+  {
+    $tag_name = $node->tagName;
+    $nextSibling = $this->getNextSiblingOfTypeDOMElement($node);
+
+    // TODO: check the spec
+    //
+    // https://html.spec.whatwg.org/multipage/syntax.html#syntax-tag-omission
+    //
+    // <html> may be omitted if first thing inside is not comment
+    // <head> may be omitted if first thing inside is an element
+    // <body> may be omitted if first thing inside is not space, comment, <meta>, <link>, <script>, <style> or <template>
+    // <colgroup> may be omitted if first thing inside is <col>
+    // <tbody> may be omitted if first thing inside is <tr>
+    // An <li> element's end tag may be omitted if the li element is immediately followed by another li element or if there is no more content in the parent element.
+    // A <dt> element's end tag may be omitted if the dt element is immediately followed by another dt element or a dd element.
+    // A <dd> element's end tag may be omitted if the dd element is immediately followed by another dd element or a dt element, or if there is no more content in the parent element.
+    // A <p> element's end tag may be omitted if the p element is immediately followed by an address, article, aside, blockquote, details, div, dl, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, hr, main, menu, nav, ol, p, pre, section, table, or ul element, or if there is no more content in the parent element and the parent element is an HTML element that is not an a, audio, del, ins, map, noscript, or video element, or an autonomous custom element.
+    // An <rp> element's end tag may be omitted if the rp element is immediately followed by an rt or rp element, or if there is no more content in the parent element.
+    // An <optgroup> element's end tag may be omitted if the optgroup element is immediately followed by another optgroup element, or if there is no more content in the parent element.
+    // An <option> element's end tag may be omitted if the option element is immediately followed by another option element, or if it is immediately followed by an optgroup element, or if there is no more content in the parent element.
+    // A <colgroup> element's start tag may be omitted if the first thing inside the colgroup element is a col element, and if the element is not immediately preceded by another colgroup element whose end tag has been omitted. (It can't be omitted if the element is empty.)
+    // A <colgroup> element's end tag may be omitted if the colgroup element is not immediately followed by ASCII whitespace or a comment.
+    // A <caption> element's end tag may be omitted if the caption element is not immediately followed by ASCII whitespace or a comment.
+    // A <thead> element's end tag may be omitted if the thead element is immediately followed by a tbody or tfoot element.
+    // A <tbody> element's start tag may be omitted if the first thing inside the tbody element is a tr element, and if the element is not immediately preceded by a tbody, thead, or tfoot element whose end tag has been omitted. (It can't be omitted if the element is empty.)
+    // A <tbody> element's end tag may be omitted if the tbody element is immediately followed by a tbody or tfoot element, or if there is no more content in the parent element.
+    // A <tfoot> element's end tag may be omitted if there is no more content in the parent element.
+    // A <tr> element's end tag may be omitted if the tr element is immediately followed by another tr element, or if there is no more content in the parent element.
+    // A <td> element's end tag may be omitted if the td element is immediately followed by a td or th element, or if there is no more content in the parent element.
+    // A <th> element's end tag may be omitted if the th element is immediately followed by a td or th element, or if there is no more content in the parent element.
+    //
+    // <-- However, a start tag must never be omitted if it has any attributes.
+
+    return in_array($tag_name, self::$optional_end_tags)
+           ||
+           (
+               $tag_name == 'li'
+               &&
+               (
+                   $nextSibling === null
+                   ||
+                   (
+                       $nextSibling instanceof \DOMElement
+                       &&
+                       $nextSibling->tagName == $tag_name
+                   )
+               )
+           )
+           ||
+           (
+               $tag_name == 'p'
+               &&
+               (
+                   (
+                       $nextSibling === null
+                       &&
+                       (
+                           $node->parentNode !== null
+                           &&
+                           $node->parentNode->tagName != 'a'
+                       )
+                   )
+                   ||
+                   (
+                       $nextSibling instanceof \DOMElement
+                       &&
+                       in_array(
+                           $nextSibling->tagName,
+                           array(
+                               'address',
+                               'article',
+                               'aside',
+                               'blockquote',
+                               'dir',
+                               'div',
+                               'dl',
+                               'fieldset',
+                               'footer',
+                               'form',
+                               'h1',
+                               'h2',
+                               'h3',
+                               'h4',
+                               'h5',
+                               'h6',
+                               'header',
+                               'hgroup',
+                               'hr',
+                               'menu',
+                               'nav',
+                               'ol',
+                               'p',
+                               'pre',
+                               'section',
+                               'table',
+                               'ul',
+                           ),
+                           true
+                       )
+                   )
+               )
+           );
+  }
+
+  protected function domNodeToString(\DOMNode $node)
+  {
+    // init
+    $htmlstr = '';
+
+    foreach ($node->childNodes as $child) {
+
+      if ($child instanceof \DOMDocumentType) {
+
+        // needed?
+
+      } else if ($child instanceof \DOMElement) {
+
+        $htmlstr .= trim('<' . $child->tagName . ' ' . $this->domNodeAttributesToString($child));
+        $htmlstr .= '>' . $this->domNodeToString($child);
+
+        if (!$this->domNodeClosingTagOptional($child)) {
+          $htmlstr .= '</' . $child->tagName . '>';
+        }
+
+      } else if ($child instanceof \DOMText) {
+
+        if ($child->isWhitespaceInElementContent()) {
+          if (
+              $child->previousSibling !== null
+              &&
+              $child->nextSibling !== null
+          ) {
+            $htmlstr .= ' ';
+          }
+        } else {
+          $htmlstr .= $child->wholeText;
+        }
+
+      } else if ($child instanceof \DOMComment) {
+
+        $htmlstr .= $child->wholeText;
+
+      } else {
+
+        throw new \Exception('Error by: ' . print_r($child, true));
+
+      }
+    }
+
+    return $htmlstr;
+  }
+
+  protected function getNextSiblingOfTypeDOMElement(\DOMNode $node)
+  {
+    do {
+      $node = $node->nextSibling;
+    } while (!($node === null || $node instanceof \DOMElement));
+
+    return $node;
   }
 
   /**
@@ -507,10 +698,11 @@ class HtmlMin
     );
 
 
-    if($this->doRemoveSpacesBetweenTags === true){
+    if ($this->doRemoveSpacesBetweenTags === true) {
       // Remove spaces that are between > and <
       $html = (string)\preg_replace('/(>) (<)/', '>$2', $html);
     }
+
     // -------------------------------------------------------------------------
     // Restore protected HTML-code.
     // -------------------------------------------------------------------------
@@ -545,7 +737,6 @@ class HtmlMin
             "\n" . '<head',
             'head/>' . "\n",
             "\n" . '</head',
-            '="' . $this->booleanAttributesHelper . '"',
         ),
         array(
             'html>',
@@ -556,12 +747,24 @@ class HtmlMin
             '<head',
             'head/>',
             '</head',
-            '',
         ),
         $html
     );
 
-    $html = (string)\preg_replace('#<\b(' . $CACHE_SELF_CLOSING_TAGS . ')([^>]+)><\/\b\1>#', '<\\1\\2/>', $html);
+    // self closing tags, don't need a trailing slash ...
+    $replace = array();
+    $replacement = array();
+    foreach (self::$selfClosingTags as $selfClosingTag) {
+      $replace[] = '<' . $selfClosingTag . '/>';
+      $replacement[] = '<' . $selfClosingTag . '>';
+      $replace[] = '<' . $selfClosingTag . ' />';
+      $replacement[] = '<' . $selfClosingTag . '>';
+    }
+    $html = \str_replace(
+        $replace,
+        $replacement,
+        $html
+    );
 
     // ------------------------------------
     // check if compression worked
@@ -635,7 +838,10 @@ class HtmlMin
     // Convert the Dom into a string.
     // -------------------------------------------------------------------------
 
-    $html = $dom->html($decodeUtf8Specials);
+    $html = $dom->fixHtmlOutput(
+        $this->domNodeToString($dom->getDocument()),
+        $decodeUtf8Specials
+    );
 
     return $html;
   }
@@ -658,12 +864,6 @@ class HtmlMin
     foreach ((array)$attributes as $attrName => $attrValue) {
 
       if (isset(self::$booleanAttributes[$attrName])) {
-
-        if ($this->doSortHtmlAttributes === true) {
-          $attrs[$attrName] = $this->booleanAttributesHelper;
-          $element->{$attrName} = null;
-        }
-
         continue;
       }
 

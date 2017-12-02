@@ -52,15 +52,15 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
     return array(
         array(
             '<html>  <body>          <h1>h  oi</h1>                         </body></html>',
-            '<html> <body> <h1>h oi</h1> </body></html>',
+            '<html><body><h1>h oi</h1>',
         ),
         array(
             '<html>   </html>',
-            '<html> </html>',
+            '<html>',
         ),
         array(
             "<html><body>  pre \r\n  suf\r\n  </body>",
-            "<html><body>  pre \r\n  suf\r\n  </body>",
+            "<html><body> pre suf",
         ),
     );
   }
@@ -73,15 +73,15 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
     return array(
         array(
             "<html>\r\t<body>\n\t\t<h1>hoi</h1>\r\n\t</body>\r\n</html>",
-            '<html> <body> <h1>hoi</h1> </body> </html>',
+            '<html><body><h1>hoi</h1>',
         ),
         array(
             "<html>\r\t<h1>hoi</h1>\r\n\t\r\n</html>",
-            '<html> <h1>hoi</h1> </html>',
+            '<html><h1>hoi</h1>',
         ),
         array(
             "<html><p>abc\r\ndef</p></html>",
-            "<html><p>abc def</p></html>",
+            "<html><p>abc def",
         ),
     );
   }
@@ -94,7 +94,7 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
     return array(
         array(
             '<html> <body> <h1>hoi</h1>   </body> </html>',
-            '<html> <body> <h1>hoi</h1> </body> </html>',
+            '<html><body><h1>hoi</h1>',
         ),
         array(
             '<html>  a',
@@ -111,7 +111,7 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
     return array(
         array(
             '<html> <body>   <h1>hoi</h1></body> </html> ',
-            '<html> <body> <h1>hoi</h1></body> </html>',
+            '<html><body><h1>hoi</h1>',
         ),
         array(
             'a     <html>',
@@ -128,7 +128,7 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
     return array(
         array(
             "<html>\r\n\t<body>\xc3\xa0</body>\r\n\t</html>",
-            '<html> <body>à</body> </html>',
+            '<html><body>à',
         ),
     );
   }
@@ -170,7 +170,8 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
   public function testBoolAttr($input, $expected)
   {
     $actual = $this->compressor->minify('<!doctype html><html><body><form>' . $input . '</form></body></html>');
-    self::assertSame('<!DOCTYPE html><html><body><form>' . $expected . '</form></body></html>', $actual);
+    $expected = '<html><body><form><input autofocus checked type=checkbox></input></form>';
+    self::assertSame($expected, $actual);
   }
 
   public function testMinifyBase()
@@ -230,15 +231,14 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
     $htmlMin = new HtmlMin();
     $htmlMin->doOptimizeViaHtmlDomParser(false);
 
-    $html = '
-      <p id="text" class="foo">
+    $html = '<p id="text" class="foo">
         foo
       </p>  <br />  <ul > <li> <p class="foo">lall</p> </li></ul>
     ';
 
     $expected = '<p id="text" class="foo">
         foo
-      </p>  <br/>  <ul> <li> <p class="foo">lall</p> </li></ul>';
+      </p>  <br>  <ul> <li> <p class="foo">lall</p> </li></ul>';
 
     self::assertSame(
         str_replace(array("\r\n", "\r", "\n"), "\n", $expected),
@@ -276,12 +276,9 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
     </html>
     ';
 
-    $expected = '<html>    <head>     </head>    <body>
-      <p id="text" class="foo">
+    $expected = '<html><head> <body><p id=text class=foo>
         foo
-      </p>  <br>  <ul> <li> <p class="foo">lall</p> </li></ul>
-    </body>
-    </html>';
+      </p> <br> <ul><li><p class=foo>lall</ul>';
 
     self::assertSame(
         str_replace(array("\r\n", "\r", "\n"), "\n", $expected),
@@ -319,7 +316,7 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
     </html>
     ';
 
-    $expected = '<html> <head> </head> <body> <p class="foo" id="text"> foo </p> <br> <ul> <li> <p class="foo foo2">lall</p> </li></ul> </body> </html>';
+    $expected = '<html><head> <body><p class=foo id=text> foo </p> <br> <ul><li><p class="foo foo2">lall</ul>';
 
     self::assertSame($expected, $htmlMin->minify($html));
   }
@@ -333,12 +330,19 @@ class HtmlMinTest extends \PHPUnit_Framework_TestCase
     <html>
     <head>     </head>
     <body>
-      <p id="text" class="foo">foo</p>  <br />  <ul > <li> <p class="foo">lall</p> </li></ul>
+      <p id="text" class="foo">foo</p> 
+      <br /> 
+      <ul > <li> <p class="foo">lall</p> </li></ul>
+      <ul>
+        <li>1</li>
+        <li>2</li>
+        <li>3</li>
+      </ul>
     </body>
     </html>
     ';
 
-    $expected = '<html> <head> </head> <body> <p class="foo" id="text">foo</p> <br> <ul> <li> <p class="foo">lall</p> </li></ul> </body> </html>';
+    $expected = '<html><head> <body><p class=foo id=text>foo</p> <br> <ul><li><p class=foo>lall</ul> <ul><li>1 <li>2 <li>3</ul>';
 
     self::assertSame($expected, $htmlMin->minify($html));
   }
