@@ -359,7 +359,7 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
     </html>
     ';
 
-    $expected = '<html><head> <body><p class=foo id=text>foo</p> <br> <ul><li><p class=foo>lall</ul> <ul><li>1 <li>2 <li>3</ul> <table><tr><th>1</th> <th>2</th></tr> <tr><td>foo <td>bar</tr></table>';
+    $expected = '<html><head> <body><p class=foo id=text>foo</p> <br> <ul><li><p class=foo>lall</ul> <ul><li>1 <li>2 <li>3</ul> <table><tr><th>1</th> <th>2</th> <tr><td>foo <td>bar</table>';
 
     self::assertSame($expected, $htmlMin->minify($html));
   }

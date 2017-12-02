@@ -472,6 +472,8 @@ class HtmlMin
     // A <p> element's end tag may be omitted if the p element is immediately followed by an address, article, aside, blockquote, details, div, dl, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, hr, main, menu, nav, ol, p, pre, section, table, or ul element, or if there is no more content in the parent element and the parent element is an HTML element that is not an a, audio, del, ins, map, noscript, or video element, or an autonomous custom element.
     // An <li> element's end tag may be omitted if the li element is immediately followed by another li element or if there is no more content in the parent element.
     // A <td> element's end tag may be omitted if the td element is immediately followed by a td or th element, or if there is no more content in the parent element.
+    // An <option> element's end tag may be omitted if the option element is immediately followed by another option element, or if it is immediately followed by an optgroup element, or if there is no more content in the parent element.
+    // A <tr> element's end tag may be omitted if the tr element is immediately followed by another tr element, or if there is no more content in the parent element.
 
     // TODO:
     //
@@ -484,7 +486,6 @@ class HtmlMin
     // A <dd> element's end tag may be omitted if the dd element is immediately followed by another dd element or a dt element, or if there is no more content in the parent element.
     // An <rp> element's end tag may be omitted if the rp element is immediately followed by an rt or rp element, or if there is no more content in the parent element.
     // An <optgroup> element's end tag may be omitted if the optgroup element is immediately followed by another optgroup element, or if there is no more content in the parent element.
-    // An <option> element's end tag may be omitted if the option element is immediately followed by another option element, or if it is immediately followed by an optgroup element, or if there is no more content in the parent element.
     // A <colgroup> element's start tag may be omitted if the first thing inside the colgroup element is a col element, and if the element is not immediately preceded by another colgroup element whose end tag has been omitted. (It can't be omitted if the element is empty.)
     // A <colgroup> element's end tag may be omitted if the colgroup element is not immediately followed by ASCII whitespace or a comment.
     // A <caption> element's end tag may be omitted if the caption element is not immediately followed by ASCII whitespace or a comment.
@@ -492,7 +493,6 @@ class HtmlMin
     // A <tbody> element's start tag may be omitted if the first thing inside the tbody element is a tr element, and if the element is not immediately preceded by a tbody, thead, or tfoot element whose end tag has been omitted. (It can't be omitted if the element is empty.)
     // A <tbody> element's end tag may be omitted if the tbody element is immediately followed by a tbody or tfoot element, or if there is no more content in the parent element.
     // A <tfoot> element's end tag may be omitted if there is no more content in the parent element.
-    // A <tr> element's end tag may be omitted if the tr element is immediately followed by another tr element, or if there is no more content in the parent element.
     // A <th> element's end tag may be omitted if the th element is immediately followed by a td or th element, or if there is no more content in the parent element.
     //
     // <-- However, a start tag must never be omitted if it has any attributes.
@@ -514,6 +514,20 @@ class HtmlMin
            )
            ||
            (
+               $tag_name == 'tr'
+               &&
+               (
+                   $nextSibling === null
+                   ||
+                   (
+                       $nextSibling instanceof \DOMElement
+                       &&
+                       $nextSibling->tagName == 'tr'
+                   )
+               )
+           )
+           ||
+           (
                $tag_name == 'td'
                &&
                (
@@ -526,6 +540,24 @@ class HtmlMin
                            $nextSibling->tagName == 'td'
                            ||
                            $nextSibling->tagName == 'th'
+                       )
+                   )
+               )
+           )
+           ||
+           (
+               $tag_name == 'option'
+               &&
+               (
+                   $nextSibling === null
+                   ||
+                   (
+                       $nextSibling instanceof \DOMElement
+                       &&
+                       (
+                           $nextSibling->tagName == 'option'
+                           ||
+                           $nextSibling->tagName == 'optgroup'
                        )
                    )
                )
