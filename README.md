@@ -59,6 +59,8 @@ $htmlMin->doRemoveValueFromEmptyInput();              // remove 'value=""' from 
 $htmlMin->doSortCssClassNames();                      // sort css-class-names, for better gzip results (depends on "doOptimizeAttributes(true)")
 $htmlMin->doSortHtmlAttributes();                     // sort html-attributes, for better gzip results (depends on "doOptimizeAttributes(true)")
 $htmlMin->doRemoveSpacesBetweenTags();                // remove more (aggressive) spaces in the dom (disabled by default)
+$htmlMin->doRemoveOmittedQuotes();                    // remove quotes e.g. class="lall" => class=lall
+$htmlMin->doRemoveOmittedHtmlTags();                  // remove ommitted html tags e.g. <p>lall</p> => <p>lall 
 ```
 
 ## Unit Test

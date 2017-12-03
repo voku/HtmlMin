@@ -27,20 +27,16 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
   {
     return [
         [
-            '<input type="checkbox" autofocus="autofocus" checked="true" />',
-            '<input autofocus checked type="checkbox">',
+            '<input type="checkbox" autofocus="autofocus" checked="true" />'
         ],
         [
-            '<input type="checkbox" autofocus="autofocus" checked="checked">',
-            '<input autofocus checked type="checkbox">',
+            '<input type="checkbox" autofocus="autofocus" checked="checked">'
         ],
         [
-            '<input type="checkbox" autofocus="" checked="">',
-            '<input autofocus checked type="checkbox">',
+            '<input type="checkbox" autofocus="" checked="">'
         ],
         [
-            '<input type="checkbox" autofocus="" checked>',
-            '<input autofocus checked type="checkbox">',
+            '<input type="checkbox" autofocus="" checked>'
         ],
     ];
   }
@@ -60,7 +56,7 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
             '<html>',
         ],
         [
-            "<html><body>  pre \r\n  suf\r\n  </body>",
+            "<html><body>  pre \r\n  suf\r\n  </body></html>",
             '<html><body> pre suf',
         ],
     ];
@@ -166,12 +162,14 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
    * @dataProvider providerBoolAttr
    *
    * @param $input
-   * @param $expected
    */
-  public function testBoolAttr($input, $expected)
+  public function testBoolAttr($input)
   {
-    $actual = $this->compressor->minify('<!doctype html><html><body><form>' . $input . '</form></body></html>');
-    $expected = '<html><body><form><input autofocus checked type=checkbox></input></form>';
+    $html = '<!doctype html><html><body><form>' . $input . '</form></body></html>';
+    $expected = '<!DOCTYPE html><html><body><form><input autofocus checked type=checkbox></form>';
+
+    $actual = $this->compressor->minify($html);
+
     self::assertSame($expected, $actual);
   }
 
@@ -369,6 +367,74 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
     $expected = '<html><head> <body><p class=foo id=text>foo</p> <br> <ul><li><p class=foo>lall</ul> <ul><li>1 <li>2 <li>3</ul> <table><tr><th>1 <th>2 <tr><td>foo <td><dl><dt>Coffee <dd>Black hot drink <dt>Milk <dd>White cold drink</dl></table>';
 
     self::assertSame($expected, $htmlMin->minify($html));
+  }
+
+  public function testMinifySimpleWithoutOmittedTags()
+  {
+    // init
+    $htmlMin = new HtmlMin();
+    $htmlMin->doRemoveOmittedHtmlTags(false)
+            ->doRemoveOmittedQuotes(false);
+
+    $html = '
+    <html>
+    <head>     </head>
+    <body>
+      <p id="text" class="foo">foo</p> 
+      <br /> 
+      <ul > <li> <p class="foo">lall</p> </li></ul>
+      <ul>
+        <li>1</li>
+        <li>2</li>
+        <li>3</li>
+      </ul>
+      <table>
+        <tr>
+          <th>1</th>
+          <th>2</th>
+        </tr>
+        <tr>
+          <td>foo</td>
+          <td>
+            <dl>
+              <dt>Coffee</dt>
+              <dd>Black hot drink</dd>
+              <dt>Milk</dt>
+              <dd>White cold drink</dd>
+            </dl>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+    ';
+
+    $expected = '<html><head></head> <body><p class="foo" id="text">foo</p> <br> <ul><li><p class="foo">lall</p></li></ul> <ul><li>1</li> <li>2</li> <li>3</li></ul> <table><tr><th>1</th> <th>2</th></tr> <tr><td>foo</td> <td><dl><dt>Coffee</dt> <dd>Black hot drink</dd> <dt>Milk</dt> <dd>White cold drink</dd></dl></td></tr></table></body></html>';
+
+    self::assertSame($expected, $htmlMin->minify($html));
+  }
+
+  public function testHtmlDoctype()
+  {
+    $html = '<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>aussagekräftiger Titel der Seite</title>
+  </head>
+  <body>
+    <!-- Sichtbarer Dokumentinhalt im body -->
+    <p>Sehen Sie sich den Quellcode dieser Seite an.
+      <kbd>(Kontextmenu: Seitenquelltext anzeigen)</kbd></p>
+  </body>
+</html>';
+
+    $expected = '<!DOCTYPE html><html lang=de><head><meta charset=utf-8><meta content="width=device-width, initial-scale=1.0" name=viewport><title>aussagekräftiger Titel der Seite</title><body><p>Sehen Sie sich den Quellcode dieser Seite an. <kbd>(Kontextmenu: Seitenquelltext anzeigen)</kbd>';
+
+    $htmlMin = new HtmlMin();
+    self::assertSame($expected, $htmlMin->minify($html));
+
   }
 
   /**
