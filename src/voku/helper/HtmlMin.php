@@ -12,6 +12,7 @@ namespace voku\helper;
  * - PHP: https://github.com/searchturbine/phpwee-php-minifier
  * - PHP: https://github.com/WyriHaximus/HtmlCompress
  * - PHP: https://github.com/zaininnari/html-minifier
+ * - PHP: https://github.com/ampaze/PHP-HTML-Minifier
  * - Java: https://code.google.com/archive/p/htmlcompressor/
  *
  * Ideas:
