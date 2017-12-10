@@ -770,8 +770,15 @@ class HtmlMin
         if (
             $this->doRemoveOmittedHtmlTags === false
             ||
-            !$this->domNodeClosingTagOptional($child)) {
+            !$this->domNodeClosingTagOptional($child)
+        ) {
           $html .= '</' . $child->tagName . '>';
+
+          if ($this->doRemoveWhitespaceAroundTags === false) {
+            if (!$child->nextSibling instanceof \DOMText) {
+              $html .= ' ';
+            }
+          }
         }
 
       } elseif ($child instanceof \DOMText) {

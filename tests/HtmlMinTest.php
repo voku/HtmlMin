@@ -200,6 +200,64 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
     self::assertSame(trim($expected), $htmlMin->minify($html));
   }
 
+  public function testRemoveWhitespaceAroundTags()
+  {
+    // init
+    $htmlMin = new HtmlMin();
+    $htmlMin->doRemoveWhitespaceAroundTags(true);
+
+    $html = '
+        <dl>
+            <dt>foo
+            <dd><span class="bar"></span>
+        </dl>
+        <a></a>
+    ';
+
+    $expected = '<dl><dt>foo <dd><span class=bar></span></dl><a></a>';
+
+    self::assertSame(
+        str_replace(["\r\n", "\r", "\n"], "\n", $expected),
+        str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
+    );
+
+    // ---
+
+    $html = '
+        <dl>
+            <dt>foo</dt>
+            <dd><span class="bar">&nbsp;</span></dd>
+        </dl>
+        <a></a>
+    ';
+
+    $expected = '<dl><dt>foo <dd><span class=bar>&nbsp;</span></dl><a></a>';
+
+    self::assertSame(
+        str_replace(["\r\n", "\r", "\n"], "\n", $expected),
+        str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
+    );
+
+    // ---
+
+    $htmlMin->doRemoveWhitespaceAroundTags(false);
+
+    $html = '
+        <dl>
+            <dt>foo
+            <dd><span class="bar"></span>
+        </dl>
+        <a></a>
+    ';
+
+    $expected = '<dl><dt>foo <dd><span class=bar></span></dl> <a></a>';
+
+    self::assertSame(
+        str_replace(["\r\n", "\r", "\n"], "\n", $expected),
+        str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
+    );
+  }
+
   public function testMinifyCodeTag()
   {
     // init
