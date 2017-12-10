@@ -169,7 +169,7 @@ class HtmlMin
   /**
    * @var bool
    */
-  private $doRemoveWhitespaceAroundTags = true;
+  private $doRemoveWhitespaceAroundTags = false;
 
   /**
    * @var bool
@@ -776,7 +776,11 @@ class HtmlMin
         }
 
         if ($this->doRemoveWhitespaceAroundTags === false) {
-          if ($child->nextSibling instanceof \DOMText) {
+          if (
+              $child->nextSibling instanceof \DOMText
+              &&
+              $child->nextSibling->wholeText === ' '
+          ) {
             $html .= ' ';
           }
         }
