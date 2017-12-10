@@ -1,3 +1,9 @@
+# Changelog 2.0.x
+
+# Changelog 2.0.1 (2017-12-10)
+
+* try to fix "Minifier removes spaces between tags"
+
 # Changelog 2.0.0 (2017-12-03)
 
 * drop support for PHP < 7.0
