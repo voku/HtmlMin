@@ -23,7 +23,7 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
   /**
    * @return array
    */
-  public function providerBoolAttr()
+  public function providerBoolAttr(): array
   {
     return [
         [
@@ -44,7 +44,7 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
   /**
    * @return array
    */
-  public function providerMultipleSpaces()
+  public function providerMultipleSpaces(): array
   {
     return [
         [
@@ -65,7 +65,7 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
   /**
    * @return array
    */
-  public function providerNewLinesTabsReturns()
+  public function providerNewLinesTabsReturns(): array
   {
     return [
         [
@@ -86,7 +86,7 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
   /**
    * @return array
    */
-  public function providerSpaceAfterGt()
+  public function providerSpaceAfterGt(): array
   {
     return [
         [
@@ -103,7 +103,7 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
   /**
    * @return array
    */
-  public function providerSpaceBeforeLt()
+  public function providerSpaceBeforeLt(): array
   {
     return [
         [
@@ -120,7 +120,7 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
   /**
    * @return array
    */
-  public function providerSpecialCharacterEncoding()
+  public function providerSpecialCharacterEncoding(): array
   {
     return [
         [
@@ -133,7 +133,7 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
   /**
    * @return array
    */
-  public function providerTrim()
+  public function providerTrim(): array
   {
     return [
         [
@@ -250,7 +250,65 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
         <a></a>
     ';
 
-    $expected = '<dl><dt>foo <dd><span class=bar></span></dl> <a></a>';
+    $expected = '<dl><dt>foo <dd><span class=bar></span> </dl><a></a>';
+
+    self::assertSame(
+        str_replace(["\r\n", "\r", "\n"], "\n", $expected),
+        str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
+    );
+  }
+
+  public function testDoNotAddSpacesViaDoRemoveWhitespaceAroundTags()
+  {
+    // init
+    $htmlMin = new HtmlMin();
+    $htmlMin->doRemoveWhitespaceAroundTags(false);
+
+    $html = '<span class="foo"><span title="bar"></span><span title="baz"></span><span title="bat"></span></span>';
+
+    $expected = '<span class=foo><span title=bar></span><span title=baz></span><span title=bat></span></span>';
+
+    self::assertSame(
+        str_replace(["\r\n", "\r", "\n"], "\n", $expected),
+        str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
+    );
+
+    // ---
+
+    $html = '<span class="title">
+                1.
+                <a>Foo</a>
+            </span>';
+
+    $expected = '<span class=title> 1. <a>Foo</a> </span>';
+
+    self::assertSame(
+        str_replace(["\r\n", "\r", "\n"], "\n", $expected),
+        str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
+    );
+
+    // ---
+
+    $htmlMin->doRemoveWhitespaceAroundTags(true);
+
+
+    $html = '<span class="foo"><span title="bar"></span><span title="baz"></span><span title="bat"></span></span>';
+
+    $expected = '<span class=foo><span title=bar></span><span title=baz></span><span title=bat></span></span>';
+
+    self::assertSame(
+        str_replace(["\r\n", "\r", "\n"], "\n", $expected),
+        str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
+    );
+
+    // ---
+
+    $html = '<span class="title">
+                1.
+                <a>Foo</a>
+            </span>';
+
+    $expected = '<span class=title> 1. <a>Foo</a></span>';
 
     self::assertSame(
         str_replace(["\r\n", "\r", "\n"], "\n", $expected),
@@ -339,9 +397,9 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
     </html>
     ';
 
-    $expected = '<html><head> <body><p id=text class=foo>
+    $expected = '<html><head>  <body><p id=text class=foo>
         foo
-      </p> <br> <ul><li><p class=foo>lall</ul>';
+      </p>  <br>  <ul><li><p class=foo>lall </ul>';
 
     self::assertSame(
         str_replace(["\r\n", "\r", "\n"], "\n", $expected),

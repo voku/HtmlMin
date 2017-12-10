@@ -773,11 +773,11 @@ class HtmlMin
             !$this->domNodeClosingTagOptional($child)
         ) {
           $html .= '</' . $child->tagName . '>';
+        }
 
-          if ($this->doRemoveWhitespaceAroundTags === false) {
-            if (!$child->nextSibling instanceof \DOMText) {
-              $html .= ' ';
-            }
+        if ($this->doRemoveWhitespaceAroundTags === false) {
+          if ($child->nextSibling instanceof \DOMText) {
+            $html .= ' ';
           }
         }
 
