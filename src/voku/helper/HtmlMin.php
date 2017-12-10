@@ -762,7 +762,7 @@ class HtmlMin
                    . '>';
         }
 
-      } else if ($child instanceof \DOMElement) {
+      } elseif ($child instanceof \DOMElement) {
 
         $html .= trim('<' . $child->tagName . ' ' . $this->domNodeAttributesToString($child));
         $html .= '>' . $this->domNodeToString($child);
