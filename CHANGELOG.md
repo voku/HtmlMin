@@ -1,8 +1,11 @@
-# Changelog 2.0.x
+# Changelog 2.0.2 (2017-12-10)
+
+* try to fix "Minifier removes spaces between tags" v2
+* disable "doRemoveWhitespaceAroundTags" by default
 
 # Changelog 2.0.1 (2017-12-10)
 
-* try to fix "Minifier removes spaces between tags"
+* try to fix "Minifier removes spaces between tags" v1
 
 # Changelog 2.0.0 (2017-12-03)
 
