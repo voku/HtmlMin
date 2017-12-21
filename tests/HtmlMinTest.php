@@ -480,7 +480,24 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
     </html>
     ';
 
-    $expected = '<html><head>  <body><p class=foo id=text>foo</p>  <br>  <ul><li><p class=foo>lall </ul>  <ul><li>1  <li>2  <li>3 </ul>  <table><tr><th>1  <th>2   <tr><td>foo  <td><dl><dt>Coffee  <dd>Black hot drink  <dt>Milk  <dd>White cold drink </dl>   </table>';
+    $expected = '<html><head> <body><p class=foo id=text>foo</p> <br><ul><li><p class=foo>lall </ul><ul><li>1 <li>2<li>3</ul><table><tr><th>1 <th>2 <tr><td>foo <td><dl><dt>Coffee <dd>Black hot drink<dt>Milk<dd>White cold drink</dl> </table>';
+
+    self::assertSame($expected, $htmlMin->minify($html));
+  }
+
+  public function testMultipleHorizontalWhitespaceCharactersCollaps()
+  {
+    // init
+    $htmlMin = new HtmlMin();
+
+    $html = '
+    <form>
+        <button>foo</button>
+        <input type="hidden" name="bar" value="baz">
+    </form>
+    ';
+
+    $expected = '<form><button>foo</button> <input name=bar type=hidden value=baz></form>';
 
     self::assertSame($expected, $htmlMin->minify($html));
   }
@@ -525,7 +542,7 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
     </html>
     ';
 
-    $expected = '<html><head></head>  <body><p class="foo" id="text">foo</p>  <br>  <ul><li><p class="foo">lall</p> </li></ul>  <ul><li>1</li>  <li>2</li>  <li>3</li> </ul>  <table><tr><th>1</th>  <th>2</th> </tr>  <tr><td>foo</td>  <td><dl><dt>Coffee</dt>  <dd>Black hot drink</dd>  <dt>Milk</dt>  <dd>White cold drink</dd> </dl> </td> </tr> </table> </body> </html>';
+    $expected = '<html><head></head> <body><p class="foo" id="text">foo</p> <br><ul><li><p class="foo">lall</p> </li></ul><ul><li>1</li> <li>2</li><li>3</li></ul><table><tr><th>1</th> <th>2</th></tr> <tr><td>foo</td> <td><dl><dt>Coffee</dt> <dd>Black hot drink</dd><dt>Milk</dt><dd>White cold drink</dd></dl> </td></tr></table></body></html>';
 
     self::assertSame($expected, $htmlMin->minify($html));
   }

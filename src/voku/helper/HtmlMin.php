@@ -736,8 +736,15 @@ class HtmlMin
   {
     // init
     $html = '';
+    $emptyStringTmp = '';
 
     foreach ($node->childNodes as $child) {
+
+      if ($emptyStringTmp === 'is_empty') {
+        $emptyStringTmp = 'last_was_empty';
+      } else {
+        $emptyStringTmp = '';
+      }
 
       if ($child instanceof \DOMDocumentType) {
 
@@ -781,22 +788,31 @@ class HtmlMin
               &&
               $child->nextSibling->wholeText === ' '
           ) {
-            $html .= ' ';
+            if ($emptyStringTmp !== 'last_was_empty') {
+              $html .= ' ';
+            }
+            $emptyStringTmp = 'is_empty';
           }
         }
 
       } elseif ($child instanceof \DOMText) {
 
-        if ($child->isWhitespaceInElementContent()) {
+        if ($child->isElementContentWhitespace()) {
           if (
               $child->previousSibling !== null
               &&
               $child->nextSibling !== null
           ) {
-            $html .= ' ';
+            if ($emptyStringTmp !== 'last_was_empty') {
+              $html .= ' ';
+            }
+            $emptyStringTmp = 'is_empty';
           }
+
         } else {
+
           $html .= $child->wholeText;
+
         }
 
       } elseif ($child instanceof \DOMComment) {
@@ -861,7 +877,7 @@ class HtmlMin
       return '';
     }
 
-    $html = trim($html);
+    $html = \trim($html);
     if (!$html) {
       return '';
     }
@@ -869,7 +885,7 @@ class HtmlMin
     // init
     static $CACHE_SELF_CLOSING_TAGS = null;
     if ($CACHE_SELF_CLOSING_TAGS === null) {
-      $CACHE_SELF_CLOSING_TAGS = implode('|', self::$selfClosingTags);
+      $CACHE_SELF_CLOSING_TAGS = \implode('|', self::$selfClosingTags);
     }
 
     // reset
@@ -899,7 +915,6 @@ class HtmlMin
         },
         $html
     );
-
 
     if ($this->doRemoveSpacesBetweenTags === true) {
       // Remove spaces that are between > and <
