@@ -169,7 +169,22 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
     $expected = '<!DOCTYPE html><html><body><form><input autofocus checked type=checkbox></form>';
 
     $actual = $this->compressor->minify($html);
+    self::assertSame($expected, $actual);
 
+    // ---
+
+    $html = '<html><body><form>' . $input . '</form></body></html>';
+    $expected = '<html><body><form><input autofocus checked type=checkbox></form>';
+
+    $actual = $this->compressor->minify($html);
+    self::assertSame($expected, $actual);
+
+    // ---
+
+    $html = '<form>' . $input . '</form>';
+    $expected = '<form><input autofocus checked type=checkbox></form>';
+
+    $actual = $this->compressor->minify($html);
     self::assertSame($expected, $actual);
   }
 
@@ -214,7 +229,7 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
         <a></a>
     ';
 
-    $expected = '<dl><dt>foo <dd><span class=bar></span></dl><a></a>';
+    $expected = '<dl><dt>foo <dd><span class=bar></span></dl> <a></a>';
 
     self::assertSame(
         str_replace(["\r\n", "\r", "\n"], "\n", $expected),
@@ -231,7 +246,7 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
         <a></a>
     ';
 
-    $expected = '<dl><dt>foo <dd><span class=bar>&nbsp;</span></dl><a></a>';
+    $expected = '<dl><dt>foo <dd><span class=bar>&nbsp;</span></dl> <a></a>';
 
     self::assertSame(
         str_replace(["\r\n", "\r", "\n"], "\n", $expected),
@@ -250,7 +265,7 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
         <a></a>
     ';
 
-    $expected = '<dl><dt>foo <dd><span class=bar></span> </dl><a></a>';
+    $expected = '<dl><dt>foo <dd><span class=bar></span> </dl> <a></a>';
 
     self::assertSame(
         str_replace(["\r\n", "\r", "\n"], "\n", $expected),
@@ -405,6 +420,24 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
         str_replace(["\r\n", "\r", "\n"], "\n", $expected),
         str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
     );
+  }
+
+  public function testDisappearingWhitespaceBetweenDlAndA()
+  {
+    // init
+    $htmlMin = new HtmlMin();
+
+    $html = '
+    <dl>
+        <dt>foo
+        <dd><span class="bar"></span>
+    </dl>
+    <a class="baz"></a>
+    ';
+
+    $expected = '<dl><dt>foo <dd><span class=bar></span> </dl> <a class=baz></a>';
+
+    self::assertSame($expected, $htmlMin->minify($html));
   }
 
   public function testOptionsTrue()
@@ -563,7 +596,7 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
   </body>
 </html>';
 
-    $expected = '<!DOCTYPE html><html lang=de><head><meta charset=utf-8><meta content="width=device-width, initial-scale=1.0" name=viewport><title>aussagekräftiger Titel der Seite</title><body><p>Sehen Sie sich den Quellcode dieser Seite an. <kbd>(Kontextmenu: Seitenquelltext anzeigen)</kbd>';
+    $expected = '<!DOCTYPE html><html lang=de><head><meta charset=utf-8> <meta content="width=device-width, initial-scale=1.0" name=viewport><title>aussagekräftiger Titel der Seite</title> <body><p>Sehen Sie sich den Quellcode dieser Seite an. <kbd>(Kontextmenu: Seitenquelltext anzeigen)</kbd>';
 
     $htmlMin = new HtmlMin();
     self::assertSame($expected, $htmlMin->minify($html));

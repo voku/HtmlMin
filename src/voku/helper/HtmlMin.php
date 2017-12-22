@@ -512,9 +512,14 @@ class HtmlMin
     return \trim($attrstr);
   }
 
+  /**
+   * @param \DOMNode $node
+   *
+   * @return bool
+   */
   private function domNodeClosingTagOptional(\DOMNode $node): bool
   {
-    $tag_name = $node->tagName;
+    $tag_name = $node->nodeName;
     $nextSibling = $this->getNextSiblingOfTypeDOMElement($node);
 
     // https://html.spec.whatwg.org/multipage/syntax.html#syntax-tag-omission
@@ -676,7 +681,7 @@ class HtmlMin
                            $node->parentNode !== null
                            &&
                            !\in_array(
-                               $node->parentNode->tagName,
+                               $node->parentNode->nodeName,
                                [
                                    'a',
                                    'audio',
@@ -771,7 +776,7 @@ class HtmlMin
 
       } elseif ($child instanceof \DOMElement) {
 
-        $html .= trim('<' . $child->tagName . ' ' . $this->domNodeAttributesToString($child));
+        $html .= \rtrim('<' . $child->tagName . ' ' . $this->domNodeAttributesToString($child));
         $html .= '>' . $this->domNodeToString($child);
 
         if (
@@ -1013,7 +1018,7 @@ class HtmlMin
     // load dom
     $dom->loadHtml($html);
 
-    $this->withDocType = (stripos(trim($html), '<!DOCTYPE') === 0);
+    $this->withDocType = (\stripos(\ltrim($html), '<!DOCTYPE') === 0);
 
     // -------------------------------------------------------------------------
     // Protect HTML tags and conditional comments.
