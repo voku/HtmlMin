@@ -1,3 +1,8 @@
+# Changelog 2.0.4 (2017-12-22)
+
+- check if there was already whitespace e.g. from the content
+
+
 # Changelog 2.0.3 (2017-12-22)
 
 - fix "Minifier removes spaces between tags"
