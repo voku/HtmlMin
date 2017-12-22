@@ -1,3 +1,10 @@
+# Changelog 3.0.0 (2017-12-22)
+
+- remove "Portable UTF-8" as required dependency
+
+-> this is a breaking change, without any API changes
+
+
 # Changelog 2.0.4 (2017-12-22)
 
 - check if there was already whitespace e.g. from the content
