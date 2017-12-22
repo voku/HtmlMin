@@ -1,3 +1,9 @@
+# Changelog 2.0.3 (2017-12-22)
+
+- fix "Minifier removes spaces between tags"
+- fix "Multiple horizontal whitespace characters not collapsed"
+
+
 # Changelog 2.0.2 (2017-12-10)
 
 - try to fix "Minifier removes spaces between tags" v2
