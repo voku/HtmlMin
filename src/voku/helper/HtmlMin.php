@@ -793,7 +793,11 @@ class HtmlMin
               &&
               $child->nextSibling->wholeText === ' '
           ) {
-            if ($emptyStringTmp !== 'last_was_empty') {
+            if (
+                $emptyStringTmp !== 'last_was_empty'
+                &&
+                UTF8::substr($html, -1) !== ' '
+            ) {
               $html .= ' ';
             }
             $emptyStringTmp = 'is_empty';
@@ -808,7 +812,11 @@ class HtmlMin
               &&
               $child->nextSibling !== null
           ) {
-            if ($emptyStringTmp !== 'last_was_empty') {
+            if (
+                $emptyStringTmp !== 'last_was_empty'
+                &&
+                UTF8::substr($html, -1) !== ' '
+            ) {
               $html .= ' ';
             }
             $emptyStringTmp = 'is_empty';

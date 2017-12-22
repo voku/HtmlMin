@@ -124,8 +124,23 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
   {
     return [
         [
-            "<html>\r\n\t<body>\xc3\xa0</body>\r\n\t</html>",
-            '<html><body>à',
+            "
+            <html>
+              \r\n\t
+              <body>
+                <ul style=''>
+                  <li style='display: inline;' class='foo'>
+                    \xc3\xa0
+                  </li>
+                  <li class='foo' style='display: inline;'>
+                    \xc3\xa1
+                  </li>
+                </ul>
+              </body>
+              \r\n\t
+            </html>
+            ",
+            '<html><body><ul><li class=foo style="display: inline;"> à <li class=foo style="display: inline;"> á </ul>',
         ],
     ];
   }
