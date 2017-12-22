@@ -1,7 +1,6 @@
 <?php
 
 use voku\helper\HtmlMin;
-use voku\helper\UTF8;
 
 /**
  * Class HtmlMinTest
@@ -364,13 +363,13 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
     $htmlMin->doRemoveHttpPrefixFromAttributes()
             ->setDomainsToRemoveHttpPrefixFromAttributes(['henkel-lifetimes.de']);
 
-    $html = str_replace(["\r\n", "\r", "\n"], "\n", UTF8::file_get_contents(__DIR__ . '/fixtures/hlt.html'));
+    $html = str_replace(["\r\n", "\r", "\n"], "\n", file_get_contents(__DIR__ . '/fixtures/hlt.html'));
     $expected = str_replace(
         [
             "\r\n",
             "\r",
             "\n",
-        ], "\n", UTF8::file_get_contents(__DIR__ . '/fixtures/hlt_result.html')
+        ], "\n", file_get_contents(__DIR__ . '/fixtures/hlt_result.html')
     );
 
     self::assertSame(trim($expected), $htmlMin->minify($html, true));

@@ -796,7 +796,7 @@ class HtmlMin
             if (
                 $emptyStringTmp !== 'last_was_empty'
                 &&
-                UTF8::substr($html, -1) !== ' '
+                substr($html, -1) !== ' '
             ) {
               $html .= ' ';
             }
@@ -815,7 +815,7 @@ class HtmlMin
             if (
                 $emptyStringTmp !== 'last_was_empty'
                 &&
-                UTF8::substr($html, -1) !== ' '
+                substr($html, -1) !== ' '
             ) {
               $html .= ' ';
             }
@@ -906,7 +906,7 @@ class HtmlMin
 
     // save old content
     $origHtml = $html;
-    $origHtmlLength = UTF8::strlen($html);
+    $origHtmlLength = \strlen($html);
 
     // -------------------------------------------------------------------------
     // Minify the HTML via "HtmlDomParser"
@@ -956,8 +956,6 @@ class HtmlMin
     // Final clean-up
     // ------------------------------------
 
-    $html = UTF8::cleanup($html);
-
     $html = \str_replace(
         [
             'html>' . "\n",
@@ -1003,7 +1001,7 @@ class HtmlMin
     // check if compression worked
     // ------------------------------------
 
-    if ($origHtmlLength < UTF8::strlen($html)) {
+    if ($origHtmlLength < \strlen($html)) {
       $html = $origHtml;
     }
 
