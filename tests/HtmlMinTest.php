@@ -343,6 +343,20 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
         str_replace(["\r\n", "\r", "\n"], "\n", $expected),
         str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
     );
+
+    // ---
+
+    $html = '  <span>foo</span>
+                                                    <a href="bar">baz</a>
+                                    <span>bat</span>
+    ';
+
+    $expected = '<span>foo</span> <a href=bar>baz</a> <span>bat</span>';
+
+    self::assertSame(
+        str_replace(["\r\n", "\r", "\n"], "\n", $expected),
+        str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
+    );
   }
 
   public function testMinifyCodeTag()
