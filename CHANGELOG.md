@@ -1,3 +1,8 @@
+# Changelog 3.0.1 (2017-12-29)
+
+- update vendor (voku/simple_html_dom >= v4.1.3)
+
+
 # Changelog 3.0.0 (2017-12-22)
 
 - remove "Portable UTF-8" as required dependency
