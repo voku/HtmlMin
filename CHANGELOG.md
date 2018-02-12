@@ -1,3 +1,7 @@
+# Changelog 3.0.2 (2018-02-12)
+
+- fix regex for self-closing tags
+
 # Changelog 3.0.1 (2017-12-29)
 
 - update vendor (voku/simple_html_dom >= v4.1.3)
