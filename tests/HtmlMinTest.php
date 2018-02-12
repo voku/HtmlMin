@@ -287,6 +287,22 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
     );
   }
 
+  public function testSelfClosingTagHr()
+  {
+    // init
+    $htmlMin = new HtmlMin();
+
+    $html = '<p class="foo bar"><hr class="bar foo"> or <hr class=" bar  foo   "/> or <hr> or <hr /> or <hr/> or <hr   /></p>';
+
+    $expected = '<p class="bar foo"><hr class="bar foo"> or <hr class="bar foo"> or <hr> or <hr> or <hr> or <hr>';
+
+    self::assertSame(
+        str_replace(["\r\n", "\r", "\n"], "\n", $expected),
+        str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
+    );
+
+  }
+
   public function testDoNotAddSpacesViaDoRemoveWhitespaceAroundTags()
   {
     // init

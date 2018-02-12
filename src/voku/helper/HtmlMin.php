@@ -995,7 +995,7 @@ class HtmlMin
         $html
     );
 
-    $html = (string)\preg_replace('#<\b(' . $CACHE_SELF_CLOSING_TAGS . ')([^>]+)><\/\b\1>#', '<\\1\\2>', $html);
+    $html = (string)\preg_replace('#<\b(' . $CACHE_SELF_CLOSING_TAGS . ')([^>]*+)><\/\b\1>#', '<\\1\\2>', $html);
 
     // ------------------------------------
     // check if compression worked
