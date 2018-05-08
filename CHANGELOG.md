@@ -1,4 +1,4 @@
-# Changelog 3.0.2 (2018-05-08)
+# Changelog 3.0.3 (2018-05-08)
 
 - update vendor (voku/simple_html_dom >= v4.1.4)
 
