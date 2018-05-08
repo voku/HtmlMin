@@ -266,7 +266,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doOptimizeAttributes(bool $doOptimizeAttributes = true)
+  public function doOptimizeAttributes(bool $doOptimizeAttributes = true): self
   {
     $this->doOptimizeAttributes = $doOptimizeAttributes;
 
@@ -278,7 +278,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doOptimizeViaHtmlDomParser(bool $doOptimizeViaHtmlDomParser = true)
+  public function doOptimizeViaHtmlDomParser(bool $doOptimizeViaHtmlDomParser = true): self
   {
     $this->doOptimizeViaHtmlDomParser = $doOptimizeViaHtmlDomParser;
 
@@ -290,7 +290,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doRemoveComments(bool $doRemoveComments = true)
+  public function doRemoveComments(bool $doRemoveComments = true): self
   {
     $this->doRemoveComments = $doRemoveComments;
 
@@ -302,7 +302,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doRemoveDefaultAttributes(bool $doRemoveDefaultAttributes = true)
+  public function doRemoveDefaultAttributes(bool $doRemoveDefaultAttributes = true): self
   {
     $this->doRemoveDefaultAttributes = $doRemoveDefaultAttributes;
 
@@ -314,7 +314,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doRemoveDeprecatedAnchorName(bool $doRemoveDeprecatedAnchorName = true)
+  public function doRemoveDeprecatedAnchorName(bool $doRemoveDeprecatedAnchorName = true): self
   {
     $this->doRemoveDeprecatedAnchorName = $doRemoveDeprecatedAnchorName;
 
@@ -326,7 +326,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doRemoveDeprecatedScriptCharsetAttribute(bool $doRemoveDeprecatedScriptCharsetAttribute = true)
+  public function doRemoveDeprecatedScriptCharsetAttribute(bool $doRemoveDeprecatedScriptCharsetAttribute = true): self
   {
     $this->doRemoveDeprecatedScriptCharsetAttribute = $doRemoveDeprecatedScriptCharsetAttribute;
 
@@ -338,7 +338,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doRemoveDeprecatedTypeFromScriptTag(bool $doRemoveDeprecatedTypeFromScriptTag = true)
+  public function doRemoveDeprecatedTypeFromScriptTag(bool $doRemoveDeprecatedTypeFromScriptTag = true): self
   {
     $this->doRemoveDeprecatedTypeFromScriptTag = $doRemoveDeprecatedTypeFromScriptTag;
 
@@ -350,7 +350,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doRemoveDeprecatedTypeFromStylesheetLink(bool $doRemoveDeprecatedTypeFromStylesheetLink = true)
+  public function doRemoveDeprecatedTypeFromStylesheetLink(bool $doRemoveDeprecatedTypeFromStylesheetLink = true): self
   {
     $this->doRemoveDeprecatedTypeFromStylesheetLink = $doRemoveDeprecatedTypeFromStylesheetLink;
 
@@ -362,7 +362,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doRemoveEmptyAttributes(bool $doRemoveEmptyAttributes = true)
+  public function doRemoveEmptyAttributes(bool $doRemoveEmptyAttributes = true): self
   {
     $this->doRemoveEmptyAttributes = $doRemoveEmptyAttributes;
 
@@ -374,7 +374,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doRemoveHttpPrefixFromAttributes(bool $doRemoveHttpPrefixFromAttributes = true)
+  public function doRemoveHttpPrefixFromAttributes(bool $doRemoveHttpPrefixFromAttributes = true): self
   {
     $this->doRemoveHttpPrefixFromAttributes = $doRemoveHttpPrefixFromAttributes;
 
@@ -386,7 +386,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doRemoveSpacesBetweenTags(bool $doRemoveSpacesBetweenTags = true)
+  public function doRemoveSpacesBetweenTags(bool $doRemoveSpacesBetweenTags = true): self
   {
     $this->doRemoveSpacesBetweenTags = $doRemoveSpacesBetweenTags;
 
@@ -398,7 +398,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doRemoveValueFromEmptyInput(bool $doRemoveValueFromEmptyInput = true)
+  public function doRemoveValueFromEmptyInput(bool $doRemoveValueFromEmptyInput = true): self
   {
     $this->doRemoveValueFromEmptyInput = $doRemoveValueFromEmptyInput;
 
@@ -410,7 +410,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doRemoveWhitespaceAroundTags(bool $doRemoveWhitespaceAroundTags = true)
+  public function doRemoveWhitespaceAroundTags(bool $doRemoveWhitespaceAroundTags = true): self
   {
     $this->doRemoveWhitespaceAroundTags = $doRemoveWhitespaceAroundTags;
 
@@ -422,7 +422,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doRemoveOmittedQuotes(bool $doRemoveOmittedQuotes = true)
+  public function doRemoveOmittedQuotes(bool $doRemoveOmittedQuotes = true): self
   {
     $this->doRemoveOmittedQuotes = $doRemoveOmittedQuotes;
 
@@ -434,7 +434,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doRemoveOmittedHtmlTags(bool $doRemoveOmittedHtmlTags = true)
+  public function doRemoveOmittedHtmlTags(bool $doRemoveOmittedHtmlTags = true): self
   {
     $this->doRemoveOmittedHtmlTags = $doRemoveOmittedHtmlTags;
 
@@ -446,7 +446,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doSortCssClassNames(bool $doSortCssClassNames = true)
+  public function doSortCssClassNames(bool $doSortCssClassNames = true): self
   {
     $this->doSortCssClassNames = $doSortCssClassNames;
 
@@ -458,7 +458,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doSortHtmlAttributes(bool $doSortHtmlAttributes = true)
+  public function doSortHtmlAttributes(bool $doSortHtmlAttributes = true): self
   {
     $this->doSortHtmlAttributes = $doSortHtmlAttributes;
 
@@ -470,7 +470,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function doSumUpWhitespace(bool $doSumUpWhitespace = true)
+  public function doSumUpWhitespace(bool $doSumUpWhitespace = true): self
   {
     $this->doSumUpWhitespace = $doSumUpWhitespace;
 
@@ -922,7 +922,7 @@ class HtmlMin
 
     // Remove extra white-space(s) between HTML attribute(s)
     $html = (string)\preg_replace_callback(
-        '#<([^\/\s<>!]+)(?:\s+([^<>]*?)\s*|\s*)(\/?)>#',
+        '#<([^/\s<>!]+)(?:\s+([^<>]*?)\s*|\s*)(/?)>#',
         function ($matches) {
           return '<' . $matches[1] . (string)\preg_replace('#([^\s=]+)(\=([\'"]?)(.*?)\3)?(\s+|$)#s', ' $1$2', $matches[2]) . $matches[3] . '>';
         },
@@ -1354,7 +1354,7 @@ class HtmlMin
    *
    * @return $this
    */
-  public function setDomainsToRemoveHttpPrefixFromAttributes($domainsToRemoveHttpPrefixFromAttributes)
+  public function setDomainsToRemoveHttpPrefixFromAttributes($domainsToRemoveHttpPrefixFromAttributes): self
   {
     $this->domainsToRemoveHttpPrefixFromAttributes = $domainsToRemoveHttpPrefixFromAttributes;
 

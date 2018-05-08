@@ -437,6 +437,22 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
     );
   }
 
+  public function testVueJsExample()
+  {
+    // init
+    $htmlMin = new HtmlMin();
+
+    $html = '
+    <select v-model="fiter" @change="getGraphData" :class="[\'c-chart__label\']" name="filter">
+    </select>
+    ';
+
+    $expected = '<select v-model="fiter" @change="getGraphData" :class="[\'c-chart__label\']" name="filter">
+    </select>';
+
+    self::assertSame($expected, $htmlMin->minify($html));
+  }
+
   public function testOptionsFalse()
   {
     // init
