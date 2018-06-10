@@ -3,9 +3,6 @@ language: php
 
 sudo: false
 
-php:
-  - nightly
-
 git:
   depth: 2
 
@@ -21,8 +18,10 @@ matrix:
     - php: 7.0
     - php: 7.1
     - php: 7.2
+    - nightly
 
 before_script:
+  - php --version
   - wget https://scrutinizer-ci.com/ocular.phar
   - travis_retry composer self-update
   - travis_retry composer require satooshi/php-coveralls:1.0.0
