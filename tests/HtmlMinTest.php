@@ -453,6 +453,26 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
     self::assertSame($expected, $htmlMin->minify($html));
   }
 
+  public function testBrokenHtmlExample()
+  {
+    // init
+    $htmlMin = new HtmlMin();
+    $htmlMin->useKeepBrokenHtml(true);
+
+    /* @noinspection JSUnresolvedVariable */
+    /* @noinspection UnterminatedStatementJS */
+    /* @noinspection BadExpressionStatementJS */
+    /* @noinspection JSUndeclaredVariable */
+    $html = '
+    </script>
+    <script async src="cdnjs"></script>
+    ';
+
+    $expected = '</script> <script async src=cdnjs></script>';
+
+    self::assertSame($expected, $htmlMin->minify($html));
+  }
+
   public function testOptionsFalse()
   {
     // init

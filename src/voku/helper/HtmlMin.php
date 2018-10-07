@@ -250,6 +250,11 @@ class HtmlMin
   private $doRemoveSpacesBetweenTags = false;
 
   /**
+   * @var bool
+   */
+  private $keepBrokenHtml = false;
+
+  /**
    * @var
    */
   private $withDocType;
@@ -1018,6 +1023,8 @@ class HtmlMin
   {
     // init dom
     $dom = new HtmlDomParser();
+    $dom->useKeepBrokenHtml($this->keepBrokenHtml);
+
     $dom->getDocument()->preserveWhiteSpace = false; // remove redundant white space
     $dom->getDocument()->formatOutput = false; // do not formats output with indentation
 
@@ -1347,6 +1354,20 @@ class HtmlMin
     }
 
     return $html;
+  }
+
+  /**
+   * WARNING: maybe bad for performance ...
+   *
+   * @param bool $keepBrokenHtml
+   *
+   * @return HtmlMin
+   */
+  public function useKeepBrokenHtml(bool $keepBrokenHtml): HtmlMin
+  {
+    $this->keepBrokenHtml = $keepBrokenHtml;
+
+    return $this;
   }
 
   /**
