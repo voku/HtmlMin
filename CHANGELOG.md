@@ -1,3 +1,8 @@
+# Changelog 3.0.5 (2018-10-17)
+
+- update vendor (voku/simple_html_dom >= v4.1.7) + fix entities (&lt;, &gt;)
+
+
 # Changelog 3.0.4 (2018-10-07)
 
 - update vendor (voku/simple_html_dom >= v4.1.6) + option for keep broken html
