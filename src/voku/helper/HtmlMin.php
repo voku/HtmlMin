@@ -1363,7 +1363,7 @@ class HtmlMin
    *
    * @return HtmlMin
    */
-  public function useKeepBrokenHtml(bool $keepBrokenHtml): HtmlMin
+  public function useKeepBrokenHtml(bool $keepBrokenHtml): self
   {
     $this->keepBrokenHtml = $keepBrokenHtml;
 
