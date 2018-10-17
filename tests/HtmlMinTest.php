@@ -473,6 +473,16 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
     self::assertSame($expected, $htmlMin->minify($html));
   }
 
+  public function testDoNotDecodeHtmlEnteties()
+  {
+    $minifier = new HtmlMin();
+    $html = $minifier->minify('<span>&lt;</span>');
+
+    $expected = '<span>&lt;</span>';
+
+    self::assertSame($expected, $html);
+  }
+
   public function testOptionsFalse()
   {
     // init
