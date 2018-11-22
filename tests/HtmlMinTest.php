@@ -775,4 +775,36 @@ class HtmlMinTest extends \PHPUnit\Framework\TestCase
     $actual = $this->compressor->minify($input);
     self::assertSame($expected, $actual);
   }
+
+  public function testDoRemoveCommentsWithFalse()
+  {
+    $this->compressor->doRemoveComments(false);
+
+    $html = <<<'HTML'
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test</title>
+</head>
+<body>
+<!-- do not remove comment -->
+<hr />
+<!--
+do not remove comment
+-->
+</body>
+</html>
+
+HTML;
+
+    $actual = $this->compressor->minify($html);
+
+    $expectedHtml = <<<'HTML'
+<!DOCTYPE html><html><head><title>Test</title> <body><!-- do not remove comment --> <hr><!--
+do not remove comment
+-->
+HTML;
+
+    self::assertSame($expectedHtml, $actual);
+  }
 }
