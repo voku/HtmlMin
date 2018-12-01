@@ -80,6 +80,8 @@ $htmlMin->doRemoveOmittedQuotes();                    // remove quotes e.g. clas
 $htmlMin->doRemoveOmittedHtmlTags();                  // remove ommitted html tags e.g. <p>lall</p> => <p>lall 
 ```
 
+PS: you can use the "nocompress"-tag to keep the html e.g.: "<nocompress>\n foobar \n</nocompress>"
+
 ## Unit Test
 
 1) [Composer](https://getcomposer.org) is a prerequisite for running the tests.

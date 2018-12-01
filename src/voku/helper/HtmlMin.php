@@ -255,9 +255,9 @@ class HtmlMin
   private $keepBrokenHtml = false;
 
   /**
-   * @var
+   * @var bool
    */
-  private $withDocType;
+  private $withDocType = false;
 
   /**
    * HtmlMin constructor.
@@ -1181,7 +1181,12 @@ class HtmlMin
       ++$counter;
     }
 
-    $dom->getDocument()->normalizeDocument();
+    foreach ($dom->find('code, nocompress') as $element) {
+      $this->protectedChildNodes[$counter] = $element->parentNode()->innerHtml();
+      $element->getNode()->parentNode->nodeValue = '<' . $this->protectedChildNodesHelper . ' data-' . $this->protectedChildNodesHelper . '="' . $counter . '"></' . $this->protectedChildNodesHelper . '>';
+
+      ++$counter;
+    }
 
     foreach ($dom->find('//comment()') as $element) {
       $text = $element->text();
@@ -1200,8 +1205,6 @@ class HtmlMin
 
       ++$counter;
     }
-
-    $dom->getDocument()->normalizeDocument();
 
     return $dom;
   }
