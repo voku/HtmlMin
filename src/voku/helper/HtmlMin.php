@@ -835,7 +835,7 @@ class HtmlMin
 
       } elseif ($child instanceof \DOMComment) {
 
-        $html .= $child->wholeText;
+        $html .= '<!--' . $child->textContent . '-->';
 
       }
     }
