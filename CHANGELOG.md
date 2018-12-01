@@ -1,3 +1,8 @@
+# Changelog 3.0.6 (2018-12-01)
+
+- implement the "<nocompress>"-tag + tests
+
+
 # Changelog 3.0.5 (2018-10-17)
 
 - update vendor (voku/simple_html_dom >= v4.1.7) + fix entities (&lt;, &gt;)
