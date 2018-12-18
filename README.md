@@ -1,14 +1,11 @@
 [![Build Status](https://travis-ci.org/voku/HtmlMin.svg?branch=master)](https://travis-ci.org/voku/HtmlMin)
 [![Coverage Status](https://coveralls.io/repos/github/voku/HtmlMin/badge.svg?branch=master)](https://coveralls.io/github/voku/HtmlMin?branch=master)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/voku/HtmlMin/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/voku/HtmlMin/?branch=master)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/a433ed2b3b7546b3a1c520310222a601)](https://www.codacy.com/app/voku/HtmlMin?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=voku/HtmlMin&amp;utm_campaign=Badge_Grade)
-[![SensioLabsInsight](https://insight.sensiolabs.com/projects/63d796ba-64b9-487d-a45f-ac121fdc5491/mini.png)](https://insight.sensiolabs.com/projects/63d796ba-64b9-487d-a45f-ac121fdc5491)
 [![Latest Stable Version](https://poser.pugx.org/voku/html-min/v/stable)](https://packagist.org/packages/voku/html-min) 
 [![Total Downloads](https://poser.pugx.org/voku/html-min/downloads)](https://packagist.org/packages/voku/html-min) 
-[![Latest Unstable Version](https://poser.pugx.org/voku/html-min/v/unstable)](https://packagist.org/packages/voku/html-min)
 [![License](https://poser.pugx.org/voku/html-min/license)](https://packagist.org/packages/voku/html-min)
 
-# HTML Compressor and Minifier
+# :clamp: HTML Compressor and Minifier for PHP
 
 ## Description
 
