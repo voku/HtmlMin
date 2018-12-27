@@ -1,3 +1,9 @@
+# Changelog 3.1.0
+
+- add "HtmlMinDomObserverInterface" (+ HtmlMin as Observable)
+- use phpcs fixer
+
+
 # Changelog 3.0.6 (2018-12-01)
 
 - implement the "<nocompress>"-tag + tests
