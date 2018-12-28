@@ -1,3 +1,8 @@
+# Changelog 3.1.2
+
+- use new version of "voku/simple_html_dom" (again)
+
+
 # Changelog 3.1.1
 
 - use new version of "voku/simple_html_dom"
