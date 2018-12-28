@@ -1,3 +1,8 @@
+# Changelog 3.1.1
+
+- use new version of "voku/simple_html_dom"
+
+
 # Changelog 3.1.0
 
 - add "HtmlMinDomObserverInterface" (+ HtmlMin as Observable)
