@@ -204,29 +204,95 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         static::assertSame($expected, $actual);
     }
 
+    public function testSpecialScriptTag()
+    {
+        // init
+        $html = '
+                <!doctype html>
+        <html lang="fr">
+        <head>
+            <title>Test</title>
+        </head>
+        <body>
+            A Body
+        
+            <script id="elements-image-1" type="text/html">
+                <div class="place badge-carte">Place du Village<br>250m - 2mn à pied</div>
+                <div class="telecabine badge-carte">Télécabine du Chamois<br>250m - 2mn à pied</div>
+                <div class="situation badge-carte"><img src="https://domain.tld/assets/frontOffice/kneiss/template-assets/assets/dist/img/08ecd8a.png" alt=""></div>
+            </script>
+            
+            <script id="elements-image-2" type="text/html">
+                <div class="place badge-carte">Place du Village<br>250m - 2mn à pied</div>
+                <div class="telecabine badge-carte">Télécabine du Chamois<br>250m - 2mn à pied</div>
+                <div class="situation badge-carte"><img src="https://domain.tld/assets/frontOffice/kneiss/template-assets/assets/dist/img/08ecd8a.png" alt=""></div>
+            </script>
+            
+            <script class="foobar" type="text/html">
+                <div class="place badge-carte">Place du Village<br>250m - 2mn à pied</div>
+                <div class="telecabine badge-carte">Télécabine du Chamois<br>250m - 2mn à pied</div>
+                <div class="situation badge-carte"><img src="https://domain.tld/assets/frontOffice/kneiss/template-assets/assets/dist/img/08ecd8a.png" alt=""></div>
+            </script>
+            <script class="foobar" type="text/html">
+                <div class="place badge-carte">Place du Village<br>250m - 2mn à pied</div>
+                <div class="telecabine badge-carte">Télécabine du Chamois<br>250m - 2mn à pied</div>
+                <div class="situation badge-carte"><img src="https://domain.tld/assets/frontOffice/kneiss/template-assets/assets/dist/img/08ecd8a.png" alt=""></div>
+            </script>
+        </body>
+        </html>
+        ';
+
+        $expected = '<!DOCTYPE html><html lang=fr><head><title>Test</title> <body> A Body <script id=elements-image-1 type=text/html><div class="badge-carte place">Place du Village<br>250m - 2mn à pied</div> <div class="badge-carte telecabine">Télécabine du Chamois<br>250m - 2mn à pied</div><div class="badge-carte situation"><img alt="" src=https://domain.tld/assets/frontOffice/kneiss/template-assets/assets/dist/img/08ecd8a.png></div></script> <script id=elements-image-2 type=text/html><div class="badge-carte place">Place du Village<br>250m - 2mn à pied</div> <div class="badge-carte telecabine">Télécabine du Chamois<br>250m - 2mn à pied</div><div class="badge-carte situation"><img alt="" src=https://domain.tld/assets/frontOffice/kneiss/template-assets/assets/dist/img/08ecd8a.png></div></script><script class=foobar type=text/html><div class="badge-carte place">Place du Village<br>250m - 2mn à pied</div> <div class="badge-carte telecabine">Télécabine du Chamois<br>250m - 2mn à pied</div><div class="badge-carte situation"><img alt="" src=https://domain.tld/assets/frontOffice/kneiss/template-assets/assets/dist/img/08ecd8a.png></div></script><script class=foobar type=text/html><div class="badge-carte place">Place du Village<br>250m - 2mn à pied</div> <div class="badge-carte telecabine">Télécabine du Chamois<br>250m - 2mn à pied</div><div class="badge-carte situation"><img alt="" src=https://domain.tld/assets/frontOffice/kneiss/template-assets/assets/dist/img/08ecd8a.png></div></script>';
+
+        $htmlMin = new HtmlMin();
+
+        $html = \str_replace(["\r\n", "\r", "\n"], "\n", $html);
+        $expected = \str_replace(["\r\n", "\r", "\n"], "\n", $expected);
+
+        static::assertSame(\trim($expected), $htmlMin->minify($html));
+    }
+
     public function testMinifyBase()
     {
         // init
         $htmlMin = new HtmlMin();
         $htmlMin->doRemoveHttpPrefixFromAttributes()
-            ->setDomainsToRemoveHttpPrefixFromAttributes(['csszengarden.com']);
+                ->setDomainsToRemoveHttpPrefixFromAttributes(['csszengarden.com']);
 
         $html = \str_replace(["\r\n", "\r", "\n"], "\n", \file_get_contents(__DIR__ . '/fixtures/base1.html'));
-        $expected = \str_replace(["\r\n", "\r", "\n"], "\n", \file_get_contents(__DIR__ . '/fixtures/base1_result.html'));
+        $expected = \str_replace(
+            [
+                "\r\n",
+                "\r",
+                "\n",
+            ], "\n", \file_get_contents(__DIR__ . '/fixtures/base1_result.html')
+        );
 
         static::assertSame(\trim($expected), $htmlMin->minify($html));
 
         // ---
 
         $html = \str_replace(["\r\n", "\r", "\n"], "\n", \file_get_contents(__DIR__ . '/fixtures/base2.html'));
-        $expected = \str_replace(["\r\n", "\r", "\n"], "\n", \file_get_contents(__DIR__ . '/fixtures/base2_result.html'));
+        $expected = \str_replace(
+            [
+                "\r\n",
+                "\r",
+                "\n",
+            ], "\n", \file_get_contents(__DIR__ . '/fixtures/base2_result.html')
+        );
 
         static::assertSame(\trim($expected), $htmlMin->minify($html));
 
         // ---
 
         $html = \str_replace(["\r\n", "\r", "\n"], "\n", \file_get_contents(__DIR__ . '/fixtures/base3.html'));
-        $expected = \str_replace(["\r\n", "\r", "\n"], "\n", \file_get_contents(__DIR__ . '/fixtures/base3_result.html'));
+        $expected = \str_replace(
+            [
+                "\r\n",
+                "\r",
+                "\n",
+            ], "\n", \file_get_contents(__DIR__ . '/fixtures/base3_result.html')
+        );
 
         static::assertSame(\trim($expected), $htmlMin->minify($html));
     }
@@ -248,9 +314,9 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         $expected = '<dl><dt>foo <dd><span class=bar></span></dl> <a></a>';
 
         static::assertSame(
-        \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
-        \str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
-    );
+            \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
+            \str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
+        );
 
         // ---
 
@@ -265,9 +331,9 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         $expected = '<dl><dt>foo <dd><span class=bar>&nbsp;</span></dl> <a></a>';
 
         static::assertSame(
-        \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
-        \str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
-    );
+            \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
+            \str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
+        );
 
         // ---
 
@@ -284,9 +350,9 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         $expected = '<dl><dt>foo <dd><span class=bar></span> </dl> <a></a>';
 
         static::assertSame(
-        \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
-        \str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
-    );
+            \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
+            \str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
+        );
     }
 
     public function testSelfClosingTagHr()
@@ -299,9 +365,9 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         $expected = '<p class="bar foo"><hr class="bar foo"> or <hr class="bar foo"> or <hr> or <hr> or <hr> or <hr>';
 
         static::assertSame(
-        \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
-        \str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
-    );
+            \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
+            \str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
+        );
     }
 
     public function testDoNotAddSpacesViaDoRemoveWhitespaceAroundTags()
@@ -315,9 +381,9 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         $expected = '<span class=foo><span title=bar></span><span title=baz></span><span title=bat></span></span>';
 
         static::assertSame(
-        \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
-        \str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
-    );
+            \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
+            \str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
+        );
 
         // ---
 
@@ -329,9 +395,9 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         $expected = '<span class=title> 1. <a>Foo</a> </span>';
 
         static::assertSame(
-        \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
-        \str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
-    );
+            \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
+            \str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
+        );
 
         // ---
 
@@ -342,9 +408,9 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         $expected = '<span class=foo><span title=bar></span><span title=baz></span><span title=bat></span></span>';
 
         static::assertSame(
-        \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
-        \str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
-    );
+            \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
+            \str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
+        );
 
         // ---
 
@@ -356,9 +422,9 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         $expected = '<span class=title> 1. <a>Foo</a></span>';
 
         static::assertSame(
-        \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
-        \str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
-    );
+            \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
+            \str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
+        );
 
         // ---
 
@@ -370,9 +436,9 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         $expected = '<span>foo</span> <a href=bar>baz</a> <span>bat</span>';
 
         static::assertSame(
-        \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
-        \str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
-    );
+            \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
+            \str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
+        );
 
         // ---
 
@@ -381,9 +447,9 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         $expected = '<span>foo</span> <span>bar</span> <a>baz</a> <a>bat</a>';
 
         static::assertSame(
-        \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
-        \str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
-    );
+            \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
+            \str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
+        );
     }
 
     public function testMinifyCodeTag()
@@ -392,7 +458,13 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         $htmlMin = new HtmlMin();
 
         $html = \str_replace(["\r\n", "\r", "\n"], "\n", \file_get_contents(__DIR__ . '/fixtures/code.html'));
-        $expected = \str_replace(["\r\n", "\r", "\n"], "\n", \file_get_contents(__DIR__ . '/fixtures/code_result.html'));
+        $expected = \str_replace(
+            [
+                "\r\n",
+                "\r",
+                "\n",
+            ], "\n", \file_get_contents(__DIR__ . '/fixtures/code_result.html')
+        );
 
         static::assertSame(\trim($expected), $htmlMin->minify($html));
     }
@@ -402,18 +474,18 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         // init
         $htmlMin = new HtmlMin();
         $htmlMin->doRemoveHttpPrefixFromAttributes()
-            ->setDomainsToRemoveHttpPrefixFromAttributes(['henkel-lifetimes.de']);
+                ->setDomainsToRemoveHttpPrefixFromAttributes(['henkel-lifetimes.de']);
 
         $html = \str_replace(["\r\n", "\r", "\n"], "\n", \file_get_contents(__DIR__ . '/fixtures/hlt.html'));
         $expected = \str_replace(
-        [
-            "\r\n",
-            "\r",
+            [
+                "\r\n",
+                "\r",
+                "\n",
+            ],
             "\n",
-        ],
-        "\n",
-        \file_get_contents(__DIR__ . '/fixtures/hlt_result.html')
-    );
+            \file_get_contents(__DIR__ . '/fixtures/hlt_result.html')
+        );
 
         static::assertSame(\trim($expected), $htmlMin->minify($html, true));
     }
@@ -434,9 +506,9 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
       </p>  <br>  <ul> <li> <p class="foo">lall</p> </li></ul>';
 
         static::assertSame(
-        \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
-        \str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
-    );
+            \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
+            \str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
+        );
     }
 
     public function testVueJsExample()
@@ -500,21 +572,21 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         // init
         $htmlMin = new HtmlMin();
         $htmlMin->doOptimizeAttributes(false);                     // optimize html attributes
-    $htmlMin->doRemoveComments(false);                         // remove default HTML comments
-    $htmlMin->doRemoveDefaultAttributes(false);                // remove defaults
-    $htmlMin->doRemoveDeprecatedAnchorName(false);             // remove deprecated anchor-jump
-    $htmlMin->doRemoveDeprecatedScriptCharsetAttribute(false); // remove deprecated charset-attribute (the browser will use the charset from the HTTP-Header, anyway)
-    $htmlMin->doRemoveDeprecatedTypeFromScriptTag(false);      // remove deprecated script-mime-types
-    $htmlMin->doRemoveDeprecatedTypeFromStylesheetLink(false); // remove "type=text/css" for css links
-    $htmlMin->doRemoveEmptyAttributes(false);                  // remove some empty attributes
-    $htmlMin->doRemoveHttpPrefixFromAttributes(false);         // remove optional "http:"-prefix from attributes
-    $htmlMin->doRemoveValueFromEmptyInput(false);              // remove 'value=""' from empty <input>
-    $htmlMin->doRemoveWhitespaceAroundTags(false);             // remove whitespace around tags
-    $htmlMin->doSortCssClassNames(false);                      // sort css-class-names, for better gzip results
-    $htmlMin->doSortHtmlAttributes(false);                     // sort html-attributes, for better gzip results
-    $htmlMin->doSumUpWhitespace(false);                        // sum-up extra whitespace from the Dom
+        $htmlMin->doRemoveComments(false);                         // remove default HTML comments
+        $htmlMin->doRemoveDefaultAttributes(false);                // remove defaults
+        $htmlMin->doRemoveDeprecatedAnchorName(false);             // remove deprecated anchor-jump
+        $htmlMin->doRemoveDeprecatedScriptCharsetAttribute(false); // remove deprecated charset-attribute (the browser will use the charset from the HTTP-Header, anyway)
+        $htmlMin->doRemoveDeprecatedTypeFromScriptTag(false);      // remove deprecated script-mime-types
+        $htmlMin->doRemoveDeprecatedTypeFromStylesheetLink(false); // remove "type=text/css" for css links
+        $htmlMin->doRemoveEmptyAttributes(false);                  // remove some empty attributes
+        $htmlMin->doRemoveHttpPrefixFromAttributes(false);         // remove optional "http:"-prefix from attributes
+        $htmlMin->doRemoveValueFromEmptyInput(false);              // remove 'value=""' from empty <input>
+        $htmlMin->doRemoveWhitespaceAroundTags(false);             // remove whitespace around tags
+        $htmlMin->doSortCssClassNames(false);                      // sort css-class-names, for better gzip results
+        $htmlMin->doSortHtmlAttributes(false);                     // sort html-attributes, for better gzip results
+        $htmlMin->doSumUpWhitespace(false);                        // sum-up extra whitespace from the Dom
 
-    $html = '
+        $html = '
     <html>
     <head>     </head>
     <body>
@@ -530,9 +602,9 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
       </p> <br> <ul><li><p class=foo>lall </ul>';
 
         static::assertSame(
-        \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
-        \str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
-    );
+            \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
+            \str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
+        );
     }
 
     public function testDisappearingWhitespaceBetweenDlAndA()
@@ -558,21 +630,21 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         // init
         $htmlMin = new HtmlMin();
         $htmlMin->doOptimizeAttributes();                     // optimize html attributes
-    $htmlMin->doRemoveComments();                         // remove default HTML comments
-    $htmlMin->doRemoveDefaultAttributes();                // remove defaults
-    $htmlMin->doRemoveDeprecatedAnchorName();             // remove deprecated anchor-jump
-    $htmlMin->doRemoveDeprecatedScriptCharsetAttribute(); // remove deprecated charset-attribute (the browser will use the charset from the HTTP-Header, anyway)
-    $htmlMin->doRemoveDeprecatedTypeFromScriptTag();      // remove deprecated script-mime-types
-    $htmlMin->doRemoveDeprecatedTypeFromStylesheetLink(); // remove "type=text/css" for css links
-    $htmlMin->doRemoveEmptyAttributes();                  // remove some empty attributes
-    $htmlMin->doRemoveHttpPrefixFromAttributes();         // remove optional "http:"-prefix from attributes
-    $htmlMin->doRemoveValueFromEmptyInput();              // remove 'value=""' from empty <input>
-    $htmlMin->doRemoveWhitespaceAroundTags();             // remove whitespace around tags
-    $htmlMin->doSortCssClassNames();                      // sort css-class-names, for better gzip results
-    $htmlMin->doSortHtmlAttributes();                     // sort html-attributes, for better gzip results
-    $htmlMin->doSumUpWhitespace();                        // sum-up extra whitespace from the Dom
+        $htmlMin->doRemoveComments();                         // remove default HTML comments
+        $htmlMin->doRemoveDefaultAttributes();                // remove defaults
+        $htmlMin->doRemoveDeprecatedAnchorName();             // remove deprecated anchor-jump
+        $htmlMin->doRemoveDeprecatedScriptCharsetAttribute(); // remove deprecated charset-attribute (the browser will use the charset from the HTTP-Header, anyway)
+        $htmlMin->doRemoveDeprecatedTypeFromScriptTag();      // remove deprecated script-mime-types
+        $htmlMin->doRemoveDeprecatedTypeFromStylesheetLink(); // remove "type=text/css" for css links
+        $htmlMin->doRemoveEmptyAttributes();                  // remove some empty attributes
+        $htmlMin->doRemoveHttpPrefixFromAttributes();         // remove optional "http:"-prefix from attributes
+        $htmlMin->doRemoveValueFromEmptyInput();              // remove 'value=""' from empty <input>
+        $htmlMin->doRemoveWhitespaceAroundTags();             // remove whitespace around tags
+        $htmlMin->doSortCssClassNames();                      // sort css-class-names, for better gzip results
+        $htmlMin->doSortHtmlAttributes();                     // sort html-attributes, for better gzip results
+        $htmlMin->doSumUpWhitespace();                        // sum-up extra whitespace from the Dom
 
-    $html = '
+        $html = '
     <html>
     <head>     </head>
     <body>
@@ -653,7 +725,7 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         // init
         $htmlMin = new HtmlMin();
         $htmlMin->doRemoveOmittedHtmlTags(false)
-            ->doRemoveOmittedQuotes(false);
+                ->doRemoveOmittedQuotes(false);
 
         $html = '
     <html>
