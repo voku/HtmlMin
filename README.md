@@ -4,21 +4,23 @@
 [![Latest Stable Version](https://poser.pugx.org/voku/html-min/v/stable)](https://packagist.org/packages/voku/html-min) 
 [![Total Downloads](https://poser.pugx.org/voku/html-min/downloads)](https://packagist.org/packages/voku/html-min) 
 [![License](https://poser.pugx.org/voku/html-min/license)](https://packagist.org/packages/voku/html-min)
+[![Donate to this project using Paypal](https://img.shields.io/badge/paypal-donate-yellow.svg)](https://www.paypal.me/moelleken)
+[![Donate to this project using Patreon](https://img.shields.io/badge/patreon-donate-yellow.svg)](https://www.patreon.com/voku)
 
 # :clamp: HTML Compressor and Minifier for PHP
 
-## Description
+### Description
 
 HtmlMin is a fast and very easy to use PHP library that minifies given HTML5 source by removing extra whitespaces, comments and other unneeded characters without breaking the content structure. As a result pages become smaller in size and load faster. It will also prepare the HTML for better gzip results, by re-ranging (sort alphabetical) attributes and css-class-names.
 
 
-## Install via "composer require"
+### Install via "composer require"
 
 ```shell
 composer require voku/html-min
 ```
 
-## Quick Start
+### Quick Start
 
 ```php
 use voku\helper\HtmlMin;
@@ -47,7 +49,7 @@ echo $htmlMin->minify($html);
 // '<html><body><ul><li class=foo style="display: inline;"> à <li class=foo style="display: inline;"> á </ul>'
 ```
 
-## Options
+### Options
 
 ```php
 $htmlMin = new HtmlMin();
@@ -79,7 +81,7 @@ $htmlMin->doRemoveOmittedHtmlTags();                  // remove ommitted html ta
 
 PS: you can use the "nocompress"-tag to keep the html e.g.: "<nocompress>\n foobar \n</nocompress>"
 
-## Unit Test
+### Unit Test
 
 1) [Composer](https://getcomposer.org) is a prerequisite for running the tests.
 
@@ -93,3 +95,18 @@ composer install voku/html-min
 ./vendor/bin/phpunit
 ```
 
+### Support
+
+For support and donations please visit [Github](https://github.com/voku/HtmlMin/) | [Issues](https://github.com/voku/HtmlMin/issues) | [PayPal](https://paypal.me/moelleken) | [Patreon](https://www.patreon.com/voku).
+
+For status updates and release announcements please visit [Releases](https://github.com/voku/HtmlMin/releases) | [Twitter](https://twitter.com/suckup_de) | [Patreon](https://www.patreon.com/voku/posts).
+
+For professional support please contact [me](https://about.me/voku).
+
+### Thanks
+
+- Thanks to [GitHub](https://github.com) (Microsoft) for hosting the code and a good infrastructure including Issues-Managment, etc.
+- Thanks to [IntelliJ](https://www.jetbrains.com) as they make the best IDEs for PHP and they gave me an open source license for PhpStorm!
+- Thanks to [Travis CI](https://travis-ci.com/) for being the most awesome, easiest continous integration tool out there!
+- Thanks to [StyleCI](https://styleci.io/) for the simple but powerfull code style check.
+- Thanks to [PHPStan](https://github.com/phpstan/phpstan) && [Psalm](https://github.com/vimeo/psalm) for relly great Static analysis tools and for discover bugs in the code!
