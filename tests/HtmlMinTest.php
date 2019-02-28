@@ -511,6 +511,17 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         );
     }
 
+    public function testMultiCode()
+    {
+        $html = '<code>foo</code> and <code>bar</code>';
+
+        $expected = '<code>foo</code> and <code>bar</code>';
+
+        $htmlMin = new voku\helper\HtmlMin();
+
+        static::assertSame($expected, $htmlMin->minify($html));
+    }
+
     public function testVueJsExample()
     {
         // init
