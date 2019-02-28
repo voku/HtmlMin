@@ -543,6 +543,36 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         static::assertSame($expected, $htmlMin->minify($html));
     }
 
+    public function testImageScrset() {
+        $html = '
+        <html lang="fr">
+<head><title>Test</title></head>
+<body>
+<article class="row" itemscope itemtype="http://schema.org/Product">
+<a href="https://www.gmp-classic.com/echappement_311_echappement-cafe-racer-bobber-classique-etc_paire-de-silencieux-type-megaton-lg-440-mm-__gmp11114.html" itemprop="url" tabindex="-1" class="product-image overlay col-sm-3">
+    <img width="212" height="170"
+         itemprop="image"
+         srcset="https://cdn.gmp-classic.com/cache/images/product/5ee4535311159aaf1c4ae44fbebd83c2-p1000223_3800.jpg 768w,
+                     https://cdn.gmp-classic.com/cache/images/product/82e8bafbecab56f932720490e7fc2f85-p1000223_3800.jpg 992w,
+                     https://cdn.gmp-classic.com/cache/images/product/93c869f20df68d3e531f7e9c3e603e5e-p1000223_3800.jpg 1200w"
+         sizes="(max-width: 768x) 354px,
+                            (max-width: 992px) 305px,
+                            212px"
+         src="https://cdn.gmp-classic.com/cache/images/product/93c869f20df68d3e531f7e9c3e603e5e-p1000223_3800.jpg"
+         class="img-responsive"
+         alt="PAIRE DE SILENCIEUX  TYPE MEGATON Lg 440 mm">
+</a>
+</article>
+</body>
+</html>';
+
+        $expected = '<html lang=fr><head><title>Test</title> <body><article class=row itemscope itemtype=http://schema.org/Product><a class="col-sm-3 overlay product-image" href=https://www.gmp-classic.com/echappement_311_echappement-cafe-racer-bobber-classique-etc_paire-de-silencieux-type-megaton-lg-440-mm-__gmp11114.html itemprop=url tabindex=-1><img alt="PAIRE DE SILENCIEUX  TYPE MEGATON Lg 440 mm" class=img-responsive height=170 itemprop=image sizes="(max-width: 768x) 354px, (max-width: 992px) 305px, 212px" src=https://cdn.gmp-classic.com/cache/images/product/93c869f20df68d3e531f7e9c3e603e5e-p1000223_3800.jpg srcset="https://cdn.gmp-classic.com/cache/images/product/5ee4535311159aaf1c4ae44fbebd83c2-p1000223_3800.jpg 768w, https://cdn.gmp-classic.com/cache/images/product/82e8bafbecab56f932720490e7fc2f85-p1000223_3800.jpg 992w, https://cdn.gmp-classic.com/cache/images/product/93c869f20df68d3e531f7e9c3e603e5e-p1000223_3800.jpg 1200w" width=212> </a> </article>';
+
+        $htmlMin = new voku\helper\HtmlMin();
+
+        static::assertSame($expected, $htmlMin->minify($html));
+    }
+
     public function testVueJsExample()
     {
         // init

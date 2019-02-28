@@ -658,37 +658,50 @@ class HtmlMin
     private function domNodeAttributesToString(\DOMNode $node): string
     {
         // Remove quotes around attribute values, when allowed (<p class="foo"> → <p class=foo>)
-        $attrstr = '';
+        $attr_str = '';
         if ($node->attributes !== null) {
             foreach ($node->attributes as $attribute) {
-                $attrstr .= $attribute->name;
+                $attr_str .= $attribute->name;
 
                 if (
                     $this->doOptimizeAttributes
                     &&
                     isset(self::$booleanAttributes[$attribute->name])
                 ) {
-                    $attrstr .= ' ';
+                    $attr_str .= ' ';
 
                     continue;
                 }
 
-                $attrstr .= '=';
+                $attr_str .= '=';
 
                 // http://www.whatwg.org/specs/web-apps/current-work/multipage/syntax.html#attributes-0
-                $omitquotes = $this->doRemoveOmittedQuotes
+                $omit_quotes = $this->doRemoveOmittedQuotes
                               &&
                               $attribute->value !== ''
                               &&
                               \preg_match('/["\'=<>` \t\r\n\f]+/', $attribute->value) === 0;
 
-                $attr_val = $attribute->value;
-                $attrstr .= ($omitquotes ? '' : '"') . $attr_val . ($omitquotes ? '' : '"');
-                $attrstr .= ' ';
+                if (
+                    $this->doOptimizeAttributes
+                    &&
+                    (
+                        $attribute->name === 'srcset'
+                        ||
+                        $attribute->name === 'sizes'
+                    )
+                ) {
+                    $attr_val = \preg_replace(self::$regExSpace, ' ', $attribute->value);
+                } else {
+                    $attr_val = $attribute->value;
+                }
+
+                $attr_str .= ($omit_quotes ? '' : '"') . $attr_val . ($omit_quotes ? '' : '"');
+                $attr_str .= ' ';
             }
         }
 
-        return \trim($attrstr);
+        return \trim($attr_str);
     }
 
     /**
