@@ -1,3 +1,9 @@
+# Changelog 3.1.4
+
+- fix issue from get parent node
+- code-style: remove "true" && "false" if return type is bool
+
+
 # Changelog 3.1.1 / 3.1.2 / 3.1.3
 
 - use new version of "voku/simple_html_dom"
