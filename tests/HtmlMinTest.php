@@ -522,6 +522,27 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         static::assertSame($expected, $htmlMin->minify($html));
     }
 
+    public function testStrongTagsSpecial()
+    {
+        $html = '
+        <!DOCTYPE html>
+<html lang="fr">
+<head><title>Test</title></head>
+<body>
+<p>Visitez notre boutique <strong>eBay</strong> : <a href="https://foo.bar/lall" target="_blank">https://foo.bar/lall</a></p>
+<p><strong>ID Vintage</strong>, spécialiste de la vente de pièces et accessoires pour motos tout- terrain classiques :<a href="https://foo.bar/123" target="_blank">https://foo.bar/123</a></p>
+<p>Magazine <strong>Café-Racer</strong> : <a href="https://foo.bar/321" target="_blank">https://foo.bar/321</a></p>
+<p><strong>Julien Lecointe</strong> : <a href="https://foo.bar/123456" target="_blank">https://foo.bar/123456</a></p>
+</body>
+</html>';
+
+        $expected = '<!DOCTYPE html><html lang=fr><head><title>Test</title> <body><p>Visitez notre boutique <strong>eBay</strong> : <a href=https://foo.bar/lall target=_blank>https://foo.bar/lall</a> <p><strong>ID Vintage</strong>, spécialiste de la vente de pièces et accessoires pour motos tout- terrain classiques :<a href=https://foo.bar/123 target=_blank>https://foo.bar/123</a><p>Magazine <strong>Café-Racer</strong> : <a href=https://foo.bar/321 target=_blank>https://foo.bar/321</a><p><strong>Julien Lecointe</strong> : <a href=https://foo.bar/123456 target=_blank>https://foo.bar/123456</a>';
+
+        $htmlMin = new voku\helper\HtmlMin();
+
+        static::assertSame($expected, $htmlMin->minify($html));
+    }
+
     public function testVueJsExample()
     {
         // init
