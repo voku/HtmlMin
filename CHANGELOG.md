@@ -1,6 +1,12 @@
+# Changelog 3.1.5
+
+- fix: keep newlines in e.g. "<pre>"-tags
+- fix: remove newlines from "srcset" and "sizes" attribute
+
+
 # Changelog 3.1.4
 
-- fix issue from get parent node
+- fix: get parent node
 - code-style: remove "true" && "false" if return type is bool
 
 
