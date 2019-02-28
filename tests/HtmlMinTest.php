@@ -573,6 +573,25 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         static::assertSame($expected, $htmlMin->minify($html));
     }
 
+    public function testKeepWhitespaceInPreTags()
+    {
+        $html = '<pre>
+foo
+        bar
+                zoo
+</pre>';
+
+        $expected = '<pre>
+foo
+        bar
+                zoo
+</pre>';
+
+        $htmlMin = new voku\helper\HtmlMin();
+
+        static::assertSame($expected, $htmlMin->minify($html));
+    }
+
     public function testVueJsExample()
     {
         // init

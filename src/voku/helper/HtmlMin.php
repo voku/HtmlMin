@@ -677,10 +677,10 @@ class HtmlMin
 
                 // http://www.whatwg.org/specs/web-apps/current-work/multipage/syntax.html#attributes-0
                 $omit_quotes = $this->doRemoveOmittedQuotes
-                              &&
-                              $attribute->value !== ''
-                              &&
-                              \preg_match('/["\'=<>` \t\r\n\f]+/', $attribute->value) === 0;
+                               &&
+                               $attribute->value !== ''
+                               &&
+                               \preg_match('/["\'=<>` \t\r\n\f]+/', $attribute->value) === 0;
 
                 if (
                     $this->doOptimizeAttributes
@@ -1354,6 +1354,7 @@ class HtmlMin
         if (isset(self::$trimWhitespaceFromTags[$element->tag])) {
             $node = $element->getNode();
 
+            /** @var \DOMNode[] $candidates */
             $candidates = [];
             if ($node->childNodes->length > 0) {
                 $candidates[] = $node->firstChild;
@@ -1367,7 +1368,7 @@ class HtmlMin
                     continue;
                 }
 
-                if ($candidate->nodeType === 3) {
+                if ($candidate->nodeType === \XML_TEXT_NODE) {
                     $candidate->nodeValue = \preg_replace(self::$regExSpace, ' ', $candidate->nodeValue);
                 }
             }
@@ -1414,11 +1415,11 @@ class HtmlMin
      */
     private function sumUpWhitespace(HtmlDomParser $dom): HtmlDomParser
     {
-        $textnodes = $dom->find('//text()');
-        foreach ($textnodes as $textnodeWrapper) {
-            /* @var $textnode \DOMNode */
-            $textnode = $textnodeWrapper->getNode();
-            $xp = $textnode->getNodePath();
+        $text_nodes = $dom->find('//text()');
+        foreach ($text_nodes as $text_node_wrapper) {
+            /* @var $text_node \DOMNode */
+            $text_node = $text_node_wrapper->getNode();
+            $xp = $text_node->getNodePath();
 
             $doSkip = false;
             foreach (self::$skipTagsForRemoveWhitespace as $pattern) {
@@ -1432,7 +1433,7 @@ class HtmlMin
                 continue;
             }
 
-            $textnode->nodeValue = \preg_replace(self::$regExSpace, ' ', $textnode->nodeValue);
+            $text_node->nodeValue = \preg_replace(self::$regExSpace, ' ', $text_node->nodeValue);
         }
 
         $dom->getDocument()->normalizeDocument();
