@@ -592,6 +592,37 @@ foo
         static::assertSame($expected, $htmlMin->minify($html));
     }
 
+    public function testTagsInsideJs()
+    {
+        $htmlWithJs = '<p>Text 1</p><script>$(".second-column-mobile-inner").wrapAll("<div class=\'collapse\' id=\'second-column\'></div>");</script><p>Text 2</p>';
+
+        $htmlMin = new voku\helper\HtmlMin();
+        $htmlMin->useKeepBrokenHtml(true);
+
+        $expected = '<p>Text 1</p><script>$(".second-column-mobile-inner").wrapAll("<div class=\'collapse\' id=\'second-column\'><\/div>");</script><p>Text 2';
+
+        static::assertSame($expected, $htmlMin->minify($htmlWithJs));
+    }
+
+    public function testHtmlInsideJavaScriptTemplates()
+    {
+        $html = '
+<script type=text/html>
+    <p>Foo</p>
+
+    <div class="alert alert-success">
+        Bar
+    </div>
+</script>
+';
+
+        $htmlMin = new voku\helper\HtmlMin();
+
+        $expected = '<script type=text/html><p>Foo <div class="alert alert-success"> Bar </div></script>';
+
+        static::assertSame($expected, $htmlMin->minify($html));
+    }
+
     public function testVueJsExample()
     {
         // init

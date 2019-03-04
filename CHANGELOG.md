@@ -1,3 +1,8 @@
+# Changelog 3.1.6
+
+- fix: keep HTML closing tags in <script> tags 
+
+
 # Changelog 3.1.5
 
 - fix: keep newlines in e.g. "<pre>"-tags
