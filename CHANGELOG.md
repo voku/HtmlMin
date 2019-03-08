@@ -5,7 +5,7 @@
 
 # Changelog 3.1.5
 
-- fix: keep newlines in e.g. "<pre>"-tags
+- fix: keep newlines in e.g. "pre"-tags
 - fix: remove newlines from "srcset" and "sizes" attribute
 
 
