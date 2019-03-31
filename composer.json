@@ -19,7 +19,7 @@
   ],
   "require": {
     "php": ">=7.0.0",
-    "voku/simple_html_dom": "^4.3.3",
+    "voku/simple_html_dom": "^4.4.0",
     "ext-dom": "*"
   },
   "require-dev": {
