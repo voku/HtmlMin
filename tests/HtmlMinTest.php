@@ -370,6 +370,26 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         );
     }
 
+    public function testDataJsonInHtml()
+    {
+        // init
+        $htmlMin = new HtmlMin();
+
+        $html = '
+        <html>
+          <body>
+            <div data-json=\'{"key":"value"}\'></div>
+          </body>
+        </html>';
+
+        $expected = '<html><body><div data-json=\'{"key":"value"}\'></div>';
+
+        static::assertSame(
+            \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
+            \str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
+        );
+    }
+
     public function testDoNotAddSpacesViaDoRemoveWhitespaceAroundTags()
     {
         // init

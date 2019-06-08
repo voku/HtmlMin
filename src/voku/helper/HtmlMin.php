@@ -682,6 +682,15 @@ class HtmlMin
                                &&
                                \preg_match('/["\'=<>` \t\r\n\f]+/', $attribute->value) === 0;
 
+                $quoteTmp = '"';
+                if (
+                    !$omit_quotes
+                    &&
+                    strpos($attribute->value, '"') !== false
+                ) {
+                    $quoteTmp = "'";
+                }
+
                 if (
                     $this->doOptimizeAttributes
                     &&
@@ -696,7 +705,7 @@ class HtmlMin
                     $attr_val = $attribute->value;
                 }
 
-                $attr_str .= ($omit_quotes ? '' : '"') . $attr_val . ($omit_quotes ? '' : '"');
+                $attr_str .= ($omit_quotes ? '' : $quoteTmp) . $attr_val . ($omit_quotes ? '' : $quoteTmp);
                 $attr_str .= ' ';
             }
         }
