@@ -1,3 +1,8 @@
+# Changelog 3.1.7
+
+- fix: "'" && '"' in attributes
+
+
 # Changelog 3.1.6
 
 - fix: keep HTML closing tags in <script> tags 
