@@ -370,6 +370,21 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         );
     }
 
+    public function testHtmlInAttribute()
+    {
+        // init
+        $htmlMin = new HtmlMin();
+
+        $html = '<button type="button" id="rotate_crop" class="btn btn-primary" data-loading-text="<i class=\'fa fa-spinner fa-spin\'></i> Rotando..." style="">Rotar</button>';
+
+        $expected = '<button class="btn btn-primary" data-loading-text="<i class=\'fa fa-spinner fa-spin\'></i> Rotando..." id=rotate_crop type=button>Rotar</button>';
+
+        static::assertSame(
+            \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
+            \str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
+        );
+    }
+
     public function testDataJsonInHtml()
     {
         // init
