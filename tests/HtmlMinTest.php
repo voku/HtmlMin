@@ -734,7 +734,7 @@ foo
         $htmlMin->doSumUpWhitespace(false);                        // sum-up extra whitespace from the Dom
 
         $html = '
-    <html>
+    <html ⚡>
     <head>     </head>
     <body>
       <p id="text" class="foo">
@@ -744,7 +744,7 @@ foo
     </html>
     ';
 
-        $expected = '<html><head> <body><p id=text class=foo>
+        $expected = '<html ⚡><head> <body><p id=text class=foo>
         foo
       </p> <br> <ul><li><p class=foo>lall </ul>';
 

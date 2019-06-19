@@ -680,6 +680,10 @@ class HtmlMin
                                &&
                                $attribute->value !== ''
                                &&
+                               \strpos($attribute->name, '____SIMPLE_HTML_DOM__VOKU') !== 0
+                               &&
+                               \strpos($attribute->name, ' ') === false
+                               &&
                                \preg_match('/["\'=<>` \t\r\n\f]+/', $attribute->value) === 0;
 
                 $quoteTmp = '"';
