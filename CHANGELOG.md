@@ -1,3 +1,8 @@
+# Changelog 3.1.8
+
+- fix / optimize: "doRemoveOmittedQuotes" -> support for "<html ⚡>" via SimpleHtmlDom
+
+
 # Changelog 3.1.7
 
 - fix: "'" && '"' in attributes
