@@ -29,21 +29,20 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
     /**
      * Receive dom elements before the minification.
      *
-     * @param SimpleHtmlDom $element
-     * @param HtmlMin       $htmlMin
+     * @param SimpleHtmlDomInterface $element
+     * @param HtmlMinInterface                $htmlMin
      */
-    public function domElementBeforeMinification(SimpleHtmlDom $element, HtmlMin $htmlMin)
+    public function domElementBeforeMinification(SimpleHtmlDomInterface $element, HtmlMinInterface $htmlMin)
     {
-
     }
 
     /**
      * Receive dom elements after the minification.
      *
-     * @param SimpleHtmlDom $element
-     * @param HtmlMin       $htmlMin
+     * @param SimpleHtmlDomInterface $element
+     * @param HtmlMinInterface                $htmlMin
      */
-    public function domElementAfterMinification(SimpleHtmlDom $element, HtmlMin $htmlMin)
+    public function domElementAfterMinification(SimpleHtmlDomInterface $element, HtmlMinInterface $htmlMin)
     {
         $attributes = $element->getAllAttributes();
         if ($attributes === null) {
@@ -58,6 +57,8 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
             // -------------------------------------------------------------------------
 
             if ($htmlMin->isDoRemoveHttpPrefixFromAttributes()) {
+                /** @noinspection InArrayCanBeUsedInspection */
+                /** @noinspection NestedPositiveIfStatementsInspection */
                 if (
                     ($attrName === 'href' || $attrName === 'src' || $attrName === 'action')
                     &&
@@ -102,7 +103,6 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
         }
     }
 
-
     /**
      * Check if the attribute can be removed.
      *
@@ -110,11 +110,11 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
      * @param string  $attrName
      * @param string  $attrValue
      * @param array   $allAttr
-     * @param HtmlMin $htmlMin
+     * @param HtmlMinInterface $htmlMin
      *
      * @return bool
      */
-    private function removeAttributeHelper($tag, $attrName, $attrValue, $allAttr, HtmlMin $htmlMin): bool
+    private function removeAttributeHelper($tag, $attrName, $attrValue, $allAttr, HtmlMinInterface $htmlMin): bool
     {
         // remove defaults
         if ($htmlMin->isDoRemoveDefaultAttributes()) {
@@ -137,6 +137,7 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
 
         // remove deprecated charset-attribute (the browser will use the charset from the HTTP-Header, anyway)
         if ($htmlMin->isDoRemoveDeprecatedScriptCharsetAttribute()) {
+            /** @noinspection NestedPositiveIfStatementsInspection */
             if ($tag === 'script' && $attrName === 'charset' && !isset($allAttr['src'])) {
                 return true;
             }
@@ -144,6 +145,7 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
 
         // remove deprecated anchor-jump
         if ($htmlMin->isDoRemoveDeprecatedAnchorName()) {
+            /** @noinspection NestedPositiveIfStatementsInspection */
             if ($tag === 'a' && $attrName === 'name' && isset($allAttr['id']) && $allAttr['id'] === $attrValue) {
                 return true;
             }
@@ -151,6 +153,7 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
 
         // remove "type=text/css" for css links
         if ($htmlMin->isDoRemoveDeprecatedTypeFromStylesheetLink()) {
+            /** @noinspection NestedPositiveIfStatementsInspection */
             if ($tag === 'link' && $attrName === 'type' && $attrValue === 'text/css' && isset($allAttr['rel']) && $allAttr['rel'] === 'stylesheet') {
                 return true;
             }
@@ -158,6 +161,7 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
 
         // remove deprecated script-mime-types
         if ($htmlMin->isDoRemoveDeprecatedTypeFromScriptTag()) {
+            /** @noinspection NestedPositiveIfStatementsInspection */
             if ($tag === 'script' && $attrName === 'type' && isset($allAttr['src'], self::$executableScriptsMimeTypes[$attrValue])) {
                 return true;
             }
@@ -165,6 +169,7 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
 
         // remove 'value=""' from <input type="text">
         if ($htmlMin->isDoRemoveValueFromEmptyInput()) {
+            /** @noinspection NestedPositiveIfStatementsInspection */
             if ($tag === 'input' && $attrName === 'value' && $attrValue === '' && isset($allAttr['type']) && $allAttr['type'] === 'text') {
                 return true;
             }
@@ -172,6 +177,7 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
 
         // remove some empty attributes
         if ($htmlMin->isDoRemoveEmptyAttributes()) {
+            /** @noinspection NestedPositiveIfStatementsInspection */
             if (\trim($attrValue) === '' && \preg_match('/^(?:class|id|style|title|lang|dir|on(?:focus|blur|change|click|dblclick|mouse(?:down|up|over|move|out)|key(?:press|down|up)))$/', $attrName)) {
                 return true;
             }
@@ -179,7 +185,6 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
 
         return false;
     }
-
 
     /**
      * @param $attrName

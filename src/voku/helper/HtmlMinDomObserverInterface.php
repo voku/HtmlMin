@@ -9,16 +9,16 @@ interface HtmlMinDomObserverInterface
     /**
      * Receive dom elements before the minification.
      *
-     * @param SimpleHtmlDom $element
-     * @param HtmlMin       $htmlMin
+     * @param SimpleHtmlDomInterface $element
+     * @param HtmlMinInterface                $htmlMin
      */
-    public function domElementBeforeMinification(SimpleHtmlDom $element, HtmlMin $htmlMin);
+    public function domElementBeforeMinification(SimpleHtmlDomInterface $element, HtmlMinInterface $htmlMin);
 
     /**
      * Receive dom elements after the minification.
      *
-     * @param SimpleHtmlDom $element
-     * @param HtmlMin       $htmlMin
+     * @param SimpleHtmlDomInterface $element
+     * @param HtmlMinInterface                $htmlMin
      */
-    public function domElementAfterMinification(SimpleHtmlDom $element, HtmlMin $htmlMin);
+    public function domElementAfterMinification(SimpleHtmlDomInterface $element, HtmlMinInterface $htmlMin);
 }

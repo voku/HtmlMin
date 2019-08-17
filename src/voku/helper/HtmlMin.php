@@ -18,7 +18,7 @@ namespace voku\helper;
  * Ideas:
  * - http://perfectionkills.com/optimizing-html/
  */
-class HtmlMin
+class HtmlMin implements HtmlMinInterface
 {
     /**
      * @var string
@@ -244,7 +244,7 @@ class HtmlMin
     private $withDocType = false;
 
     /**
-     * @var \SplObjectStorage|HtmlMinDomObserverInterface[]
+     * @var HtmlMinDomObserverInterface[]|\SplObjectStorage
      */
     private $domLoopObservers;
 
@@ -269,18 +269,23 @@ class HtmlMin
     }
 
     /**
-     * @param $domElement SimpleHtmlDom
+     * @param $domElement SimpleHtmlDomInterface
      *
      * @return void
      */
-    private function notifyObserversAboutDomElementBeforeMinification(SimpleHtmlDom $domElement)
+    private function notifyObserversAboutDomElementBeforeMinification(SimpleHtmlDomInterface $domElement)
     {
         foreach ($this->domLoopObservers as $observer) {
             $observer->domElementBeforeMinification($domElement, $this);
         }
     }
 
-    private function notifyObserversAboutDomElementAfterMinification(SimpleHtmlDom $domElement)
+    /**
+     * @param SimpleHtmlDomInterface $domElement
+     *
+     * @return void
+     */
+    private function notifyObserversAboutDomElementAfterMinification(SimpleHtmlDomInterface $domElement)
     {
         foreach ($this->domLoopObservers as $observer) {
             $observer->domElementAfterMinification($domElement, $this);
@@ -690,7 +695,7 @@ class HtmlMin
                 if (
                     !$omit_quotes
                     &&
-                    strpos($attribute->value, '"') !== false
+                    \strpos($attribute->value, '"') !== false
                 ) {
                     $quoteTmp = "'";
                 }
@@ -741,7 +746,11 @@ class HtmlMin
         // A <dd> element's end tag may be omitted if the dd element is immediately followed by another dd element or a dt element, or if there is no more content in the parent element.
         // An <rp> element's end tag may be omitted if the rp element is immediately followed by an rt or rp element, or if there is no more content in the parent element.
 
-        // TODO:
+        /**
+         * @noinspection TodoComment
+         *
+         * TODO: Not Implemented
+         */
         //
         // <html> may be omitted if first thing inside is not comment
         // <head> may be omitted if first thing inside is an element
@@ -988,6 +997,7 @@ class HtmlMin
                 }
 
                 if (!$this->doRemoveWhitespaceAroundTags) {
+                    /** @noinspection NestedPositiveIfStatementsInspection */
                     if (
                         $child->nextSibling instanceof \DOMText
                         &&
@@ -1293,7 +1303,7 @@ class HtmlMin
                 }
             }
 
-            $this->protectedChildNodes[$counter] = $element->text();
+            $this->protectedChildNodes[$counter] = $element->innerhtml;
             $element->getNode()->nodeValue = '<' . $this->protectedChildNodesHelper . ' data-' . $this->protectedChildNodesHelper . '="' . $counter . '"></' . $this->protectedChildNodesHelper . '>';
 
             ++$counter;
@@ -1358,11 +1368,11 @@ class HtmlMin
     /**
      * Trim tags in the dom.
      *
-     * @param SimpleHtmlDom $element
+     * @param SimpleHtmlDomInterface $element
      *
      * @return void
      */
-    private function removeWhitespaceAroundTags(SimpleHtmlDom $element)
+    private function removeWhitespaceAroundTags(SimpleHtmlDomInterface $element)
     {
         if (isset(self::$trimWhitespaceFromTags[$element->tag])) {
             $node = $element->getNode();

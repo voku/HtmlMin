@@ -265,7 +265,9 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
                 "\r\n",
                 "\r",
                 "\n",
-            ], "\n", \file_get_contents(__DIR__ . '/fixtures/base1_result.html')
+            ],
+            "\n",
+            \file_get_contents(__DIR__ . '/fixtures/base1_result.html')
         );
 
         static::assertSame(\trim($expected), $htmlMin->minify($html));
@@ -278,7 +280,9 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
                 "\r\n",
                 "\r",
                 "\n",
-            ], "\n", \file_get_contents(__DIR__ . '/fixtures/base2_result.html')
+            ],
+            "\n",
+            \file_get_contents(__DIR__ . '/fixtures/base2_result.html')
         );
 
         static::assertSame(\trim($expected), $htmlMin->minify($html));
@@ -291,7 +295,9 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
                 "\r\n",
                 "\r",
                 "\n",
-            ], "\n", \file_get_contents(__DIR__ . '/fixtures/base3_result.html')
+            ],
+            "\n",
+            \file_get_contents(__DIR__ . '/fixtures/base3_result.html')
         );
 
         static::assertSame(\trim($expected), $htmlMin->minify($html));
@@ -498,7 +504,9 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
                 "\r\n",
                 "\r",
                 "\n",
-            ], "\n", \file_get_contents(__DIR__ . '/fixtures/code_result.html')
+            ],
+            "\n",
+            \file_get_contents(__DIR__ . '/fixtures/code_result.html')
         );
 
         static::assertSame(\trim($expected), $htmlMin->minify($html));
@@ -578,7 +586,8 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         static::assertSame($expected, $htmlMin->minify($html));
     }
 
-    public function testImageScrset() {
+    public function testImageScrset()
+    {
         $html = '
         <html lang="fr">
 <head><title>Test</title></head>
@@ -846,6 +855,26 @@ foo
     ';
 
         $expected = '<html><head> <body><p class=foo id=text>foo</p> <br><ul><li><p class=foo>lall </ul><ul><li>1 <li>2<li>3</ul><table><tr><th>1 <th>2 <tr><td>foo <td><dl><dt>Coffee <dd>Black hot drink<dt>Milk<dd>White cold drink</dl> </table>';
+
+        static::assertSame($expected, $htmlMin->minify($html));
+    }
+
+    public function testHtmlAndCssEdgeCase()
+    {
+        // init
+        $htmlMin = new HtmlMin();
+
+        $html = '<style><!--
+h1 {
+    color: red;
+}
+--></style>';
+
+        $expected = '<style><!--
+h1 {
+    color: red;
+}
+--></style>';
 
         static::assertSame($expected, $htmlMin->minify($html));
     }
