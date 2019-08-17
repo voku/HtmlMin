@@ -799,6 +799,7 @@ foo
         $htmlMin->doSortCssClassNames();                      // sort css-class-names, for better gzip results
         $htmlMin->doSortHtmlAttributes();                     // sort html-attributes, for better gzip results
         $htmlMin->doSumUpWhitespace();                        // sum-up extra whitespace from the Dom
+        $htmlMin->doRemoveSpacesBetweenTags();                // remove spaces between tags
 
         $html = '
     <html>
@@ -811,7 +812,7 @@ foo
     </html>
     ';
 
-        $expected = '<html><head> <body><p class=foo id=text> foo </p> <br> <ul><li><p class="foo foo2">lall</ul>';
+        $expected = '<html><head><body><p class=foo id=text> foo </p><br><ul><li><p class="foo foo2">lall</ul>';
 
         static::assertSame($expected, $htmlMin->minify($html));
     }
