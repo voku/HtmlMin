@@ -1153,9 +1153,9 @@ class HtmlMin implements HtmlMinInterface
 
         // Remove extra white-space(s) between HTML attribute(s)
         $html = (string) \preg_replace_callback(
-            '#<([^/\s<>!]+)(?:\s+([^<>]*?)\s*|\s*)(/?)>#',
+            '#<([^/\s<>!]+)(?:\s+([^<>]*?)\s*|\s*)(/?)>#u',
             static function ($matches) {
-                return '<' . $matches[1] . \preg_replace('#([^\s=]+)(\=([\'"]?)(.*?)\3)?(\s+|$)#s', ' $1$2', $matches[2]) . $matches[3] . '>';
+                return '<' . $matches[1] . \preg_replace('#([^\s=]+)(\=([\'"]?)(.*?)\3)?(\s+|$)#su', ' $1$2', $matches[2]) . $matches[3] . '>';
             },
             $html
         );
@@ -1324,9 +1324,9 @@ class HtmlMin implements HtmlMinInterface
 
         foreach ($dom->find('script, style') as $element) {
 
-            // skip external links
             if ($element->tag === 'script' || $element->tag === 'style') {
                 $attributes = $element->getAllAttributes();
+                // skip external links
                 if (isset($attributes['src'])) {
                     continue;
                 }
