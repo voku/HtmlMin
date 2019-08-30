@@ -1,3 +1,10 @@
+# Changelog 4.0.1
+
+- optimize unicode support
+- fix: remove unnecessary </source> closing tag #40
+- fix: bad minify text/x-custom-template #38
+
+
 # Changelog 4.0.0
 
 - use interfaces in the "HtmlMinDom"-Observer
