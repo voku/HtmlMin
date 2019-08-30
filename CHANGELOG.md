@@ -18,7 +18,7 @@
 
 # Changelog 3.1.8
 
-- fix / optimize: "doRemoveOmittedQuotes" -> support for "<html ⚡>" via SimpleHtmlDom
+- fix / optimize: "doRemoveOmittedQuotes" -> support for "\<html ⚡>" via SimpleHtmlDom
 
 
 # Changelog 3.1.7
@@ -28,7 +28,7 @@
 
 # Changelog 3.1.6
 
-- fix: keep HTML closing tags in <script> tags 
+- fix: keep HTML closing tags in \<script> tags 
 
 
 # Changelog 3.1.5
@@ -56,7 +56,7 @@
 
 # Changelog 3.0.6 (2018-12-01)
 
-- implement the "<nocompress>"-tag + tests
+- implement the "\<nocompress>"-tag + tests
 
 
 # Changelog 3.0.5 (2018-10-17)
@@ -118,4 +118,4 @@
 - drop support for PHP < 7.0
 - use "strict_types"
 - doRemoveOmittedQuotes() -> remove quotes e.g. class="lall" => class=lall
-- doRemoveOmittedHtmlTags() -> remove ommitted html tags e.g. <p>lall</p> => <p>lall 
+- doRemoveOmittedHtmlTags() -> remove ommitted html tags e.g. \<p>lall\</p> => \<p>lall 
