@@ -781,6 +781,24 @@ foo
         static::assertSame($expected, $htmlMin->minify($html));
     }
 
+    public function testSourceNotNeeded()
+    {
+        // init
+        $htmlMin = new HtmlMin();
+
+        $html = "\r\n
+        \t<audio>\r\n
+        \t<source src=\"horse.ogg\" type=\"audio/ogg\">\r\n
+        \t<source src=\"horse.mp3\" type=\"audio/mpeg\">\r\n
+        \tYour browser does not support the audio element.\r\n
+        \t</audio>
+        ";
+
+        $expected = '<audio><source src=horse.ogg type=audio/ogg><source src=horse.mp3 type=audio/mpeg> Your browser does not support the audio element. </audio>';
+
+        static::assertSame($expected, $htmlMin->minify($html));
+    }
+
     public function testOptionsTrue()
     {
         // init

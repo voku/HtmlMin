@@ -730,6 +730,13 @@ class HtmlMin implements HtmlMinInterface
     private function domNodeClosingTagOptional(\DOMNode $node): bool
     {
         $tag_name = $node->nodeName;
+
+        if ($node->parentNode) {
+            $parent_tag_name = $node->parentNode->nodeName;
+        } else {
+            $parent_tag_name = null;
+        }
+
         $nextSibling = $this->getNextSiblingOfTypeDOMElement($node);
 
         // https://html.spec.whatwg.org/multipage/syntax.html#syntax-tag-omission
@@ -785,9 +792,7 @@ class HtmlMin implements HtmlMinInterface
                )
                ||
                (
-                   (
-                       $tag_name === 'rp'
-                   )
+                   $tag_name === 'rp'
                    &&
                    (
                        $nextSibling === null
@@ -814,6 +819,30 @@ class HtmlMin implements HtmlMinInterface
                            $nextSibling instanceof \DOMElement
                            &&
                            $nextSibling->tagName === 'tr'
+                       )
+                   )
+               )
+               ||
+               (
+                   $tag_name === 'source'
+                   &&
+                   (
+                       $parent_tag_name === 'audio'
+                       ||
+                       $parent_tag_name === 'video'
+                       ||
+                       $parent_tag_name === 'picture'
+                       ||
+                       $parent_tag_name === 'source'
+                   )
+                   &&
+                   (
+                       $nextSibling === null
+                       ||
+                       (
+                           $nextSibling instanceof \DOMElement
+                           &&
+                           $nextSibling->tagName === 'source'
                        )
                    )
                )
