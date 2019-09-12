@@ -112,8 +112,8 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
                 '<html><body><h1>hoi</h1>',
             ],
             [
-                'a     <html>',
-                'a     <html>',
+                '<html> a',
+                '<html> a',
             ],
         ];
     }
@@ -1090,7 +1090,7 @@ h1 {
     public function testSpaceBeforeLt($input, $expected)
     {
         $actual = $this->compressor->minify($input);
-        static::assertSame($expected, $actual);
+        static::assertSame($expected, $actual, 'tested: ' . $input);
     }
 
     /**
