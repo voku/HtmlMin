@@ -1,3 +1,8 @@
+# Changelog 4.0.2
+
+- use new version of "voku/simple_html_dom"
+
+
 # Changelog 4.0.1
 
 - optimize unicode support
