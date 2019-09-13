@@ -756,7 +756,7 @@ foo
 
         $expected = '<html ⚡><head> <body><p id=text class=foo>
         foo
-        <br> <ul><li><p class=foo>lall </ul>';
+       <br> <ul><li><p class=foo>lall </ul>';
 
         static::assertSame(
             \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
