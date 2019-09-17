@@ -1,3 +1,8 @@
+# Changelog 4.0.3
+
+- fix removing of "\</p>"-tags
+
+
 # Changelog 4.0.2
 
 - use new version of "voku/simple_html_dom"
