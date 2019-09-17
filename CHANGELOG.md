@@ -1,3 +1,8 @@
+# Changelog 4.0.4
+
+- fix removing of dom elements
+
+
 # Changelog 4.0.3
 
 - fix removing of "\</p>"-tags
