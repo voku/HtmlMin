@@ -9,5 +9,6 @@
 /.gitignore export-ignore
 /.travis.yml export-ignore
 /circle.yml export-ignore
+/phpstan.neon export-ignore
 /phpcs.php_cs export-ignore
 /phpunit.xml export-ignore
