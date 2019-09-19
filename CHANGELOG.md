@@ -1,11 +1,16 @@
+# Changelog 4.0.5
+
+- fix: protect "nocompress"-tags before notifying the Observer
+
+
 # Changelog 4.0.4
 
-- fix removing of dom elements
+- fix: removing of dom elements
 
 
 # Changelog 4.0.3
 
-- fix removing of "\</p>"-tags
+- fix: removing of "\</p>"-tags
 
 
 # Changelog 4.0.2
