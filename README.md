@@ -7,7 +7,7 @@
 [![Donate to this project using Paypal](https://img.shields.io/badge/paypal-donate-yellow.svg)](https://www.paypal.me/moelleken)
 [![Donate to this project using Patreon](https://img.shields.io/badge/patreon-donate-yellow.svg)](https://www.patreon.com/voku)
 
-# :clamp: HTML Compressor and Minifier for PHP
+# :clamp: HtmlMin: HTML Compressor and Minifier for PHP
 
 ### Description
 
