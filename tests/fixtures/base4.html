@@ -1,0 +1,359 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8" />
+    <title>Titel3 « Syntax Highlighter « bar lall</title>
+    <link rel="stylesheet" href="/src/css/main.css?t=1572135326">
+    <link rel="apple-touch-icon" sizes="180x180" href="/src/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/src/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/src/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/src/favicon/site.webmanifest">
+    <link rel="mask-icon" href="/src/favicon/safari-pinned-tab.svg" color="#1b7340">
+    <link rel="shortcut icon" href="/src/favicon/favicon.ico">
+    <meta name="msapplication-TileColor" content="#1b7340">
+    <meta name="msapplication-config" content="/src/favicon/browserconfig.xml">
+    <meta name="theme-color" content="#1b7340">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="author" content="bar lall">
+    <meta name="robots" content="index, follow">
+<meta name="description" content="Speichere hier Code &amp; Text mit Syntax-Highlighter (Prism.js), der alle geängigsten Code-/Porgrammier-Sprachen unterstützt und gebe diesen weiter.">
+    <link rel="stylesheet" href="https://cdn.barlall.com/assets/prism/css/prism.min.css?t=1569673429"><link rel="stylesheet" href="/src/css/bootstrap-select.css?t=1572135324">
+</head>
+<body id="body">
+
+<header class="navbar fixed-top navbar-expand-sm navbar-dark bg-gradient-primary">
+    <div class="navbar-brand">
+        <img src="/src/images/avatar/avatar-50px.jpg" alt="Logo" class="rounded-circle">
+    </div>
+    <button class="navbar-toggler collapsed mr-auto" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" id="top-toggle">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+    </button>
+    <ul class="navbar-nav navbar-forced-expand ml-auto d-sm-none">
+        <li class="nav-item">
+            <a class="nav-link" href="https://barlall.com/Syntax-Highlighter/7TcD2eVL" hreflang="en">
+                <span class="flag-icon flag-icon-gb"></span>
+                <span class="sr-only">English Site</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://www.facebook.com/foooOfficial" target="_blank" rel="noopener">
+                <i class="fab fa-facebook-f"></i>
+                <span class="sr-only">Facebook Profil</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://www.instagram.com/fooo_official" target="_blank" rel="noopener">
+                <i class="fab fa-instagram"></i>
+                <span class="sr-only">Instagram Profil</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://github.com/foooOfficial" target="_blank" rel="noopener">
+                <i class="fab fa-github"></i>
+                <span class="sr-only">Github Profil</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://www.xing.com/profile/bar_lall/" target="_blank" rel="noopener">
+                <i class="fab fa-xing"></i>
+                <span class="sr-only">Xing Profil</span>
+            </a>
+        </li>
+    </ul>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto pr-2">
+            <li class="nav-item">
+                <a class="nav-link text-right" href="/">
+                    <i class="fas fa-home fa-fw"></i>
+                    Startseite
+                </a>
+            </li>
+            <li class="nav-item dropdown active" id="top-menu-dropdown-li">
+                <a class="nav-link text-right dropdown-toggle dropdown-toggle-alt" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-tools fa-fw"></i>
+                    Tools
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown" id="top-menu-dropdown-div">
+                    <a class="dropdown-item text-right text-sm-left" href="/Message-Crypter">Nachrichten Crypter</a><a class="dropdown-item text-right text-sm-left" href="/RAID-Calculator">RAID-Rechner</a><a class="dropdown-item text-right text-sm-left" href="/Password-Generator">Passwort Generator</a><a class="dropdown-item text-right text-sm-left" href="/PX-REM-Calculator">PX-REM Rechner</a><a class="dropdown-item text-right text-sm-left" href="/Password-Hash-Generator">Passwort Hash Generator</a><a class="dropdown-item text-right text-sm-left" href="/Base64-decode-encode">Base64 decode/encode</a><a class="dropdown-item text-right text-sm-left" href="/Placeholder">Placeholder Images</a><a class="dropdown-item text-right text-sm-left" href="/SEO-Friendly-URLs">SEO-freundliche URLs erstellen</a><a class="dropdown-item text-right text-sm-left" href="/Minify">CSS & JS Minify</a><a class="dropdown-item text-right text-sm-left" href="/Text-Diff-Compare">Texte vergleichen</a><a class="dropdown-item text-right text-sm-left" href="/List-sorting">Liste sortieren</a><a class="dropdown-item text-right text-sm-left" href="/IP-Subnet-Calculator">IP Subnet Rechner</a><a class="dropdown-item text-right text-sm-left active" href="/Syntax-Highlighter">Syntax Highlighter</a>
+                </div>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-right" href="/Contact">
+                    <i class="fas fa-address-card fa-fw"></i>
+                    Kontakt
+                </a>
+            </li>
+
+        </ul>
+    </div>
+    <ul class="navbar-nav navbar-forced-expand ml-auto d-none d-sm-inline-flex">
+        <li class="nav-item">
+            <a class="nav-link" href="https://barlall.com/Syntax-Highlighter/7TcD2eVL" hreflang="en">
+                <span class="flag-icon flag-icon-gb"></span>
+                <span class="sr-only">English Site</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://www.facebook.com/foooOfficial" target="_blank">
+                <i class="fab fa-facebook-f"></i>
+                <span class="sr-only">Facebook Link</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://www.instagram.com/fooo_official" target="_blank">
+                <i class="fab fa-instagram"></i>
+                <span class="sr-only">Instagram Link</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://github.com/foooOfficial" target="_blank">
+                <i class="fab fa-github"></i>
+                <span class="sr-only">Github Link</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="https://www.xing.com/profile/bar_lall/" target="_blank">
+                <i class="fab fa-xing"></i>
+                <span class="sr-only">Xing Link</span>
+            </a>
+        </li>
+    </ul>
+</header>
+
+<!--
+  ~ Copyright (c) 2019 bar lall <contact@barlall.com>
+  -->
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <h1>Syntax Highlighter</h1>
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+    <h2 class="h3 text-center">Titel3</h2>
+</li>
+            <li class="list-group-item">
+                <div class="form-row">
+                    <div class="form-group col-lg-8">
+                        <label for="copy_to_clipboard">Link zu dieser Seite</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control form-control focus-click" id="copy_to_clipboard" aria-describedby="copy_to_clipboard_" value="http://lhw.barlall.de/Syntax-Highlighter/7TcD2eVL" readonly>
+                            <div class="input-group-append cursor-pointer" title="In die Zwischenablage kopieren" onclick="CopyToClipboard('#copy_to_clipboard')" id="copy_to_clipboard_">
+                                <span class="input-group-text copy-to-clipboard">
+                                    <i class="fas fa-copy fa-fw"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group col-lg-4">
+                        <form action="/Syntax-Highlighter/7TcD2eVL" method="post">
+                            <label for="code_lang">Sprache</label>
+                            <select name="code_lang" id="code_lang" class="select_picker" onchange="this.form.submit()">
+                                <option value="asm6502">6502 Assembly</option><option value="abap">ABAP</option><option value="apl">APL</option><option value="arff">ARFF</option><option value="aspnet">ASP.NET (C#)</option><option value="actionscript">ActionScript</option><option value="ada">Ada</option><option value="apacheconf">Apache Configuration</option><option value="applescript">AppleScript</option><option value="arduino">Arduino</option><option value="autohotkey">AutoHotkey</option><option value="autoit">AutoIt</option><option value="basic">BASIC</option><option value="bash">Bash</option><option value="batch">Batch</option><option value="bison">Bison</option><option value="brainfuck">Brainfuck</option><option value="bro">Bro</option><option value="c">C</option><option value="csharp">C#</option><option value="cpp">C++</option><option value="clike">C-like</option><option value="css">CSS</option><option value="clojure">Clojure</option><option value="coffeescript">CoffeeScript</option><option value="csp">Content-Security-Policy</option><option value="crystal">Crystal</option><option value="D">D</option><option value="dart">Dart</option><option value="diff">Diff</option><option value="django">Django/Jinja2</option><option value="docker">Docker</option><option value="erb">ERB</option><option value="eiffel">Eiffel</option><option value="elixir">Elixir</option><option value="elm">Elm</option><option value="erlang">Erlang</option><option value="fsharp">F#</option><option value="flow">Flow</option><option value="fortran">Fortran</option><option value="gedcom">GEDCOM</option><option value="glsl">GLSL</option><option value="gherkin">Gherkin</option><option value="git">Git</option><option value="go">Go</option><option value="graphql">GraphQL</option><option value="groovy">Groovy</option><option value="http">HTTP</option><option value="hpkp">HTTP Public-Key-Pins</option><option value="hsts">HTTP Strict-Transport-Security</option><option value="haml">Haml</option><option value="handlebars">Handlebars</option><option value="haskell">Haskell</option><option value="haxe">Haxe</option><option value="html">HTML</option><option value="ichigojam">IchigoJam</option><option value="icon">Icon</option><option value="inform7">Inform7</option><option value="io">Io</option><option value="j">J</option><option value="json">JSON</option><option value="java">Java</option><option value="javascript">Javascript</option><option value="jolie">Jolie</option><option value="julia">Julia</option><option value="keyman">Keyman</option><option value="kotlin">Kotlin</option><option value="lolcode">LOLCODE</option><option value="latex">LaTeX</option><option value="less">Less</option><option value="liquid">Liquid</option><option value="lisp">Lisp</option><option value="livescript">LiveScript</option><option value="lua">Lua</option><option value="matlab">MATLAB</option><option value="mel">MEL</option><option value="makefile">Makefile</option><option value="markdown">Markdown</option><option value="markup">Markup</option><option value="markup-templating">Markup templating</option><option value="mizar">Mizar</option><option value="monkey">Monkey</option><option value="n4js">N4JS</option><option value="nasm">NASM</option><option value="nim">Nim</option><option value="nix">Nix</option><option value="nsis">Nsis</option><option value="ocaml">OCaml</option><option value="objectivec">Objective-C</option><option value="opencl">OpenCL</option><option value="oz">Oz</option><option value="parigp">PARI/GP</option><option value="php" selected>PHP</option><option value="plsql">PL/SQL</option><option value="parser">Parser</option><option value="pascal">Pascal</option><option value="perl">Perl</option><option value="powershell">PowerShell</option><option value="processing">Processing</option><option value="prolog">Prolog</option><option value="protobuf">Protocol Buffers</option><option value="pug">Pug</option><option value="puppet">Puppet</option><option value="pure">Pure</option><option value="python">Python</option><option value="q">Q (kdb+ database)</option><option value="qore">Qore</option><option value="r">R</option><option value="jsx">React JSX</option><option value="tsx">React TSX</option><option value="reason">Reason</option><option value="renpy">Ren'py</option><option value="rip">Rip</option><option value="roboconf">Roboconf</option><option value="ruby">Ruby</option><option value="rust">Rust</option><option value="sas">SAS</option><option value="sql">SQL</option><option value="sass">Sass (Sass)</option><option value="scss">Sass (Scss)</option><option value="scala">Scala</option><option value="scheme">Scheme</option><option value="smalltalk">Smalltalk</option><option value="smarty">Smarty</option><option value="soy">Soy (Closure Template)</option><option value="stylus">Stylus</option><option value="swift">Swift</option><option value="tap">TAP</option><option value="tcl">Tcl</option><option value="textile">Textile</option><option value="tt2">Template Toolkit 2</option><option value="twig">Twig</option><option value="typescript">TypeScript</option><option value="vbnet">VB.Net</option><option value="vhdl">VHDL</option><option value="velocity">Velocity</option><option value="verilog">Verilog</option><option value="visual-basic">Visual Basic</option><option value="wasm">WebAssembly</option><option value="wiki">Wiki markup</option><option value="xquery">XQuery</option><option value="xeora">Xeora</option><option value="xojo">Xojo (REALbasic)</option><option value="yaml">YAML</option><option value="ini">ini</option><option value="nginx">nginx</option><option value="rest">reST</option><option value="vim">vim</option><option value="xml">XML</option>
+                            </select>
+                        <input type="hidden" name="_token" value="1mcQUnIEPU83fPRHEToGprBOKpO7Lhkge0sHdPg97nVkpr3FNJV6pxER5PmqwHv29bgKJavDH+wZQbkCiGNUHzXNXOzCTSwmBKTEC/FwHCY="></form>
+                    </div>
+                </div>
+            </li>
+            <li class="list-group-item">
+                <pre class="line-numbers mb-0"><code class="language-php" id="code">&lt;?php if(!defined('barlall') &amp;&amp; barlall!='Public') die('Access denied');
+
+if(!isset($DB)) {
+    $DB = new db();
+}
+$URL = Bootstrap(1);
+$code_unique = md5($URL);
+include CfgPath.'prism.php';
+
+$TPL-&gt;SetSiteTitle($LANG['Syntax_Highlighter']);
+$TPL-&gt;SetMetaDescription($LANG['Syntax_Highlighter_Desc']);
+$TPL-&gt;Load('bootstrap-select');
+$TPL-&gt;Load('select_picker');
+
+if($URL) {
+    $DB-&gt;query('SELECT code_id,code_url,code_title,code_lang,code_text,code_notes,code_author,code_password,code_editpassword,created,updated FROM '.TBL_syntaxhigh.' WHERE code_unique=:code_unique AND deleted IS NULL LIMIT 1');
+    $DB-&gt;str(':code_unique',$code_unique);
+    if($code = $DB-&gt;fetch_row()) {
+        if($code = $DB-&gt;fetch_row()) {
+            if($code['code_password'] &amp;&amp; !isset($_SESSION[$code['code_url']]) &amp;&amp; $_SESSION[$code['code_url']]!='access') {
+                $show_title=$lang_row=$show_notes='';
+                if($code['code_title']) {
+                    $TPL-&gt;set('code_title',$code['code_title']);
+                    $show_title = $TPL-&gt;writeTpl('Syntax-Highlighter/show/title');
+                    $TPL-&gt;SetSiteTitle($code['code_title'].' « '.$LANG['Syntax_Highlighter']);
+                }
+
+                $code_lang = isset($_POST['code_lang']) &amp;&amp; $_POST['code_lang']!='' ? $_POST['code_lang']:$code['code_lang'];
+
+                foreach ($_PRISM_LANGUAGES as $prism_language =&gt; $prism_class) {
+                    $selected = $prism_class==$code_lang ? ' selected':'';
+                    $lang_row.= '&lt;option value=&quot;'.$prism_class.'&quot;'.$selected.'&gt;'.HTMLChars($prism_language).'&lt;/option&gt;';
+                }
+
+                if($code['code_notes']) {
+                    $TPL-&gt;set('notes',HTMLChars($code['code_notes']));
+                    $show_notes = $TPL-&gt;writeTpl('Syntax-Highlighter/show/notes');
+                }
+
+                $TPL-&gt;set('url',$_SERVER['SERVER_NAME'].REQUEST_URI);
+                $TPL-&gt;set('code_lang',HTMLChars($code_lang));
+                $TPL-&gt;set('code_text',HTMLChars($code['code_text']));
+                $TPL-&gt;set('lang_row',$lang_row);
+                $TPL-&gt;set('show_title',$show_title);
+                $TPL-&gt;set('show_notes',$show_notes);
+
+                $TPL-&gt;LoadPrism();
+                $BODY.= $TPL-&gt;writeTpl('Syntax-Highlighter/show/show');
+            }
+        }
+    } else {
+        $TPL-&gt;NotFound();
+    }
+}
+
+if(!$BODY) {
+    $lang = isset($_POST['lang']) &amp;&amp; $_POST['lang']!='' ? $_POST['lang']:array_keys($_PRISM_LANGUAGES)[0];
+    $code = isset($_POST['code']) &amp;&amp; $_POST['code']!='' ? $_POST['code']:'';
+
+    $lang_row='';
+    foreach ($_PRISM_LANGUAGES as $prism_language =&gt; $prism_class) {
+        $selected = $prism_language==$lang ? ' selected':'';
+
+        $lang_row.= '&lt;option value=&quot;'.$prism_class.'&quot;'.$selected.'&gt;'.HTMLChars($prism_language).'&lt;/option&gt;';
+    }
+
+    function CreateURL()  {
+        $USER 	= new user();
+        $DB     = new db();
+        $string = $USER-&gt;RandStr(8,true);
+        $md5    = $string ? md5($string):'';
+        $DB-&gt;query('SELECT code_id FROM '.TBL_syntaxhigh.' WHERE code_unique=:code_unique LIMIT 1');
+        $DB-&gt;str('code_unique',$md5);
+        if($q = $DB-&gt;fetch_row()) {
+            $string = CreateURL();
+        }
+        if(!$string) {
+            $string = CreateURL();
+        }
+        return $string;
+    }
+
+    if(isset($_POST['store']) &amp;&amp; $lang &amp;&amp; $code) {
+        $code_url    = CreateURL();
+        $code_unique = md5($code_url);
+
+        $title             = isset($_POST['title']) &amp;&amp; $_POST['title']!='' ? $_POST['title']:'';
+        $notes             = isset($_POST['notes']) &amp;&amp; $_POST['notes']!='' ? $_POST['notes']:'';
+        $code_password     = isset($_POST['show-password']) &amp;&amp; $_POST['show-password']!='' ? password_hash($_POST['show-password'], PASSWORD_DEFAULT):'';
+        $code_editpassword = isset($_POST['edit-password']) &amp;&amp; $_POST['edit-password']!='' ? password_hash($_POST['edit-password'], PASSWORD_DEFAULT):'';
+        $DB-&gt;query('INSERT '.TBL_syntaxhigh.'
+            (code_unique,code_url,code_title,code_lang,code_text,code_notes,code_author,code_password,code_editpassword,created)
+                VALUES
+            (:code_unique,:code_url,:code_title,:code_lang,:code_text,:code_notes,:code_author,:code_password,:code_editpassword,:created)');
+        $DB-&gt;str('code_unique',$code_unique);
+        $DB-&gt;str('code_url',$code_url);
+        $DB-&gt;str('code_title',$title);
+        $DB-&gt;str('code_lang',$lang);
+        $DB-&gt;str('code_text',$code);
+        $DB-&gt;str('code_notes',$notes);
+        $DB-&gt;str('code_author',$USER-&gt;id());
+        $DB-&gt;str('code_password',$code_password);
+        $DB-&gt;str('code_editpassword',$code_editpassword);
+        $DB-&gt;str('created',$DB-&gt;datetime());
+        $DB-&gt;execute();
+
+        $USER-&gt;redirect('/'.$SITE.'/'.$code_url);
+    }
+
+    $TPL-&gt;set('title',isset($_POST['title']) &amp;&amp; $_POST['title']!='' ? HTMLChars($_POST['title']):'');
+    $TPL-&gt;set('code',isset($_POST['code']) &amp;&amp; $_POST['code']!='' ? HTMLChars($_POST['code']):'');
+    $TPL-&gt;set('notes',isset($_POST['notes']) &amp;&amp; $_POST['notes']!='' ? HTMLChars($_POST['notes']):'');
+    $TPL-&gt;set('lang_row',$lang_row);
+
+    $BODY.= $TPL-&gt;writeTpl('Syntax-Highlighter/Syntax-Highlighter');
+}</code></pre>
+            </li>
+            <li class="list-group-item">
+    Bla Bla2332
+</li>
+        </ul>
+        <div class="card-footer">
+
+    <form action="/Syntax-Highlighter/7TcD2eVL" method="post" class="form-inline text-center justify-content-center d-sm-block-" id="edit_code_form">
+        <label for="7TcD2eVL" class="d-none"></label>
+        <input type="text" name="7TcD2eVL" id="7TcD2eVL" value="7TcD2eVL" class="d-none">
+        <div class="form-group">
+            <label for="edit_code" class="">Code bearbeiten</label><br class="d-sm-none">
+            <input type="password" class="form-control form-control-sm mx-sm-3" id="edit_code" name="edit_code" placeholder="Password">
+        </div>
+        <div class="d-sm-none d-block"></div>
+        <button type="submit" class="btn btn-sm btn-primary" style="min-width: 7.105rem">Code bearbeiten</button>
+    <input type="hidden" name="_token" value="1mcQUnIEPU83fPRHEToGprBOKpO7Lhkge0sHdPg97nVkpr3FNJV6pxER5PmqwHv29bgKJavDH+wZQbkCiGNUHzXNXOzCTSwmBKTEC/FwHCY="></form>
+</div>
+    </div>
+</div>
+
+<footer class="navbar sticky-bottom navbar-expand navbar-dark bg-gradient-primary pt-0">
+    <div class="collapse navbar-collapse flex-column">
+        <ul class="navbar-nav mx-auto flex-row">
+            <li class="nav-item">
+                <a class="nav-link text-center no-external-icon pb-0" href="/Imprint">Impressum</a>
+            </li>
+            <li class="nav-item dropup">
+                <a class="nav-link dropdown-toggle" href="#" id="BottomDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Mehr
+                </a>
+                <div class="dropdown-menu dropdown-menu-bottom text-center" aria-labelledby="BottomDropdown">
+                    <div class="d-none"><a class="dropdown-item" href="/login" rel="nofollow">
+                        <i class="fas fa-running fa-fw"></i>
+                        Login
+                    </a></div>
+                    <a class="dropdown-item" href="/CDN">
+                        <i class="fas fa-cloud fa-fw"></i>
+                        CDN
+                    </a>
+                    <a class="dropdown-item" href="/Sitemap">
+                        <i class="fas fa-sitemap fa-fw"></i>
+                        Sitemap
+                    </a>
+                    <a class="dropdown-item" href="/Image-Upload">
+                        <i class="fas fa-images fa-fw"></i>
+                        Bild Upload
+                    </a>
+                    <a class="dropdown-item" href="/Privacy">
+                        <i class="fas fa-user-secret fa-fw"></i>
+                        Datenschutzerklärung
+                    </a>
+                    <a class="dropdown-item" href="/Terms-of-use">
+                        <i class="fas fa-file-contract fa-fw"></i>
+                        Nutzungsbedingungen
+                    </a>
+                    <a class="dropdown-item" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=V35PNWK54DUES&amp;source=url" target="_blank">
+                        <i class="fas fa-coffee fa-fw"></i>
+                        Ein Kaffee ausgeben
+                    </a>
+                </div>
+            </li>
+        </ul>
+        <div class="flex-row small text-center" style="color: rgba(255,255,255,.75);">
+            <i class="far fa-copyright"></i>
+            2019 bar lall
+        </div>
+        <a href="https://validator.w3.org/check?uri=https%3A%2F%2Flhw.barlall.de%2FSyntax-Highlighter%2F7TcD2eVL" class="no-icon" target="_blank" hreflang="en" rel="nofollow">
+            <img src="/src/images/w3c/w3c-validated-w100.png" alt="Valid HTML 5!">
+        </a>
+    </div>
+</footer>
+<script src="/src/js/main.js?t=1572135192"></script>
+<script>
+
+    const _token = "Lf0IG0Bz1M8XLKpJ/DfqRitDLM9BKrSpFNS3Z9ywgXgc9CQSUYqHnJYJbBTRFBNQPP1ochnveC4taKSCuUKRJXNV29RALIQwLDWICni0I6E=";
+
+</script>
+<script src="https://cdn.barlall.com/assets/prism/js/prism.min.js?t=1569673429"></script><script src="/src/js/sites/Syntax-Highlighter.js?t=1572135194"></script><script src="/src/js/bootstrap-select.js?t=1572135190"></script><script src="/src/js/select_picker.js?t=1572135192"></script>
+</body>
+</html>

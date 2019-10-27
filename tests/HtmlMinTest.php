@@ -259,7 +259,15 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         $htmlMin->doRemoveHttpPrefixFromAttributes()
                 ->setDomainsToRemoveHttpPrefixFromAttributes(['csszengarden.com']);
 
-        $html = \str_replace(["\r\n", "\r", "\n"], "\n", \file_get_contents(__DIR__ . '/fixtures/base1.html'));
+        $html = \str_replace(
+            [
+                "\r\n",
+                "\r",
+                "\n",
+            ],
+            "\n",
+            \file_get_contents(__DIR__ . '/fixtures/base1.html')
+        );
         $expected = \str_replace(
             [
                 "\r\n",
@@ -274,7 +282,15 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
 
         // ---
 
-        $html = \str_replace(["\r\n", "\r", "\n"], "\n", \file_get_contents(__DIR__ . '/fixtures/base2.html'));
+        $html = \str_replace(
+            [
+                "\r\n",
+                "\r",
+                "\n",
+            ],
+            "\n",
+            \file_get_contents(__DIR__ . '/fixtures/base2.html')
+        );
         $expected = \str_replace(
             [
                 "\r\n",
@@ -289,7 +305,15 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
 
         // ---
 
-        $html = \str_replace(["\r\n", "\r", "\n"], "\n", \file_get_contents(__DIR__ . '/fixtures/base3.html'));
+        $html = \str_replace(
+            [
+                "\r\n",
+                "\r",
+                "\n",
+            ],
+            "\n",
+            \file_get_contents(__DIR__ . '/fixtures/base3.html')
+        );
         $expected = \str_replace(
             [
                 "\r\n",
@@ -301,6 +325,29 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         );
 
         static::assertSame(\trim($expected), $htmlMin->minify($html));
+
+        // ---
+
+        $html = \str_replace(
+            [
+                "\r\n",
+                "\r",
+                "\n",
+            ],
+            "\n",
+            \file_get_contents(__DIR__ . '/fixtures/base4.html')
+        );
+        $expected = \str_replace(
+            [
+                "\r\n",
+                "\r",
+                "\n",
+            ],
+            "\n",
+            \file_get_contents(__DIR__ . '/fixtures/base4_result.html')
+        );
+
+        static::assertSame($expected, $htmlMin->minify($html));
     }
 
     public function testRemoveWhitespaceAroundTags()
@@ -552,6 +599,18 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
             \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
             \str_replace(["\r\n", "\r", "\n"], "\n", $htmlMin->minify($html))
         );
+    }
+
+    public function testCodeAndSpecialEncoding()
+    {
+        $html = '<pre class="line-numbers mb-0"><code class="language-php" id="code">&lt;?php if(!defined(\'NormanHuth\') &amp;&amp; NormanHuth!=\'Public\') die(\'Access denied\');' . "\r\n" . '</code></pre>';
+
+        $expected = '<pre class="line-numbers mb-0"><code class="language-php" id="code">&lt;?php if(!defined(\'NormanHuth\') &amp;&amp; NormanHuth!=\'Public\') die(\'Access denied\');
+</code></pre>';
+
+        $htmlMin = new voku\helper\HtmlMin();
+
+        static::assertSame($expected, $htmlMin->minify($html));
     }
 
     public function testMultiCode()

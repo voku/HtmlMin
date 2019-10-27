@@ -98,7 +98,7 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
             \ksort($attrs);
             foreach ($attrs as $attrName => $attrValue) {
                 $attrValue = HtmlDomParser::replaceToPreserveHtmlEntities($attrValue);
-                $element->setAttribute((string)$attrName, $attrValue, true);
+                $element->setAttribute((string) $attrName, $attrValue, true);
             }
         }
     }

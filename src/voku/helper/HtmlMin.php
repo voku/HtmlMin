@@ -1055,11 +1055,11 @@ class HtmlMin implements HtmlMinInterface
 
     /**
      * @param string $html
-     * @param bool   $decodeUtf8Specials <p>Use this only in special cases, e.g. for PHP 5.3</p>
+     * @param bool   $multiDecodeNewHtmlEntity
      *
      * @return string
      */
-    public function minify($html, $decodeUtf8Specials = false): string
+    public function minify($html, $multiDecodeNewHtmlEntity = false): string
     {
         $html = (string) $html;
         if (!isset($html[0])) {
@@ -1083,7 +1083,7 @@ class HtmlMin implements HtmlMinInterface
         // -------------------------------------------------------------------------
 
         if ($this->doOptimizeViaHtmlDomParser) {
-            $html = $this->minifyHtmlDom($html, $decodeUtf8Specials);
+            $html = $this->minifyHtmlDom($html, $multiDecodeNewHtmlEntity);
         }
 
         // -------------------------------------------------------------------------
@@ -1091,7 +1091,7 @@ class HtmlMin implements HtmlMinInterface
         // -------------------------------------------------------------------------
 
         // Remove extra white-space(s) between HTML attribute(s)
-        if (strpos($html, ' ') !== false) {
+        if (\strpos($html, ' ') !== false) {
             $html = (string) \preg_replace_callback(
                 '#<([^/\s<>!]+)(?:\s+([^<>]*?)\s*|\s*)(/?)>#',
                 static function ($matches) {
@@ -1103,7 +1103,7 @@ class HtmlMin implements HtmlMinInterface
 
         if ($this->doRemoveSpacesBetweenTags) {
             /** @noinspection NestedPositiveIfStatementsInspection */
-            if (strpos($html, ' ') !== false) {
+            if (\strpos($html, ' ') !== false) {
                 // Remove spaces that are between > and <
                 $html = (string) \preg_replace('#(>)\s(<)#', '>$2', $html);
             }
@@ -1113,7 +1113,7 @@ class HtmlMin implements HtmlMinInterface
         // Restore protected HTML-code.
         // -------------------------------------------------------------------------
 
-        if (strpos($html, $this->protectedChildNodesHelper) !== false) {
+        if (\strpos($html, $this->protectedChildNodesHelper) !== false) {
             $html = (string) \preg_replace_callback(
                 '/<(?<element>' . $this->protectedChildNodesHelper . ')(?<attributes> [^>]*)?>(?<value>.*?)<\/' . $this->protectedChildNodesHelper . '>/',
                 [$this, 'restoreProtectedHtml'],
@@ -1214,14 +1214,14 @@ class HtmlMin implements HtmlMinInterface
      */
     private function isConditionalComment($comment): bool
     {
-        if (strpos($comment, '[if ') !== false) {
+        if (\strpos($comment, '[if ') !== false) {
             /** @noinspection RegExpRedundantEscape */
             if (\preg_match('/^\[if [^\]]+\]/', $comment)) {
                 return true;
             }
         }
 
-        if (strpos($comment, '[endif]') !== false) {
+        if (\strpos($comment, '[endif]') !== false) {
             /** @noinspection RegExpRedundantEscape */
             if (\preg_match('/\[endif\]$/', $comment)) {
                 return true;
@@ -1233,11 +1233,11 @@ class HtmlMin implements HtmlMinInterface
 
     /**
      * @param string $html
-     * @param bool $decodeUtf8Specials
+     * @param bool   $multiDecodeNewHtmlEntity
      *
      * @return string
      */
-    private function minifyHtmlDom($html, $decodeUtf8Specials): string
+    private function minifyHtmlDom($html, $multiDecodeNewHtmlEntity): string
     {
         // init dom
         $dom = new HtmlDomParser();
@@ -1312,7 +1312,7 @@ class HtmlMin implements HtmlMinInterface
 
         return $dom->fixHtmlOutput(
             $this->domNodeToString($dom->getDocument()),
-            $decodeUtf8Specials
+            $multiDecodeNewHtmlEntity
         );
     }
 

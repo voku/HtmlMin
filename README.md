@@ -25,8 +25,6 @@ composer require voku/html-min
 ```php
 use voku\helper\HtmlMin;
 
-require_once 'composer/autoload.php';
-
 $html = "
 <html>
   \r\n\t
@@ -52,6 +50,8 @@ echo $htmlMin->minify($html);
 ### Options
 
 ```php
+use voku\helper\HtmlMin;
+
 $htmlMin = new HtmlMin();
 
 /* 
