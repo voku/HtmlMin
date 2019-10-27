@@ -1,3 +1,9 @@
+# Changelog 4.0.6
+
+- fix: fix regex for self-closing tags
+- optimize performance via "strpos" before regex
+
+
 # Changelog 4.0.5
 
 - fix: protect "nocompress"-tags before notifying the Observer
