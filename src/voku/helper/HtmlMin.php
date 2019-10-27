@@ -1071,12 +1071,6 @@ class HtmlMin implements HtmlMinInterface
             return '';
         }
 
-        // init
-        static $CACHE_SELF_CLOSING_TAGS = null;
-        if ($CACHE_SELF_CLOSING_TAGS === null) {
-            $CACHE_SELF_CLOSING_TAGS = \implode('|', self::$selfClosingTags);
-        }
-
         // reset
         $this->protectedChildNodes = [];
 
@@ -1100,7 +1094,7 @@ class HtmlMin implements HtmlMinInterface
         $html = (string) \preg_replace_callback(
             '#<([^/\s<>!]+)(?:\s+([^<>]*?)\s*|\s*)(/?)>#u',
             static function ($matches) {
-                return '<' . $matches[1] . \preg_replace('#([^\s=]+)(\=([\'"]?)(.*?)\3)?(\s+|$)#su', ' $1$2', $matches[2]) . $matches[3] . '>';
+                return '<' . $matches[1] . \preg_replace('#([^\s=]+)(=([\'"]?)(.*?)\3)?(\s+|$)#su', ' $1$2', $matches[2]) . $matches[3] . '>';
             },
             $html
         );
@@ -1164,14 +1158,14 @@ class HtmlMin implements HtmlMinInterface
             $replacement[] = '<' . $selfClosingTag . '>';
             $replace[] = '<' . $selfClosingTag . ' />';
             $replacement[] = '<' . $selfClosingTag . '>';
+            $replace[] = '></' . $selfClosingTag . '>';
+            $replacement[] = '>';
         }
         $html = \str_replace(
             $replace,
             $replacement,
             $html
         );
-
-        $html = (string) \preg_replace('#<\b(' . $CACHE_SELF_CLOSING_TAGS . ')([^>]*+)><\/\b\1>#', '<\\1\\2>', $html);
 
         // ------------------------------------
         // check if compression worked
@@ -1213,10 +1207,12 @@ class HtmlMin implements HtmlMinInterface
      */
     private function isConditionalComment($comment): bool
     {
+        /** @noinspection RegExpRedundantEscape */
         if (\preg_match('/^\[if [^\]]+\]/', $comment)) {
             return true;
         }
 
+        /** @noinspection RegExpRedundantEscape */
         if (\preg_match('/\[endif\]$/', $comment)) {
             return true;
         }

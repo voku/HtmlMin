@@ -1148,4 +1148,24 @@ HTML;
 
         static::assertSame($expectedHtml, $actual);
     }
+
+    public function testSelfClosingInput()
+    {
+        $html = '
+        <div class="form-group col-xl-10">
+            <label for="chars">Zeichen</label>
+            <div class="input-group">
+                <input type="text" id="chars" class="form-control" value="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789![]{}()%&*$#^<>~@|" aria-describedby="chars-refresh-icon">
+                <div class="input-group-append cursor-pointer" id="chars-refresh">
+                    <div class="input-group-text" id="chars-refresh-icon"><i class="fas fa-undo fa-fw"></i></div>
+                </div>
+            </div>
+        </div>
+        ';
+
+        $expected = '<div class="col-xl-10 form-group"><label for=chars>Zeichen</label> <div class=input-group><input aria-describedby=chars-refresh-icon class=form-control id=chars type=text value="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789![]{}()%&*$#^<>~@|"> <div class="cursor-pointer input-group-append" id=chars-refresh><div class=input-group-text id=chars-refresh-icon><i class="fa-fw fa-undo fas"></i></div> </div></div></div>';
+
+        $htmlMin = new HtmlMin();
+        static::assertSame($expected, $htmlMin->minify($html));
+    }
 }
