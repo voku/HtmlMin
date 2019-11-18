@@ -1,3 +1,8 @@
+# Changelog 4.0.7
+
+- fix: too many single white spaces are removed
+
+
 # Changelog 4.0.6
 
 - fix: fix regex for self-closing tags
