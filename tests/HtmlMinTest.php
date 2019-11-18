@@ -242,7 +242,7 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         </html>
         ';
 
-        $expected = '<!DOCTYPE html><html lang=fr><head><title>Test</title> <body> A Body <script id=elements-image-1 type=text/html><div class="badge-carte place">Place du Village<br>250m - 2mn à pied</div> <div class="badge-carte telecabine">Télécabine du Chamois<br>250m - 2mn à pied</div><div class="badge-carte situation"><img alt="" src=https://domain.tld/assets/frontOffice/kneiss/template-assets/assets/dist/img/08ecd8a.png></div></script> <script id=elements-image-2 type=text/html><div class="badge-carte place">Place du Village<br>250m - 2mn à pied</div> <div class="badge-carte telecabine">Télécabine du Chamois<br>250m - 2mn à pied</div><div class="badge-carte situation"><img alt="" src=https://domain.tld/assets/frontOffice/kneiss/template-assets/assets/dist/img/08ecd8a.png></div></script><script class=foobar type=text/html><div class="badge-carte place">Place du Village<br>250m - 2mn à pied</div> <div class="badge-carte telecabine">Télécabine du Chamois<br>250m - 2mn à pied</div><div class="badge-carte situation"><img alt="" src=https://domain.tld/assets/frontOffice/kneiss/template-assets/assets/dist/img/08ecd8a.png></div></script><script class=foobar type=text/html><div class="badge-carte place">Place du Village<br>250m - 2mn à pied</div> <div class="badge-carte telecabine">Télécabine du Chamois<br>250m - 2mn à pied</div><div class="badge-carte situation"><img alt="" src=https://domain.tld/assets/frontOffice/kneiss/template-assets/assets/dist/img/08ecd8a.png></div></script>';
+        $expected = '<!DOCTYPE html><html lang=fr><head><title>Test</title> <body> A Body <script id=elements-image-1 type=text/html><div class="badge-carte place">Place du Village<br>250m - 2mn à pied</div> <div class="badge-carte telecabine">Télécabine du Chamois<br>250m - 2mn à pied</div> <div class="badge-carte situation"><img alt="" src=https://domain.tld/assets/frontOffice/kneiss/template-assets/assets/dist/img/08ecd8a.png></div></script> <script id=elements-image-2 type=text/html><div class="badge-carte place">Place du Village<br>250m - 2mn à pied</div> <div class="badge-carte telecabine">Télécabine du Chamois<br>250m - 2mn à pied</div> <div class="badge-carte situation"><img alt="" src=https://domain.tld/assets/frontOffice/kneiss/template-assets/assets/dist/img/08ecd8a.png></div></script> <script class=foobar type=text/html><div class="badge-carte place">Place du Village<br>250m - 2mn à pied</div> <div class="badge-carte telecabine">Télécabine du Chamois<br>250m - 2mn à pied</div> <div class="badge-carte situation"><img alt="" src=https://domain.tld/assets/frontOffice/kneiss/template-assets/assets/dist/img/08ecd8a.png></div></script> <script class=foobar type=text/html><div class="badge-carte place">Place du Village<br>250m - 2mn à pied</div> <div class="badge-carte telecabine">Télécabine du Chamois<br>250m - 2mn à pied</div> <div class="badge-carte situation"><img alt="" src=https://domain.tld/assets/frontOffice/kneiss/template-assets/assets/dist/img/08ecd8a.png></div></script>';
 
         $htmlMin = new HtmlMin();
 
@@ -638,7 +638,7 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
 </body>
 </html>';
 
-        $expected = '<!DOCTYPE html><html lang=fr><head><title>Test</title> <body><p>Visitez notre boutique <strong>eBay</strong> : <a href=https://foo.bar/lall target=_blank>https://foo.bar/lall</a> <p><strong>ID Vintage</strong>, spécialiste de la vente de pièces et accessoires pour motos tout- terrain classiques :<a href=https://foo.bar/123 target=_blank>https://foo.bar/123</a><p>Magazine <strong>Café-Racer</strong> : <a href=https://foo.bar/321 target=_blank>https://foo.bar/321</a><p><strong>Julien Lecointe</strong> : <a href=https://foo.bar/123456 target=_blank>https://foo.bar/123456</a>';
+        $expected = '<!DOCTYPE html><html lang=fr><head><title>Test</title> <body><p>Visitez notre boutique <strong>eBay</strong> : <a href=https://foo.bar/lall target=_blank>https://foo.bar/lall</a> <p><strong>ID Vintage</strong>, spécialiste de la vente de pièces et accessoires pour motos tout- terrain classiques :<a href=https://foo.bar/123 target=_blank>https://foo.bar/123</a> <p>Magazine <strong>Café-Racer</strong> : <a href=https://foo.bar/321 target=_blank>https://foo.bar/321</a> <p><strong>Julien Lecointe</strong> : <a href=https://foo.bar/123456 target=_blank>https://foo.bar/123456</a>';
 
         $htmlMin = new voku\helper\HtmlMin();
 
@@ -736,8 +736,7 @@ foo
     </select>
     ';
 
-        $expected = '<select v-model="fiter" @change="getGraphData" :class="[\'c-chart__label\']" name="filter">
-    </select>';
+        $expected = '<select :class="[\'c-chart__label\']" @change=getGraphData name=filter v-model=fiter></select>';
 
         static::assertSame($expected, $htmlMin->minify($html));
     }
@@ -916,7 +915,7 @@ foo
                     </li>
                     <% }); %>
                 </ul>
-              </script><div data-role=tier-price-block></div>';
+              </script> <div data-role=tier-price-block></div>';
 
         static::assertSame($expected, $htmlMin->minify($html));
     }
@@ -995,7 +994,20 @@ foo
     </html>
     ';
 
-        $expected = '<html><head> <body><p class=foo id=text>foo</p> <br><ul><li><p class=foo>lall </ul><ul><li>1 <li>2<li>3</ul><table><tr><th>1 <th>2 <tr><td>foo <td><dl><dt>Coffee <dd>Black hot drink<dt>Milk<dd>White cold drink</dl> </table>';
+        $expected = '<html><head> <body><p class=foo id=text>foo</p> <br> <ul><li><p class=foo>lall </ul> <ul><li>1 <li>2 <li>3</ul> <table><tr><th>1 <th>2 <tr><td>foo <td><dl><dt>Coffee <dd>Black hot drink <dt>Milk <dd>White cold drink</dl> </table>';
+
+        static::assertSame($expected, $htmlMin->minify($html));
+    }
+
+    public function testMinifyKeepWhitespace()
+    {
+        // init
+        $htmlMin = new HtmlMin();
+        $htmlMin->doRemoveWhitespaceAroundTags(false);
+
+        $html = '<p><span class="label-icons">XXX</span> <span class="label-icons label-free">FREE</span> <span class="label-icons label-pro">PRO</span> <span class="label-icons label-popular">POPULAR</span> <span class="label-icons label-community">COMMUNITY CHOICE</span></p>';
+
+        $expected = '<p><span class=label-icons>XXX</span> <span class="label-free label-icons">FREE</span> <span class="label-icons label-pro">PRO</span> <span class="label-icons label-popular">POPULAR</span> <span class="label-community label-icons">COMMUNITY CHOICE</span>';
 
         static::assertSame($expected, $htmlMin->minify($html));
     }
@@ -1077,7 +1089,7 @@ h1 {
     </html>
     ';
 
-        $expected = '<html><head></head> <body><p class="foo" id="text">foo</p> <br><ul><li><p class="foo">lall</p> </li></ul><ul><li>1</li> <li>2</li><li>3</li></ul><table><tr><th>1</th> <th>2</th></tr> <tr><td>foo</td> <td><dl><dt>Coffee</dt> <dd>Black hot drink</dd><dt>Milk</dt><dd>White cold drink</dd></dl> </td></tr></table></body></html>';
+        $expected = '<html><head></head> <body><p class="foo" id="text">foo</p> <br> <ul><li><p class="foo">lall</p> </li></ul> <ul><li>1</li> <li>2</li> <li>3</li></ul> <table><tr><th>1</th> <th>2</th></tr> <tr><td>foo</td> <td><dl><dt>Coffee</dt> <dd>Black hot drink</dd> <dt>Milk</dt> <dd>White cold drink</dd></dl> </td></tr></table></body></html>';
 
         static::assertSame($expected, $htmlMin->minify($html));
     }
@@ -1098,7 +1110,7 @@ h1 {
   </body>
 </html>';
 
-        $expected = '<!DOCTYPE html><html lang=de><head><meta charset=utf-8> <meta content="width=device-width, initial-scale=1.0" name=viewport><title>aussagekräftiger Titel der Seite</title> <body><p>Sehen Sie sich den Quellcode dieser Seite an. <kbd>(Kontextmenu: Seitenquelltext anzeigen)</kbd>';
+        $expected = '<!DOCTYPE html><html lang=de><head><meta charset=utf-8><meta content="width=device-width, initial-scale=1.0" name=viewport><title>aussagekräftiger Titel der Seite</title> <body><p>Sehen Sie sich den Quellcode dieser Seite an. <kbd>(Kontextmenu: Seitenquelltext anzeigen)</kbd>';
 
         $htmlMin = new HtmlMin();
         static::assertSame($expected, $htmlMin->minify($html));
@@ -1200,7 +1212,7 @@ HTML;
         $actual = $this->compressor->minify($html);
 
         $expectedHtml = <<<'HTML'
-<!DOCTYPE html><html><head><title>Test</title> <body><!-- do not remove comment --> <hr><!--
+<!DOCTYPE html><html><head><title>Test</title> <body><!-- do not remove comment --> <hr> <!--
 do not remove comment
 -->
 HTML;

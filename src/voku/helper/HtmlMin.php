@@ -869,7 +869,15 @@ class HtmlMin implements HtmlMinInterface
                             &&
                             \substr($html, -1) !== ' '
                         ) {
-                            $html .= ' ';
+                            $html = \rtrim($html);
+
+                            if (
+                                $child->parentNode
+                                &&
+                                $child->parentNode->nodeName !== 'head'
+                            ) {
+                                $html .= ' ';
+                            }
                         }
                         $emptyStringTmp = 'is_empty';
                     }
@@ -882,11 +890,27 @@ class HtmlMin implements HtmlMinInterface
                         $child->nextSibling !== null
                     ) {
                         if (
-                            $emptyStringTmp !== 'last_was_empty'
-                            &&
-                            \substr($html, -1) !== ' '
+                            (
+                                $child->wholeText
+                                &&
+                                strpos($child->wholeText, ' ') !== false
+                            )
+                            ||
+                            (
+                                $emptyStringTmp !== 'last_was_empty'
+                                &&
+                                \substr($html, -1) !== ' '
+                            )
                         ) {
-                            $html .= ' ';
+                            $html = \rtrim($html);
+
+                            if (
+                                $child->parentNode
+                                &&
+                                $child->parentNode->nodeName !== 'head'
+                            ) {
+                                $html .= ' ';
+                            }
                         }
                         $emptyStringTmp = 'is_empty';
                     }
