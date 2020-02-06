@@ -180,7 +180,7 @@ class HtmlMin implements HtmlMinInterface
     /**
      * @var bool
      */
-    private $doRemoveHttpPrefixFromAttributes = true;
+    private $doRemoveHttpPrefixFromAttributes = false;
 
     /**
      * @var bool
