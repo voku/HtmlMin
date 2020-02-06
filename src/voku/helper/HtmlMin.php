@@ -26,7 +26,9 @@ class HtmlMin implements HtmlMinInterface
     private static $regExSpace = "/[[:space:]]{2,}|[\r\n]/u";
 
     /**
-     * @var array
+     * @var string[]
+     *
+     * @psalm-var list<string>
      */
     private static $optional_end_tags = [
         'html',
@@ -34,6 +36,11 @@ class HtmlMin implements HtmlMinInterface
         'body',
     ];
 
+    /**
+     * @var string[]
+     *
+     * @psalm-var list<string>
+     */
     private static $selfClosingTags = [
         'area',
         'base',
@@ -56,6 +63,11 @@ class HtmlMin implements HtmlMinInterface
         'wbr',
     ];
 
+    /**
+     * @var string[]
+     *
+     * @psalm-var array<string, string>
+     */
     private static $trimWhitespaceFromTags = [
         'article' => '',
         'br'      => '',
@@ -168,7 +180,12 @@ class HtmlMin implements HtmlMinInterface
     /**
      * @var bool
      */
-    private $doRemoveHttpPrefixFromAttributes = false;
+    private $doRemoveHttpPrefixFromAttributes = true;
+
+    /**
+     * @var bool
+     */
+    private $doRemoveHttpsPrefixFromAttributes = false;
 
     /**
      * @var array
@@ -389,6 +406,18 @@ class HtmlMin implements HtmlMinInterface
     public function doRemoveHttpPrefixFromAttributes(bool $doRemoveHttpPrefixFromAttributes = true): self
     {
         $this->doRemoveHttpPrefixFromAttributes = $doRemoveHttpPrefixFromAttributes;
+
+        return $this;
+    }
+
+    /**
+     * @param bool $doRemoveHttpsPrefixFromAttributes
+     *
+     * @return $this
+     */
+    public function doRemoveHttpsPrefixFromAttributes(bool $doRemoveHttpsPrefixFromAttributes = true): self
+    {
+        $this->doRemoveHttpsPrefixFromAttributes = $doRemoveHttpsPrefixFromAttributes;
 
         return $this;
     }
@@ -893,7 +922,7 @@ class HtmlMin implements HtmlMinInterface
                             (
                                 $child->wholeText
                                 &&
-                                strpos($child->wholeText, ' ') !== false
+                                \strpos($child->wholeText, ' ') !== false
                             )
                             ||
                             (
@@ -1011,6 +1040,14 @@ class HtmlMin implements HtmlMinInterface
     public function isDoRemoveHttpPrefixFromAttributes(): bool
     {
         return $this->doRemoveHttpPrefixFromAttributes;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDoRemoveHttpsPrefixFromAttributes(): bool
+    {
+        return $this->doRemoveHttpsPrefixFromAttributes;
     }
 
     /**
@@ -1378,7 +1415,10 @@ class HtmlMin implements HtmlMinInterface
             }
 
             $this->protectedChildNodes[$this->protected_tags_counter] = $element->parentNode()->innerHtml();
-            $element->getNode()->parentNode->nodeValue = '<' . $this->protectedChildNodesHelper . ' data-' . $this->protectedChildNodesHelper . '="' . $this->protected_tags_counter . '"></' . $this->protectedChildNodesHelper . '>';
+            $parentNode = $element->getNode()->parentNode;
+            if ($parentNode !== null) {
+                $parentNode->nodeValue = '<' . $this->protectedChildNodesHelper . ' data-' . $this->protectedChildNodesHelper . '="' . $this->protected_tags_counter . '"></' . $this->protectedChildNodesHelper . '>';
+            }
 
             ++$this->protected_tags_counter;
         }
@@ -1433,8 +1473,10 @@ class HtmlMin implements HtmlMinInterface
             /* @var $node \DOMComment */
             $node = $element->getNode();
             $child = new \DOMText('<' . $this->protectedChildNodesHelper . ' data-' . $this->protectedChildNodesHelper . '="' . $this->protected_tags_counter . '"></' . $this->protectedChildNodesHelper . '>');
-            /** @noinspection UnusedFunctionResultInspection */
-            $element->getNode()->parentNode->replaceChild($child, $node);
+            $parentNode = $element->getNode()->parentNode;
+            if ($parentNode !== null) {
+                $parentNode->replaceChild($child, $node);
+            }
 
             ++$this->protected_tags_counter;
         }
@@ -1455,8 +1497,10 @@ class HtmlMin implements HtmlMinInterface
             $comment = $commentWrapper->getNode();
             $val = $comment->nodeValue;
             if (\strpos($val, '[') === false) {
-                /** @noinspection UnusedFunctionResultInspection */
-                $comment->parentNode->removeChild($comment);
+                $parentNode = $comment->parentNode;
+                if ($parentNode !== null) {
+                    $parentNode->removeChild($comment);
+                }
             }
         }
 

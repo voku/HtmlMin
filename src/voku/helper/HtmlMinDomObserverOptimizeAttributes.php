@@ -15,7 +15,9 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
      * // https://mathiasbynens.be/demo/javascript-mime-type
      * // https://developer.mozilla.org/en/docs/Web/HTML/Element/script#attr-type
      *
-     * @var array
+     * @var string[]
+     *
+     * @psalm-var array<string, string>
      */
     private static $executableScriptsMimeTypes = [
         'text/javascript'          => '',
@@ -30,7 +32,9 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
      * Receive dom elements before the minification.
      *
      * @param SimpleHtmlDomInterface $element
-     * @param HtmlMinInterface                $htmlMin
+     * @param HtmlMinInterface       $htmlMin
+     *
+     * @return void
      */
     public function domElementBeforeMinification(SimpleHtmlDomInterface $element, HtmlMinInterface $htmlMin)
     {
@@ -40,7 +44,9 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
      * Receive dom elements after the minification.
      *
      * @param SimpleHtmlDomInterface $element
-     * @param HtmlMinInterface                $htmlMin
+     * @param HtmlMinInterface       $htmlMin
+     *
+     * @return void
      */
     public function domElementAfterMinification(SimpleHtmlDomInterface $element, HtmlMinInterface $htmlMin)
     {
@@ -57,17 +63,21 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
             // -------------------------------------------------------------------------
 
             if ($htmlMin->isDoRemoveHttpPrefixFromAttributes()) {
-                /** @noinspection InArrayCanBeUsedInspection */
-                /** @noinspection NestedPositiveIfStatementsInspection */
-                if (
-                    ($attrName === 'href' || $attrName === 'src' || $attrName === 'action')
-                    &&
-                    !(isset($attributes['rel']) && $attributes['rel'] === 'external')
-                    &&
-                    !(isset($attributes['target']) && $attributes['target'] === '_blank')
-                ) {
-                    $attrValue = \str_replace('http://', '//', $attrValue);
-                }
+                $attrValue = $this->removeHttpPrefixHelper(
+                    $attrValue,
+                    $attrName,
+                    'http',
+                    $attributes
+                );
+            }
+
+            if ($htmlMin->isDoRemoveHttpsPrefixFromAttributes()) {
+                $attrValue = $this->removeHttpPrefixHelper(
+                    $attrValue,
+                    $attrName,
+                    'https',
+                    $attributes
+                );
             }
 
             if ($this->removeAttributeHelper($element->tag, $attrName, $attrValue, $attributes, $htmlMin)) {
@@ -184,6 +194,34 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
         }
 
         return false;
+    }
+
+    /**
+     * @param string $attrValue
+     * @param string $attrName
+     * @param string $scheme
+     * @param array  $attributes
+     *
+     * @return string
+     */
+    private function removeHttpPrefixHelper(
+        string $attrValue,
+        string $attrName,
+        string $scheme,
+        array $attributes
+    ): string {
+        /** @noinspection InArrayCanBeUsedInspection */
+        if (
+            ($attrName === 'href' || $attrName === 'src' || $attrName === 'srcset' || $attrName === 'action')
+            &&
+            !(isset($attributes['rel']) && $attributes['rel'] === 'external')
+            &&
+            !(isset($attributes['target']) && $attributes['target'] === '_blank')
+        ) {
+            $attrValue = \str_replace($scheme . '://', '//', $attrValue);
+        }
+
+        return $attrValue;
     }
 
     /**

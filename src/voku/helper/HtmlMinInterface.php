@@ -103,6 +103,11 @@ interface HtmlMinInterface
     public function isDoRemoveHttpPrefixFromAttributes(): bool;
 
     /**
+     * @return bool
+     */
+    public function isDoRemoveHttpsPrefixFromAttributes(): bool;
+
+    /**
      * @return array
      */
     public function getDomainsToRemoveHttpPrefixFromAttributes(): array;

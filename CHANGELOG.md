@@ -1,3 +1,7 @@
+# Changelog 4.1.0 (2020-02-06)
+
+- add "doRemoveHttpsPrefixFromAttributes()": remove optional "https:"-prefix from attributes (depends on "doOptimizeAttributes(true)")
+
 # Changelog 4.0.7
 
 - fix: too many single white spaces are removed
