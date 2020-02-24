@@ -188,6 +188,21 @@ class HtmlMin implements HtmlMinInterface
     private $doRemoveHttpsPrefixFromAttributes = false;
 
     /**
+     * @var bool
+     */
+    private $keepPrefixOnExternalAttributes = false;
+
+    /**
+     * @var bool
+     */
+    private $doMakeSameDomainLinksRelative = false;
+
+    /**
+     * @var string
+     */
+    private $localDomain = '';
+
+    /**
      * @var array
      */
     private $domainsToRemoveHttpPrefixFromAttributes = [
@@ -420,7 +435,57 @@ class HtmlMin implements HtmlMinInterface
         $this->doRemoveHttpsPrefixFromAttributes = $doRemoveHttpsPrefixFromAttributes;
 
         return $this;
+	}
+	
+    /**
+     * @param bool $keepPrefixOnExternalAttributes
+     *
+     * @return $this
+     */
+    public function keepPrefixOnExternalAttributes(bool $keepPrefixOnExternalAttributes = true): self
+    {
+        $this->keepPrefixOnExternalAttributes = $keepPrefixOnExternalAttributes;
+
+        return $this;
     }
+	
+    /**
+     * @param bool $doMakeSameDomainLinksRelative
+     *
+     * @return $this
+     */
+    public function doMakeSameDomainLinksRelative(bool $doMakeSameDomainLinksRelative = true): self
+    {
+        $this->doMakeSameDomainLinksRelative = $doMakeSameDomainLinksRelative;
+
+        return $this;
+    }
+	
+    /**
+     * @param bool $setLocalDomain
+     *
+     * @return $this
+     */
+    public function setLocalDomain(string $localDomain = ''): self
+    {
+		if ($localDomain === ''){
+			$this->localDomain = $_SERVER['SERVER_NAME'];
+		}else{
+			$this->localDomain = $localDomain;
+			preg_replace('/(https?:)?\/\//', '', $this->localDomain);
+		}
+
+        return $this;
+	}
+	
+	/**
+     * @param void
+     *
+     * @return $this->localDomain
+     */
+	public function getLocalDomain(): string{
+		return $this->localDomain;
+	}
 
     /**
      * @param bool $doRemoveOmittedHtmlTags
@@ -1048,6 +1113,30 @@ class HtmlMin implements HtmlMinInterface
     public function isDoRemoveHttpsPrefixFromAttributes(): bool
     {
         return $this->doRemoveHttpsPrefixFromAttributes;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isKeepPrefixOnExternalAttributes(): bool
+    {
+        return $this->keepPrefixOnExternalAttributes;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDoMakeSameDomainLinksRelative(): bool
+    {
+        return $this->doMakeSameDomainLinksRelative;
+	}
+	
+    /**
+     * @param bool
+     */
+    public function isLocalDomainSet(): bool
+    {
+		return (!empty($this->localDomain));
     }
 
     /**

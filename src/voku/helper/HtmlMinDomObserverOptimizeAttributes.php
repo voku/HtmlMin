@@ -67,7 +67,8 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
                     $attrValue,
                     $attrName,
                     'http',
-                    $attributes
+					$attributes,
+					$htmlMin
                 );
             }
 
@@ -76,8 +77,25 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
                     $attrValue,
                     $attrName,
                     'https',
-                    $attributes
+                    $attributes,
+					$htmlMin
                 );
+            }
+
+            if ($htmlMin->isDoMakeSameDomainLinksRelative()) {
+				if (!$htmlMin->isLocalDomainSet()){
+					$htmlMin->setLocalDomain();
+				}
+				$localDomain = $htmlMin->getLocalDomain();
+				if (
+					(($attrName === 'href') || $attrName === 'src' || $attrName === 'srcset' || $attrName === 'action')
+					&&
+					!(isset($attributes['rel']) && $attributes['rel'] === 'external')
+					&&
+					!(isset($attributes['target']) && $attributes['target'] === '_blank')
+				) {
+					$attrValue = \preg_replace("/^((https?:)?\/\/)?{$localDomain}(?!\w)(\/?)/", '/', $attrValue);
+				}
             }
 
             if ($this->removeAttributeHelper($element->tag, $attrName, $attrValue, $attributes, $htmlMin)) {
@@ -208,11 +226,12 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
         string $attrValue,
         string $attrName,
         string $scheme,
-        array $attributes
+		array $attributes,
+		HtmlMinInterface $htmlMin
     ): string {
         /** @noinspection InArrayCanBeUsedInspection */
         if (
-            ($attrName === 'href' || $attrName === 'src' || $attrName === 'srcset' || $attrName === 'action')
+            (($attrName === 'href' && !$htmlMin->isKeepPrefixOnExternalAttributes()) || $attrName === 'src' || $attrName === 'srcset' || $attrName === 'action')
             &&
             !(isset($attributes['rel']) && $attributes['rel'] === 'external')
             &&
