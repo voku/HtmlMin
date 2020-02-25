@@ -1240,5 +1240,39 @@ HTML;
 
         $htmlMin = new HtmlMin();
         static::assertSame($expected, $htmlMin->minify($html));
-    }
+	}
+	
+	public function testRelativeLinks()
+	{
+		$html='<a href="https://www.example.com">Just an example</a>';
+		$expected='<a href=/>Just an example</a>';
+
+		$htmlMin = new HtmlMin();
+		$htmlMin->doMakeSameDomainLinksRelative();
+		$htmlMin->setLocalDomain('www.example.com');
+		static::assertSame($expected, $htmlMin->minify($html));
+	}
+
+	public function testSetLocalDomain()
+	{
+		$html='<a href="www.example.com">Just an example</a>';
+		$expected='<a href=/>Just an example</a>';
+
+		$htmlMin = new HtmlMin();
+		$htmlMin->doMakeSameDomainLinksRelative();
+		$htmlMin->setLocalDomain('https://www.example.com/');
+		static::assertSame($expected, $htmlMin->minify($html));
+	}
+
+	public function testKeepPrefixOnExternalAttributes(){
+		$html='<a href="http://www.example.com/">No remove</a><img src="http://www.example.com/" />';
+		$expected = '<a href=http://www.example.com/>No remove</a><img src=//www.example.com/>';
+
+		$htmlMin = new HtmlMin();
+		$htmlMin->doRemoveHttpPrefixFromAttributes();
+		$htmlMin->keepPrefixOnExternalAttributes();
+		static::assertSame($expected, $htmlMin->minify($html));
+
+
+	}
 }

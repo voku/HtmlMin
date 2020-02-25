@@ -108,6 +108,26 @@ interface HtmlMinInterface
     public function isDoRemoveHttpsPrefixFromAttributes(): bool;
 
     /**
+     * @return bool
+     */
+    public function isKeepPrefixOnExternalAttributes(): bool;
+
+    /**
+     * @return bool
+     */
+	public function isDoMakeSameDomainLinksRelative(): bool;
+
+	/**
+     * @param bool
+     */
+    public function isLocalDomainSet(): bool;
+	
+	/**
+     * @return string
+     */
+	public function getLocalDomain(): string;
+
+    /**
      * @return array
      */
     public function getDomainsToRemoveHttpPrefixFromAttributes(): array;
