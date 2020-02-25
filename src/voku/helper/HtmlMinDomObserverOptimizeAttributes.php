@@ -67,8 +67,8 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
                     $attrValue,
                     $attrName,
                     'http',
-					$attributes,
-					$htmlMin
+                    $attributes,
+                    $htmlMin
                 );
             }
 
@@ -78,24 +78,38 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
                     $attrName,
                     'https',
                     $attributes,
-					$htmlMin
+                    $htmlMin
                 );
             }
 
             if ($htmlMin->isDoMakeSameDomainLinksRelative()) {
-				if (!$htmlMin->isLocalDomainSet()){
-					$htmlMin->setLocalDomain();
-				}
-				$localDomain = $htmlMin->getLocalDomain();
-				if (
-					(($attrName === 'href') || $attrName === 'src' || $attrName === 'srcset' || $attrName === 'action')
-					&&
-					!(isset($attributes['rel']) && $attributes['rel'] === 'external')
-					&&
-					!(isset($attributes['target']) && $attributes['target'] === '_blank')
-				) {
-					$attrValue = \preg_replace("/^((https?:)?\/\/)?{$localDomain}(?!\w)(\/?)/", '/', $attrValue);
-				}
+                if (!$htmlMin->isLocalDomainSet()) {
+                    $htmlMin->setLocalDomain();
+                }
+
+                $localDomain = $htmlMin->getLocalDomain();
+                /** @noinspection InArrayCanBeUsedInspection */
+                if (
+                    (
+                        $attrName === 'href'
+                        ||
+                        $attrName === 'src'
+                        ||
+                        $attrName === 'srcset'
+                        ||
+                        $attrName === 'action'
+                    )
+                    &&
+                    !(isset($attributes['rel']) && $attributes['rel'] === 'external')
+                    &&
+                    !(isset($attributes['target']) && $attributes['target'] === '_blank')
+                    &&
+                    \stripos($attrValue, $localDomain) !== false
+                ) {
+                    $localDomainEscaped = \preg_quote($localDomain, '/');
+
+                    $attrValue = \preg_replace("/^(?:(?:https?:)?\/\/)?{$localDomainEscaped}(?!\w)(?:\/?)/i", '/', $attrValue);
+                }
             }
 
             if ($this->removeAttributeHelper($element->tag, $attrName, $attrValue, $attributes, $htmlMin)) {
@@ -134,10 +148,10 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
     /**
      * Check if the attribute can be removed.
      *
-     * @param string  $tag
-     * @param string  $attrName
-     * @param string  $attrValue
-     * @param array   $allAttr
+     * @param string           $tag
+     * @param string           $attrName
+     * @param string           $attrValue
+     * @param array            $allAttr
      * @param HtmlMinInterface $htmlMin
      *
      * @return bool
@@ -215,10 +229,11 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
     }
 
     /**
-     * @param string $attrValue
-     * @param string $attrName
-     * @param string $scheme
-     * @param array  $attributes
+     * @param string           $attrValue
+     * @param string           $attrName
+     * @param string           $scheme
+     * @param array            $attributes
+     * @param HtmlMinInterface $htmlMin
      *
      * @return string
      */
@@ -226,16 +241,28 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
         string $attrValue,
         string $attrName,
         string $scheme,
-		array $attributes,
-		HtmlMinInterface $htmlMin
+        array $attributes,
+        HtmlMinInterface $htmlMin
     ): string {
         /** @noinspection InArrayCanBeUsedInspection */
         if (
-            (($attrName === 'href' && !$htmlMin->isKeepPrefixOnExternalAttributes()) || $attrName === 'src' || $attrName === 'srcset' || $attrName === 'action')
-            &&
             !(isset($attributes['rel']) && $attributes['rel'] === 'external')
             &&
             !(isset($attributes['target']) && $attributes['target'] === '_blank')
+            &&
+            (
+                (
+                    $attrName === 'href'
+                    &&
+                    !$htmlMin->isKeepPrefixOnExternalAttributes()
+                )
+                ||
+                $attrName === 'src'
+                ||
+                $attrName === 'srcset'
+                ||
+                $attrName === 'action'
+            )
         ) {
             $attrValue = \str_replace($scheme . '://', '//', $attrValue);
         }

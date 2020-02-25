@@ -115,17 +115,17 @@ interface HtmlMinInterface
     /**
      * @return bool
      */
-	public function isDoMakeSameDomainLinksRelative(): bool;
+    public function isDoMakeSameDomainLinksRelative(): bool;
 
-	/**
-     * @param bool
+    /**
+     * @return bool
      */
     public function isLocalDomainSet(): bool;
-	
-	/**
+
+    /**
      * @return string
      */
-	public function getLocalDomain(): string;
+    public function getLocalDomain(): string;
 
     /**
      * @return array

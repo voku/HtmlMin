@@ -435,8 +435,8 @@ class HtmlMin implements HtmlMinInterface
         $this->doRemoveHttpsPrefixFromAttributes = $doRemoveHttpsPrefixFromAttributes;
 
         return $this;
-	}
-	
+    }
+
     /**
      * @param bool $keepPrefixOnExternalAttributes
      *
@@ -448,7 +448,7 @@ class HtmlMin implements HtmlMinInterface
 
         return $this;
     }
-	
+
     /**
      * @param bool $doMakeSameDomainLinksRelative
      *
@@ -460,32 +460,28 @@ class HtmlMin implements HtmlMinInterface
 
         return $this;
     }
-	
+
     /**
-     * @param bool $setLocalDomain
+     * @param string $localDomain
      *
      * @return $this
      */
     public function setLocalDomain(string $localDomain = ''): self
     {
-		if ($localDomain === ''){
-			$this->localDomain = $_SERVER['SERVER_NAME'];
-		}else{
-			$this->localDomain = rtrim(preg_replace('/(https?:)?\/\//', '', $localDomain), '/');
-		}
+        $this->localDomain = \rtrim(\preg_replace('/(?:https?:)?\/\//i', '', $localDomain), '/');
 
         return $this;
-	}
-	
-	/**
+    }
+
+    /**
      * @param void
      *
      * @return $this->localDomain
      */
-	public function getLocalDomain(): string
-	{
-		return $this->localDomain;
-	}
+    public function getLocalDomain(): string
+    {
+        return $this->localDomain;
+    }
 
     /**
      * @param bool $doRemoveOmittedHtmlTags
@@ -701,6 +697,7 @@ class HtmlMin implements HtmlMinInterface
         //
         // <-- However, a start tag must never be omitted if it has any attributes.
 
+        /** @noinspection InArrayCanBeUsedInspection */
         return \in_array($tag_name, self::$optional_end_tags, true)
                ||
                (
@@ -1129,14 +1126,14 @@ class HtmlMin implements HtmlMinInterface
     public function isDoMakeSameDomainLinksRelative(): bool
     {
         return $this->doMakeSameDomainLinksRelative;
-	}
-	
+    }
+
     /**
-     * @param bool
+     * @return bool
      */
     public function isLocalDomainSet(): bool
     {
-		return (!empty($this->localDomain));
+        return $this->localDomain !== '';
     }
 
     /**
