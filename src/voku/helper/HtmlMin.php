@@ -471,8 +471,7 @@ class HtmlMin implements HtmlMinInterface
 		if ($localDomain === ''){
 			$this->localDomain = $_SERVER['SERVER_NAME'];
 		}else{
-			$this->localDomain = $localDomain;
-			preg_replace('/(https?:)?\/\//', '', $this->localDomain);
+			$this->localDomain = rtrim(preg_replace('/(https?:)?\/\//', '', $localDomain), '/');
 		}
 
         return $this;
@@ -483,7 +482,8 @@ class HtmlMin implements HtmlMinInterface
      *
      * @return $this->localDomain
      */
-	public function getLocalDomain(): string{
+	public function getLocalDomain(): string
+	{
 		return $this->localDomain;
 	}
 
