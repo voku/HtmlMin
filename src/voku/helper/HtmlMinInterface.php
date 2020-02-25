@@ -128,6 +128,13 @@ interface HtmlMinInterface
     public function getLocalDomain(): string;
 
     /**
+     * @param string $localDomain
+     *
+     * @return self
+     */
+    public function setLocalDomain(string $localDomain = '');
+
+    /**
      * @return array
      */
     public function getDomainsToRemoveHttpPrefixFromAttributes(): array;

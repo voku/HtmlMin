@@ -468,15 +468,13 @@ class HtmlMin implements HtmlMinInterface
      */
     public function setLocalDomain(string $localDomain = ''): self
     {
-        $this->localDomain = \rtrim(\preg_replace('/(?:https?:)?\/\//i', '', $localDomain), '/');
+        $this->localDomain = \rtrim((string) \preg_replace('/(?:https?:)?\/\//i', '', $localDomain), '/');
 
         return $this;
     }
 
     /**
-     * @param void
-     *
-     * @return $this->localDomain
+     * @return string
      */
     public function getLocalDomain(): string
     {

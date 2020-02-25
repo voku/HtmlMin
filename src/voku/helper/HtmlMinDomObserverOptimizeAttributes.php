@@ -108,11 +108,17 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
                 ) {
                     $localDomainEscaped = \preg_quote($localDomain, '/');
 
-                    $attrValue = \preg_replace("/^(?:(?:https?:)?\/\/)?{$localDomainEscaped}(?!\w)(?:\/?)/i", '/', $attrValue);
+                    $attrValue = (string) \preg_replace("/^(?:(?:https?:)?\/\/)?{$localDomainEscaped}(?!\w)(?:\/?)/i", '/', $attrValue);
                 }
             }
 
-            if ($this->removeAttributeHelper($element->tag, $attrName, $attrValue, $attributes, $htmlMin)) {
+            if ($this->removeAttributeHelper(
+                $element->tag,
+                $attrName,
+                $attrValue,
+                $attributes,
+                $htmlMin
+            )) {
                 $element->{$attrName} = null;
 
                 continue;
