@@ -50,6 +50,7 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
      */
     public function domElementAfterMinification(SimpleHtmlDomInterface $element, HtmlMinInterface $htmlMin)
     {
+		$tag_name = $node->nodeName;
         $attributes = $element->getAllAttributes();
         if ($attributes === null) {
             return;
@@ -68,6 +69,7 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
                     $attrName,
                     'http',
                     $attributes,
+					$tag_name,
                     $htmlMin
                 );
             }
@@ -78,6 +80,7 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
                     $attrName,
                     'https',
                     $attributes,
+					$tag_name,
                     $htmlMin
                 );
             }
@@ -248,6 +251,7 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
         string $attrName,
         string $scheme,
         array $attributes,
+		string $tag_name,
         HtmlMinInterface $htmlMin
     ): string {
         /** @noinspection InArrayCanBeUsedInspection */
@@ -260,8 +264,12 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
                 (
                     $attrName === 'href'
                     &&
+					(
                     !$htmlMin->isKeepPrefixOnExternalAttributes()
+						||
+						$tag_name === 'link'
                 )
+				)
                 ||
                 $attrName === 'src'
                 ||
