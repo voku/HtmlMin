@@ -118,21 +118,9 @@ interface HtmlMinInterface
     public function isDoMakeSameDomainLinksRelative(): bool;
 
     /**
-     * @return bool
-     */
-    public function isLocalDomainSet(): bool;
-
-    /**
      * @return string
      */
     public function getLocalDomain(): string;
-
-    /**
-     * @param string $localDomain
-     *
-     * @return self
-     */
-    public function setLocalDomain(string $localDomain = '');
 
     /**
      * @return array
