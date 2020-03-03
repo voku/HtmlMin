@@ -50,7 +50,7 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
      */
     public function domElementAfterMinification(SimpleHtmlDomInterface $element, HtmlMinInterface $htmlMin)
     {
-		$tag_name = $node->nodeName;
+		$tag_name = $element->getNode()->nodeName;
         $attributes = $element->getAllAttributes();
         if ($attributes === null) {
             return;
