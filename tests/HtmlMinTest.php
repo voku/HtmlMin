@@ -1248,19 +1248,7 @@ HTML;
         $expected = '<a href=/>Just an example</a>';
 
         $htmlMin = new HtmlMin();
-        $htmlMin->doMakeSameDomainLinksRelative();
-        $htmlMin->setLocalDomain('www.example.com');
-        static::assertSame($expected, $htmlMin->minify($html));
-    }
-
-    public function testSetLocalDomain()
-    {
-        $html = '<a href="www.example.com">Just an example</a>';
-        $expected = '<a href=/>Just an example</a>';
-
-        $htmlMin = new HtmlMin();
-        $htmlMin->doMakeSameDomainLinksRelative();
-        $htmlMin->setLocalDomain('https://www.example.com/');
+        $htmlMin->doMakeSameDomainLinksRelative('www.example.com');
         static::assertSame($expected, $htmlMin->minify($html));
 
         // --
@@ -1269,8 +1257,7 @@ HTML;
         $expected = '<a href=/>Just an example</a>';
 
         $htmlMin = new HtmlMin();
-        $htmlMin->doMakeSameDomainLinksRelative();
-        $htmlMin->setLocalDomain('https://www.example.com/');
+        $htmlMin->doMakeSameDomainLinksRelative('https://www.example.com/');
         static::assertSame($expected, $htmlMin->minify($html));
 
         // --
@@ -1279,8 +1266,7 @@ HTML;
         $expected = '<a href=/foo/bar>Just an example</a>';
 
         $htmlMin = new HtmlMin();
-        $htmlMin->doMakeSameDomainLinksRelative();
-        $htmlMin->setLocalDomain('httpS://www.example.com/');
+        $htmlMin->doMakeSameDomainLinksRelative('httpS://www.example.com/');
         static::assertSame($expected, $htmlMin->minify($html));
 
         // --
@@ -1289,8 +1275,7 @@ HTML;
         $expected = '<a href=/foo/bar>Just an example</a>';
 
         $htmlMin = new HtmlMin();
-        $htmlMin->doMakeSameDomainLinksRelative();
-        $htmlMin->setLocalDomain('www.Example.com');
+        $htmlMin->doMakeSameDomainLinksRelative('www.Example.com');
         static::assertSame($expected, $htmlMin->minify($html));
 
         // --
@@ -1299,8 +1284,7 @@ HTML;
         $expected = '<a href=/foo/bar>Just an example</a>';
 
         $htmlMin = new HtmlMin();
-        $htmlMin->doMakeSameDomainLinksRelative();
-        $htmlMin->setLocalDomain('موقع.وزارة-الاتصالات.مصر');
+        $htmlMin->doMakeSameDomainLinksRelative('موقع.وزارة-الاتصالات.مصر');
         static::assertSame($expected, $htmlMin->minify($html));
 
         // --
@@ -1308,8 +1292,7 @@ HTML;
         $html = '<a href=HTTPS://موقع.وزارة-الاتصالات.مصر/foo/bar target=_blank>Just an example</a>';
 
         $htmlMin = new HtmlMin();
-        $htmlMin->doMakeSameDomainLinksRelative();
-        $htmlMin->setLocalDomain('موقع.وزارة-الاتصالات.مصر');
+        $htmlMin->doMakeSameDomainLinksRelative('موقع.وزارة-الاتصالات.مصر');
         static::assertSame($html, $htmlMin->minify($html));
 
         // --
@@ -1317,8 +1300,7 @@ HTML;
         $html = '<a href=HTTPS://موقع.وزارة-الاتصالات.مصر/foo/bar rel=external>Just an example</a>';
 
         $htmlMin = new HtmlMin();
-        $htmlMin->doMakeSameDomainLinksRelative();
-        $htmlMin->setLocalDomain('موقع.وزارة-الاتصالات.مصر');
+        $htmlMin->doMakeSameDomainLinksRelative('موقع.وزارة-الاتصالات.مصر');
         static::assertSame($html, $htmlMin->minify($html));
     }
 
@@ -1330,6 +1312,16 @@ HTML;
         $htmlMin = new HtmlMin();
         $htmlMin->doRemoveHttpPrefixFromAttributes();
         $htmlMin->keepPrefixOnExternalAttributes();
-        static::assertSame($expected, $htmlMin->minify($html));
+		static::assertSame($expected, $htmlMin->minify($html));
+		
+		// --
+
+		$html = '<html><head><link href="http://www.example.com/"></head><body><a href="http://www.example.com/">No remove</a><img src="http://www.example.com/" /></body></html>';
+		$expected = '<html><head><link href=//www.example.com/><body><a href=http://www.example.com/>No remove</a><img src=//www.example.com/>';
+		
+		$htmlMin = new HtmlMin();
+        $htmlMin->doRemoveHttpPrefixFromAttributes();
+        $htmlMin->keepPrefixOnExternalAttributes();
+		static::assertSame($expected, $htmlMin->minify($html));
     }
 }

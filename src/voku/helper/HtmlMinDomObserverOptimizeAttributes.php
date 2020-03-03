@@ -50,6 +50,7 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
      */
     public function domElementAfterMinification(SimpleHtmlDomInterface $element, HtmlMinInterface $htmlMin)
     {
+		$tag_name = $element->getNode()->nodeName;
         $attributes = $element->getAllAttributes();
         if ($attributes === null) {
             return;
@@ -67,7 +68,8 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
                     $attrValue,
                     $attrName,
                     'http',
-                    $attributes,
+					$attributes,
+					$tag_name,
                     $htmlMin
                 );
             }
@@ -77,15 +79,13 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
                     $attrValue,
                     $attrName,
                     'https',
-                    $attributes,
+					$attributes,
+					$tag_name,
                     $htmlMin
                 );
             }
 
             if ($htmlMin->isDoMakeSameDomainLinksRelative()) {
-                if (!$htmlMin->isLocalDomainSet()) {
-                    $htmlMin->setLocalDomain();
-                }
 
                 $localDomain = $htmlMin->getLocalDomain();
                 /** @noinspection InArrayCanBeUsedInspection */
@@ -247,7 +247,8 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
         string $attrValue,
         string $attrName,
         string $scheme,
-        array $attributes,
+		array $attributes,
+		string $tag_name,
         HtmlMinInterface $htmlMin
     ): string {
         /** @noinspection InArrayCanBeUsedInspection */
@@ -260,8 +261,12 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
                 (
                     $attrName === 'href'
                     &&
-                    !$htmlMin->isKeepPrefixOnExternalAttributes()
-                )
+					(
+						!$htmlMin->isKeepPrefixOnExternalAttributes()
+						||
+						$tag_name === 'link'
+					)
+				)
                 ||
                 $attrName === 'src'
                 ||

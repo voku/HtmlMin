@@ -454,21 +454,11 @@ class HtmlMin implements HtmlMinInterface
      *
      * @return $this
      */
-    public function doMakeSameDomainLinksRelative(bool $doMakeSameDomainLinksRelative = true): self
+    public function doMakeSameDomainLinksRelative(string $localDomain = ''): self
     {
-        $this->doMakeSameDomainLinksRelative = $doMakeSameDomainLinksRelative;
+		$this->localDomain = \rtrim((string) \preg_replace('/(?:https?:)?\/\//i', '', $localDomain), '/');
 
-        return $this;
-    }
-
-    /**
-     * @param string $localDomain
-     *
-     * @return $this
-     */
-    public function setLocalDomain(string $localDomain = ''): self
-    {
-        $this->localDomain = \rtrim((string) \preg_replace('/(?:https?:)?\/\//i', '', $localDomain), '/');
+		$this->doMakeSameDomainLinksRelative = ($this->localDomain !== '');
 
         return $this;
     }
@@ -1124,14 +1114,6 @@ class HtmlMin implements HtmlMinInterface
     public function isDoMakeSameDomainLinksRelative(): bool
     {
         return $this->doMakeSameDomainLinksRelative;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isLocalDomainSet(): bool
-    {
-        return $this->localDomain !== '';
     }
 
     /**
