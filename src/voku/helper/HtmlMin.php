@@ -450,15 +450,15 @@ class HtmlMin implements HtmlMinInterface
     }
 
     /**
-     * @param bool $doMakeSameDomainLinksRelative
+     * @param string $localDomain
      *
      * @return $this
      */
     public function doMakeSameDomainLinksRelative(string $localDomain = ''): self
     {
-		$this->localDomain = \rtrim((string) \preg_replace('/(?:https?:)?\/\//i', '', $localDomain), '/');
+        $this->localDomain = \rtrim((string) \preg_replace('/(?:https?:)?\/\//i', '', $localDomain), '/');
 
-		$this->doMakeSameDomainLinksRelative = ($this->localDomain !== '');
+        $this->doMakeSameDomainLinksRelative = ($this->localDomain !== '');
 
         return $this;
     }
@@ -662,6 +662,7 @@ class HtmlMin implements HtmlMinInterface
         // A <dt> element's end tag may be omitted if the dt element is immediately followed by another dt element or a dd element.
         // A <dd> element's end tag may be omitted if the dd element is immediately followed by another dd element or a dt element, or if there is no more content in the parent element.
         // An <rp> element's end tag may be omitted if the rp element is immediately followed by an rt or rp element, or if there is no more content in the parent element.
+        // An <optgroup> element's end tag may be omitted if the optgroup element is immediately followed by another optgroup element, or if there is no more content in the parent element.
 
         /**
          * @noinspection TodoComment
@@ -674,7 +675,6 @@ class HtmlMin implements HtmlMinInterface
         // <body> may be omitted if first thing inside is not space, comment, <meta>, <link>, <script>, <style> or <template>
         // <colgroup> may be omitted if first thing inside is <col>
         // <tbody> may be omitted if first thing inside is <tr>
-        // An <optgroup> element's end tag may be omitted if the optgroup element is immediately followed by another optgroup element, or if there is no more content in the parent element.
         // A <colgroup> element's start tag may be omitted if the first thing inside the colgroup element is a col element, and if the element is not immediately preceded by another colgroup element whose end tag has been omitted. (It can't be omitted if the element is empty.)
         // A <colgroup> element's end tag may be omitted if the colgroup element is not immediately followed by ASCII whitespace or a comment.
         // A <caption> element's end tag may be omitted if the caption element is not immediately followed by ASCII whitespace or a comment.
@@ -698,6 +698,20 @@ class HtmlMin implements HtmlMinInterface
                            $nextSibling instanceof \DOMElement
                            &&
                            $nextSibling->tagName === 'li'
+                       )
+                   )
+               )
+               ||
+               (
+                   $tag_name === 'optgroup'
+                   &&
+                   (
+                       $nextSibling === null
+                       ||
+                       (
+                           $nextSibling instanceof \DOMElement
+                           &&
+                           $nextSibling->tagName === 'optgroup'
                        )
                    )
                )

@@ -697,6 +697,30 @@ foo
         static::assertSame($expected, $htmlMin->minify($html));
     }
 
+    public function testOptGroup()
+    {
+        $html = '<select>
+          <optgroup label="Gruppe 1">
+            <option>Option 1.1</option>
+          </optgroup> 
+          <optgroup label="Gruppe 2">
+            <option>Option 2.1</option>
+            <option>Option 2.2</option>
+          </optgroup>
+          <optgroup label="Gruppe 3" disabled>
+            <option>Option 3.1</option>
+            <option>Option 3.2</option>
+            <option>Option 3.3</option>
+          </optgroup>
+        </select>';
+
+        $htmlMin = new voku\helper\HtmlMin();
+
+        $expected = '<select><optgroup label="Gruppe 1"><option>Option 1.1 <optgroup label="Gruppe 2"><option>Option 2.1 <option>Option 2.2 <optgroup disabled label="Gruppe 3"><option>Option 3.1 <option>Option 3.2 <option>Option 3.3</select>';
+
+        static::assertSame($expected, $htmlMin->minify($html));
+    }
+
     public function testTagsInsideJs()
     {
         $htmlWithJs = '<p>Text 1</p><script>$(".second-column-mobile-inner").wrapAll("<div class=\'collapse\' id=\'second-column\'></div>");</script><p>Text 2</p>';
@@ -1312,16 +1336,16 @@ HTML;
         $htmlMin = new HtmlMin();
         $htmlMin->doRemoveHttpPrefixFromAttributes();
         $htmlMin->keepPrefixOnExternalAttributes();
-		static::assertSame($expected, $htmlMin->minify($html));
-		
-		// --
+        static::assertSame($expected, $htmlMin->minify($html));
 
-		$html = '<html><head><link href="http://www.example.com/"></head><body><a href="http://www.example.com/">No remove</a><img src="http://www.example.com/" /></body></html>';
-		$expected = '<html><head><link href=//www.example.com/><body><a href=http://www.example.com/>No remove</a><img src=//www.example.com/>';
-		
-		$htmlMin = new HtmlMin();
+        // --
+
+        $html = '<html><head><link href="http://www.example.com/"></head><body><a href="http://www.example.com/">No remove</a><img src="http://www.example.com/" /></body></html>';
+        $expected = '<html><head><link href=//www.example.com/><body><a href=http://www.example.com/>No remove</a><img src=//www.example.com/>';
+
+        $htmlMin = new HtmlMin();
         $htmlMin->doRemoveHttpPrefixFromAttributes();
         $htmlMin->keepPrefixOnExternalAttributes();
-		static::assertSame($expected, $htmlMin->minify($html));
+        static::assertSame($expected, $htmlMin->minify($html));
     }
 }

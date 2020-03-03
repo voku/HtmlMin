@@ -50,12 +50,12 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
      */
     public function domElementAfterMinification(SimpleHtmlDomInterface $element, HtmlMinInterface $htmlMin)
     {
-		$tag_name = $element->getNode()->nodeName;
         $attributes = $element->getAllAttributes();
         if ($attributes === null) {
             return;
         }
 
+        $tagName = $element->getNode()->nodeName;
         $attrs = [];
         foreach ((array) $attributes as $attrName => $attrValue) {
 
@@ -68,8 +68,8 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
                     $attrValue,
                     $attrName,
                     'http',
-					$attributes,
-					$tag_name,
+                    $attributes,
+                    $tagName,
                     $htmlMin
                 );
             }
@@ -79,14 +79,13 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
                     $attrValue,
                     $attrName,
                     'https',
-					$attributes,
-					$tag_name,
+                    $attributes,
+                    $tagName,
                     $htmlMin
                 );
             }
 
             if ($htmlMin->isDoMakeSameDomainLinksRelative()) {
-
                 $localDomain = $htmlMin->getLocalDomain();
                 /** @noinspection InArrayCanBeUsedInspection */
                 if (
@@ -238,17 +237,20 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
      * @param string           $attrValue
      * @param string           $attrName
      * @param string           $scheme
-     * @param array            $attributes
+     * @param string[]         $attributes
+     * @param string           $tagName
      * @param HtmlMinInterface $htmlMin
      *
      * @return string
+     *
+     * @noinspection PhpTooManyParametersInspection
      */
     private function removeHttpPrefixHelper(
         string $attrValue,
         string $attrName,
         string $scheme,
-		array $attributes,
-		string $tag_name,
+        array $attributes,
+        string $tagName,
         HtmlMinInterface $htmlMin
     ): string {
         /** @noinspection InArrayCanBeUsedInspection */
@@ -261,12 +263,12 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
                 (
                     $attrName === 'href'
                     &&
-					(
-						!$htmlMin->isKeepPrefixOnExternalAttributes()
-						||
-						$tag_name === 'link'
-					)
-				)
+                    (
+                        !$htmlMin->isKeepPrefixOnExternalAttributes()
+                        ||
+                        $tagName === 'link'
+                    )
+                )
                 ||
                 $attrName === 'src'
                 ||
