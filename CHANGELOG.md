@@ -1,3 +1,10 @@
+# Changelog 4.2.0 (2020-03-06)
+
+- add "doKeepHttpAndHttpsPrefixOnExternalAttributes(bool)": keep http:// and https:// prefix for external links | thanks @abuyoyo
+- add "doMakeSameDomainsLinksRelative(string[] $localDomains)": make the local domains relative | thanks @abuyoyo
+- optimized "optgroup"-html compressing
+
+
 # Changelog 4.1.0 (2020-02-06)
 
 - add "doRemoveHttpsPrefixFromAttributes()": remove optional "https:"-prefix from attributes (depends on "doOptimizeAttributes(true)")

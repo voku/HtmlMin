@@ -110,17 +110,17 @@ interface HtmlMinInterface
     /**
      * @return bool
      */
-    public function isKeepPrefixOnExternalAttributes(): bool;
+    public function isdoKeepHttpAndHttpsPrefixOnExternalAttributes(): bool;
 
     /**
      * @return bool
      */
-    public function isDoMakeSameDomainLinksRelative(): bool;
+    public function isDoMakeSameDomainsLinksRelative(): bool;
 
     /**
-     * @return string
+     * @return string[]
      */
-    public function getLocalDomain(): string;
+    public function getLocalDomains(): array;
 
     /**
      * @return array

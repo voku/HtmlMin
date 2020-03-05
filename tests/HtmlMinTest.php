@@ -1272,7 +1272,7 @@ HTML;
         $expected = '<a href=/>Just an example</a>';
 
         $htmlMin = new HtmlMin();
-        $htmlMin->doMakeSameDomainLinksRelative('www.example.com');
+        $htmlMin->doMakeSameDomainsLinksRelative(['www.example.com']);
         static::assertSame($expected, $htmlMin->minify($html));
 
         // --
@@ -1281,7 +1281,7 @@ HTML;
         $expected = '<a href=/>Just an example</a>';
 
         $htmlMin = new HtmlMin();
-        $htmlMin->doMakeSameDomainLinksRelative('https://www.example.com/');
+        $htmlMin->doMakeSameDomainsLinksRelative(['https://www.example.com/']);
         static::assertSame($expected, $htmlMin->minify($html));
 
         // --
@@ -1290,7 +1290,16 @@ HTML;
         $expected = '<a href=/foo/bar>Just an example</a>';
 
         $htmlMin = new HtmlMin();
-        $htmlMin->doMakeSameDomainLinksRelative('httpS://www.example.com/');
+        $htmlMin->doMakeSameDomainsLinksRelative(['httpS://www.example.com/']);
+        static::assertSame($expected, $htmlMin->minify($html));
+
+        // --
+
+        $html = '<a href="www.example.com/foo/bar">Just an example</a><a href="www.google.com/foo/bar">Just an example v2</a>';
+        $expected = '<a href=/foo/bar>Just an example</a><a href=/foo/bar>Just an example v2</a>';
+
+        $htmlMin = new HtmlMin();
+        $htmlMin->doMakeSameDomainsLinksRelative(['httpS://www.example.com/', 'httpS://www.google.com/']);
         static::assertSame($expected, $htmlMin->minify($html));
 
         // --
@@ -1299,7 +1308,7 @@ HTML;
         $expected = '<a href=/foo/bar>Just an example</a>';
 
         $htmlMin = new HtmlMin();
-        $htmlMin->doMakeSameDomainLinksRelative('www.Example.com');
+        $htmlMin->doMakeSameDomainsLinksRelative(['www.Example.com']);
         static::assertSame($expected, $htmlMin->minify($html));
 
         // --
@@ -1308,7 +1317,7 @@ HTML;
         $expected = '<a href=/foo/bar>Just an example</a>';
 
         $htmlMin = new HtmlMin();
-        $htmlMin->doMakeSameDomainLinksRelative('موقع.وزارة-الاتصالات.مصر');
+        $htmlMin->doMakeSameDomainsLinksRelative(['موقع.وزارة-الاتصالات.مصر']);
         static::assertSame($expected, $htmlMin->minify($html));
 
         // --
@@ -1316,7 +1325,7 @@ HTML;
         $html = '<a href=HTTPS://موقع.وزارة-الاتصالات.مصر/foo/bar target=_blank>Just an example</a>';
 
         $htmlMin = new HtmlMin();
-        $htmlMin->doMakeSameDomainLinksRelative('موقع.وزارة-الاتصالات.مصر');
+        $htmlMin->doMakeSameDomainsLinksRelative(['موقع.وزارة-الاتصالات.مصر']);
         static::assertSame($html, $htmlMin->minify($html));
 
         // --
@@ -1324,18 +1333,18 @@ HTML;
         $html = '<a href=HTTPS://موقع.وزارة-الاتصالات.مصر/foo/bar rel=external>Just an example</a>';
 
         $htmlMin = new HtmlMin();
-        $htmlMin->doMakeSameDomainLinksRelative('موقع.وزارة-الاتصالات.مصر');
+        $htmlMin->doMakeSameDomainsLinksRelative(['موقع.وزارة-الاتصالات.مصر']);
         static::assertSame($html, $htmlMin->minify($html));
     }
 
-    public function testKeepPrefixOnExternalAttributes()
+    public function testdoKeepHttpAndHttpsPrefixOnExternalAttributes()
     {
         $html = '<a href="http://www.example.com/">No remove</a><img src="http://www.example.com/" />';
         $expected = '<a href=http://www.example.com/>No remove</a><img src=//www.example.com/>';
 
         $htmlMin = new HtmlMin();
         $htmlMin->doRemoveHttpPrefixFromAttributes();
-        $htmlMin->keepPrefixOnExternalAttributes();
+        $htmlMin->doKeepHttpAndHttpsPrefixOnExternalAttributes();
         static::assertSame($expected, $htmlMin->minify($html));
 
         // --
@@ -1345,7 +1354,67 @@ HTML;
 
         $htmlMin = new HtmlMin();
         $htmlMin->doRemoveHttpPrefixFromAttributes();
-        $htmlMin->keepPrefixOnExternalAttributes();
+        $htmlMin->doKeepHttpAndHttpsPrefixOnExternalAttributes();
+        static::assertSame($expected, $htmlMin->minify($html));
+
+        // --
+
+        $html = '<a target="_blank" href="http://www.example.com/">No remove</a><img src="http://www.example.com/" />';
+        $expected = '<a href=http://www.example.com/ target=_blank>No remove</a><img src=//www.example.com/>';
+
+        $htmlMin = new HtmlMin();
+        $htmlMin->doRemoveHttpPrefixFromAttributes();
+        $htmlMin->doKeepHttpAndHttpsPrefixOnExternalAttributes();
+        static::assertSame($expected, $htmlMin->minify($html));
+
+        // --
+
+        $html = '<html><head><link href="http://www.example.com/"></head><body><a target="_blank" href="http://www.example.com/">No remove</a><img src="http://www.example.com/" /></body></html>';
+        $expected = '<html><head><link href=//www.example.com/><body><a href=http://www.example.com/ target=_blank>No remove</a><img src=//www.example.com/>';
+
+        $htmlMin = new HtmlMin();
+        $htmlMin->doRemoveHttpPrefixFromAttributes();
+        $htmlMin->doKeepHttpAndHttpsPrefixOnExternalAttributes();
+        static::assertSame($expected, $htmlMin->minify($html));
+
+        // --
+
+        $html = '<a href="http://www.example.com/">No remove</a><img src="http://www.example.com/" />';
+        $expected = '<a href=//www.example.com/>No remove</a><img src=//www.example.com/>';
+
+        $htmlMin = new HtmlMin();
+        $htmlMin->doRemoveHttpPrefixFromAttributes();
+        $htmlMin->doKeepHttpAndHttpsPrefixOnExternalAttributes(false);
+        static::assertSame($expected, $htmlMin->minify($html));
+
+        // --
+
+        $html = '<html><head><link href="http://www.example.com/"></head><body><a href="http://www.example.com/">No remove</a><img src="http://www.example.com/" /></body></html>';
+        $expected = '<html><head><link href=//www.example.com/><body><a href=//www.example.com/>No remove</a><img src=//www.example.com/>';
+
+        $htmlMin = new HtmlMin();
+        $htmlMin->doRemoveHttpPrefixFromAttributes();
+        $htmlMin->doKeepHttpAndHttpsPrefixOnExternalAttributes(false);
+        static::assertSame($expected, $htmlMin->minify($html));
+
+        // --
+
+        $html = '<a target="_blank" href="http://www.example.com/">No remove</a><img src="http://www.example.com/" />';
+        $expected = '<a href=http://www.example.com/ target=_blank>No remove</a><img src=//www.example.com/>';
+
+        $htmlMin = new HtmlMin();
+        $htmlMin->doRemoveHttpPrefixFromAttributes();
+        $htmlMin->doKeepHttpAndHttpsPrefixOnExternalAttributes(false);
+        static::assertSame($expected, $htmlMin->minify($html));
+
+        // --
+
+        $html = '<html><head><link href="http://www.example.com/"></head><body><a target="_blank" href="http://www.example.com/">No remove</a><img src="http://www.example.com/" /></body></html>';
+        $expected = '<html><head><link href=//www.example.com/><body><a href=http://www.example.com/ target=_blank>No remove</a><img src=//www.example.com/>';
+
+        $htmlMin = new HtmlMin();
+        $htmlMin->doRemoveHttpPrefixFromAttributes();
+        $htmlMin->doKeepHttpAndHttpsPrefixOnExternalAttributes(false);
         static::assertSame($expected, $htmlMin->minify($html));
     }
 }

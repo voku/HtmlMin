@@ -190,17 +190,17 @@ class HtmlMin implements HtmlMinInterface
     /**
      * @var bool
      */
-    private $keepPrefixOnExternalAttributes = false;
+    private $doKeepHttpAndHttpsPrefixOnExternalAttributes = false;
 
     /**
      * @var bool
      */
-    private $doMakeSameDomainLinksRelative = false;
+    private $doMakeSameDomainsLinksRelative = false;
 
     /**
-     * @var string
+     * @var string[]
      */
-    private $localDomain = '';
+    private $localDomains = [];
 
     /**
      * @var array
@@ -438,37 +438,41 @@ class HtmlMin implements HtmlMinInterface
     }
 
     /**
-     * @param bool $keepPrefixOnExternalAttributes
+     * @param bool $doKeepHttpAndHttpsPrefixOnExternalAttributes
      *
      * @return $this
      */
-    public function keepPrefixOnExternalAttributes(bool $keepPrefixOnExternalAttributes = true): self
+    public function doKeepHttpAndHttpsPrefixOnExternalAttributes(bool $doKeepHttpAndHttpsPrefixOnExternalAttributes = true): self
     {
-        $this->keepPrefixOnExternalAttributes = $keepPrefixOnExternalAttributes;
+        $this->doKeepHttpAndHttpsPrefixOnExternalAttributes = $doKeepHttpAndHttpsPrefixOnExternalAttributes;
 
         return $this;
     }
 
     /**
-     * @param string $localDomain
+     * @param string[] $localDomains
      *
      * @return $this
      */
-    public function doMakeSameDomainLinksRelative(string $localDomain = ''): self
+    public function doMakeSameDomainsLinksRelative(array $localDomains): self
     {
-        $this->localDomain = \rtrim((string) \preg_replace('/(?:https?:)?\/\//i', '', $localDomain), '/');
+        /** @noinspection AlterInForeachInspection */
+        foreach ($localDomains as &$localDomain) {
+            $localDomain = \rtrim((string) \preg_replace('/(?:https?:)?\/\//i', '', $localDomain), '/');
+        }
 
-        $this->doMakeSameDomainLinksRelative = ($this->localDomain !== '');
+        $this->localDomains = $localDomains;
+        $this->doMakeSameDomainsLinksRelative = \count($this->localDomains) > 0;
 
         return $this;
     }
 
     /**
-     * @return string
+     * @return string[]
      */
-    public function getLocalDomain(): string
+    public function getLocalDomains(): array
     {
-        return $this->localDomain;
+        return $this->localDomains;
     }
 
     /**
@@ -1117,17 +1121,17 @@ class HtmlMin implements HtmlMinInterface
     /**
      * @return bool
      */
-    public function isKeepPrefixOnExternalAttributes(): bool
+    public function isdoKeepHttpAndHttpsPrefixOnExternalAttributes(): bool
     {
-        return $this->keepPrefixOnExternalAttributes;
+        return $this->doKeepHttpAndHttpsPrefixOnExternalAttributes;
     }
 
     /**
      * @return bool
      */
-    public function isDoMakeSameDomainLinksRelative(): bool
+    public function isDoMakeSameDomainsLinksRelative(): bool
     {
-        return $this->doMakeSameDomainLinksRelative;
+        return $this->doMakeSameDomainsLinksRelative;
     }
 
     /**

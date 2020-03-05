@@ -60,11 +60,43 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
         foreach ((array) $attributes as $attrName => $attrValue) {
 
             // -------------------------------------------------------------------------
+            // Remove local domains from attributes.
+            // -------------------------------------------------------------------------
+
+            if ($htmlMin->isDoMakeSameDomainsLinksRelative()) {
+                $localDomains = $htmlMin->getLocalDomains();
+                foreach ($localDomains as $localDomain) {
+                    /** @noinspection InArrayCanBeUsedInspection */
+                    if (
+                        (
+                            $attrName === 'href'
+                            ||
+                            $attrName === 'src'
+                            ||
+                            $attrName === 'srcset'
+                            ||
+                            $attrName === 'action'
+                        )
+                        &&
+                        !(isset($attributes['rel']) && $attributes['rel'] === 'external')
+                        &&
+                        !(isset($attributes['target']) && $attributes['target'] === '_blank')
+                        &&
+                        \stripos($attrValue, $localDomain) !== false
+                    ) {
+                        $localDomainEscaped = \preg_quote($localDomain, '/');
+
+                        $attrValue = (string) \preg_replace("/^(?:(?:https?:)?\/\/)?{$localDomainEscaped}(?!\w)(?:\/?)/i", '/', $attrValue);
+                    }
+                }
+            }
+
+            // -------------------------------------------------------------------------
             // Remove optional "http:"-prefix from attributes.
             // -------------------------------------------------------------------------
 
             if ($htmlMin->isDoRemoveHttpPrefixFromAttributes()) {
-                $attrValue = $this->removeHttpPrefixHelper(
+                $attrValue = $this->removeUrlSchemeHelper(
                     $attrValue,
                     $attrName,
                     'http',
@@ -75,7 +107,7 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
             }
 
             if ($htmlMin->isDoRemoveHttpsPrefixFromAttributes()) {
-                $attrValue = $this->removeHttpPrefixHelper(
+                $attrValue = $this->removeUrlSchemeHelper(
                     $attrValue,
                     $attrName,
                     'https',
@@ -85,31 +117,9 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
                 );
             }
 
-            if ($htmlMin->isDoMakeSameDomainLinksRelative()) {
-                $localDomain = $htmlMin->getLocalDomain();
-                /** @noinspection InArrayCanBeUsedInspection */
-                if (
-                    (
-                        $attrName === 'href'
-                        ||
-                        $attrName === 'src'
-                        ||
-                        $attrName === 'srcset'
-                        ||
-                        $attrName === 'action'
-                    )
-                    &&
-                    !(isset($attributes['rel']) && $attributes['rel'] === 'external')
-                    &&
-                    !(isset($attributes['target']) && $attributes['target'] === '_blank')
-                    &&
-                    \stripos($attrValue, $localDomain) !== false
-                ) {
-                    $localDomainEscaped = \preg_quote($localDomain, '/');
-
-                    $attrValue = (string) \preg_replace("/^(?:(?:https?:)?\/\/)?{$localDomainEscaped}(?!\w)(?:\/?)/i", '/', $attrValue);
-                }
-            }
+            // -------------------------------------------------------------------------
+            // Remove some special attributes.
+            // -------------------------------------------------------------------------
 
             if ($this->removeAttributeHelper(
                 $element->tag,
@@ -245,7 +255,7 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
      *
      * @noinspection PhpTooManyParametersInspection
      */
-    private function removeHttpPrefixHelper(
+    private function removeUrlSchemeHelper(
         string $attrValue,
         string $attrName,
         string $scheme,
@@ -264,7 +274,7 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
                     $attrName === 'href'
                     &&
                     (
-                        !$htmlMin->isKeepPrefixOnExternalAttributes()
+                        !$htmlMin->isdoKeepHttpAndHttpsPrefixOnExternalAttributes()
                         ||
                         $tagName === 'link'
                     )
