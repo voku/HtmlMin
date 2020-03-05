@@ -3,6 +3,7 @@
 - add "doKeepHttpAndHttpsPrefixOnExternalAttributes(bool)": keep http:// and https:// prefix for external links | thanks @abuyoyo
 - add "doMakeSameDomainsLinksRelative(string[] $localDomains)": make the local domains relative | thanks @abuyoyo
 - optimized "optgroup"-html compressing
+- use a new version of "voku/simple_html_dom" (4.7.12)
 
 
 # Changelog 4.1.0 (2020-02-06)
