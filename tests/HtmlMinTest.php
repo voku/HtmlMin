@@ -1266,6 +1266,26 @@ HTML;
         static::assertSame($expected, $htmlMin->minify($html));
     }
 
+    public function testRemoveDeprecatedTypeFromScriptTag()
+    {
+		$html = '<script type="text/javascript">alert("Hello");</script>
+				<script type="text/ecmascript" src="ecmascript.js"></script>';
+        $expected = '<script>alert("Hello");</script><script src=ecmascript.js></script>';
+
+        $htmlMin = new HtmlMin();
+        static::assertSame($expected, $htmlMin->minify($html));
+
+        // --
+
+        $html = '<script type="text/javascript">alert("Hello");</script>
+				<script type="text/ecmascript" src="ecmascript.js"></script>';
+        $expected = '<script type=text/javascript>alert("Hello");</script><script src=ecmascript.js type=text/ecmascript></script>';
+
+		$htmlMin = new HtmlMin();
+		$htmlMin->doRemoveDeprecatedTypeFromScriptTag(false);
+        static::assertSame($expected, $htmlMin->minify($html));
+    }
+
     public function testRelativeLinks()
     {
         $html = '<a href="https://www.example.com">Just an example</a>';
