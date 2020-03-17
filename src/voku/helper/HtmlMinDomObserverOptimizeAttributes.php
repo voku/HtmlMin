@@ -219,7 +219,7 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
         // remove deprecated script-mime-types
         if ($htmlMin->isDoRemoveDeprecatedTypeFromScriptTag()) {
             /** @noinspection NestedPositiveIfStatementsInspection */
-            if ($tag === 'script' && $attrName === 'type' && isset($allAttr['src'], self::$executableScriptsMimeTypes[$attrValue])) {
+            if ($tag === 'script' && $attrName === 'type' && isset(self::$executableScriptsMimeTypes[$attrValue])) {
                 return true;
             }
         }
