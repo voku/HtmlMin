@@ -1,3 +1,11 @@
+# Changelog 4.3.0 (2020-03-22)
+
+- add "isHTML4()"
+- add "isXHTML()"
+- fix "remove deprecated script-mime-types"
+- use a new version of "voku/simple_html_dom" (4.7.13)
+
+
 # Changelog 4.2.0 (2020-03-06)
 
 - add "doKeepHttpAndHttpsPrefixOnExternalAttributes(bool)": keep http:// and https:// prefix for external links | thanks @abuyoyo
