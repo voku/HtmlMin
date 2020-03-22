@@ -252,6 +252,20 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         static::assertSame(\trim($expected), $htmlMin->minify($html));
     }
 
+    public function testMinifyJsTagStuff()
+    {
+        $html = '<script type="text/javascript">alert("Hello");</script>';
+
+        $expected = '<script>alert("Hello");</script>';
+
+        $htmlMin = new HtmlMin();
+
+        $html = \str_replace(["\r\n", "\r", "\n"], "\n", $html);
+        $expected = \str_replace(["\r\n", "\r", "\n"], "\n", $expected);
+
+        static::assertSame(\trim($expected), $htmlMin->minify($html));
+    }
+
     public function testMinifyBase()
     {
         // init
