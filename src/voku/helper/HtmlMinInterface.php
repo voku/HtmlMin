@@ -118,6 +118,16 @@ interface HtmlMinInterface
     public function isDoMakeSameDomainsLinksRelative(): bool;
 
     /**
+     * @return bool
+     */
+    public function isHTML4(): bool;
+
+    /**
+     * @return bool
+     */
+    public function isXHTML(): bool;
+
+    /**
      * @return string[]
      */
     public function getLocalDomains(): array;
