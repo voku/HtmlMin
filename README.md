@@ -11,7 +11,7 @@
 
 ### Description
 
-HtmlMin is a fast and very easy to use PHP library that minifies given HTML5 source by removing extra whitespaces, comments and other unneeded characters without breaking the content structure. As a result pages become smaller in size and load faster. It will also prepare the HTML for better gzip results, by re-ranging (sort alphabetical) attributes and css-class-names.
+HtmlMin is a fast and very easy to use PHP library that minifies given HTML5 source by removing extra whitespaces, comments and other unneeded characters without breaking the content structure. As a result pages become smaller in size and load faster. It will also prepare the HTML for better gzip results, by rearranging (sort alphabetical) attributes and css-class-names.
 
 
 ### Install via "composer require"
@@ -112,4 +112,4 @@ For professional support please contact [me](https://about.me/voku).
 - Thanks to [IntelliJ](https://www.jetbrains.com) as they make the best IDEs for PHP and they gave me an open source license for PhpStorm!
 - Thanks to [Travis CI](https://travis-ci.com/) for being the most awesome, easiest continous integration tool out there!
 - Thanks to [StyleCI](https://styleci.io/) for the simple but powerfull code style check.
-- Thanks to [PHPStan](https://github.com/phpstan/phpstan) && [Psalm](https://github.com/vimeo/psalm) for relly great Static analysis tools and for discover bugs in the code!
+- Thanks to [PHPStan](https://github.com/phpstan/phpstan) & [Psalm](https://github.com/vimeo/psalm) for really great Static analysis tools and for discover bugs in the code!
