@@ -773,6 +773,24 @@ foo
         static::assertSame($expected, $htmlMin->minify($html));
     }
 
+    public function testHtmlClosingTagInSpecialScript()
+    {
+        $htmlMin = new \voku\helper\HtmlMin();
+        $htmlMin->doOptimizeViaHtmlDomParser(true);
+        $html = $htmlMin->minify('
+        <script id="comment-loader" type="text/x-handlebars-template">
+            <nocompress>
+                <i class="fas fa-spinner fa-pulse"></i> Loading ... 
+             </nocompress>
+        </script>');
+
+        $expected = '<script id=comment-loader type=text/x-handlebars-template><nocompress>
+                <i class="fas fa-spinner fa-pulse"></i> Loading ... 
+             </nocompress></script>';
+
+        static::assertSame($expected, $html);
+    }
+
     public function testVueJsExample()
     {
         // init

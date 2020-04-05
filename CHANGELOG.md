@@ -1,3 +1,7 @@
+# Changelog 4.4.1 (2020-04-05) 
+
+- use a new version of "voku/simple_html_dom" (4.7.16)
+
 # Changelog 4.4.0 (2020-04-05)
 
 - add support for removing more default attributes
