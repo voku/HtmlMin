@@ -920,6 +920,16 @@ class HtmlMin implements HtmlMinInterface
                            (
                                $node->parentNode !== null
                                &&
+                               (
+                                   $node->parentNode->lastChild !== null
+                                    &&
+                                    (
+                                        $node->parentNode->lastChild === $node
+                                        ||
+                                        \trim($node->parentNode->lastChild->textContent) === ''
+                                    )
+                               )
+                               &&
                                !\in_array(
                                    $node->parentNode->nodeName,
                                    [

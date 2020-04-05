@@ -791,6 +791,26 @@ foo
         static::assertSame($expected, $html);
     }
 
+    public function testKeepPTagIfNeeded()
+    {
+        $html = '
+        <div class="rating">
+            <p style="margin: 0;">
+                <span style="width: 100%;"></span>
+            </p>
+        
+            (2 reviews)
+        </div>
+        ';
+
+        $htmlMin = new voku\helper\HtmlMin();
+        $result = $htmlMin->minify($html);
+
+        $expected = '<div class=rating><p style="margin: 0;"><span style="width: 100%;"></span> </p> (2 reviews) </div>';
+
+        static::assertSame($expected, $result);
+    }
+
     public function testVueJsExample()
     {
         // init
