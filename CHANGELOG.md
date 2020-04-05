@@ -1,4 +1,4 @@
-# Changelog 4.4.0
+# Changelog 4.4.0 (2020-04-05)
 
 - add support for removing more default attributes
 - add "doRemoveDefaultTypeFromButton()"
