@@ -243,6 +243,21 @@ class HtmlMin implements HtmlMinInterface
     /**
      * @var bool
      */
+    private $doRemoveDeprecatedTypeFromStyleAndLinkTag = true;
+
+    /**
+     * @var bool
+     */
+    private $doRemoveDefaultMediaTypeFromStyleAndLinkTag = true;
+
+    /**
+     * @var bool
+     */
+    private $doRemoveDefaultTypeFromButton = false;
+
+    /**
+     * @var bool
+     */
     private $doRemoveDeprecatedTypeFromScriptTag = true;
 
     /**
@@ -296,6 +311,11 @@ class HtmlMin implements HtmlMinInterface
      * @var bool
      */
     private $isXHTML = false;
+
+    /**
+     * @var string[]|null
+     */
+    private $templateLogicSyntaxInSpecialScriptTags;
 
     /**
      * HtmlMin constructor.
@@ -409,6 +429,42 @@ class HtmlMin implements HtmlMinInterface
     public function doRemoveDeprecatedTypeFromStylesheetLink(bool $doRemoveDeprecatedTypeFromStylesheetLink = true): self
     {
         $this->doRemoveDeprecatedTypeFromStylesheetLink = $doRemoveDeprecatedTypeFromStylesheetLink;
+
+        return $this;
+    }
+
+    /**
+     * @param bool $doRemoveDeprecatedTypeFromStyleAndLinkTag
+     *
+     * @return $this
+     */
+    public function doRemoveDeprecatedTypeFromStyleAndLinkTag(bool $doRemoveDeprecatedTypeFromStyleAndLinkTag = true): self
+    {
+        $this->doRemoveDeprecatedTypeFromStyleAndLinkTag = $doRemoveDeprecatedTypeFromStyleAndLinkTag;
+
+        return $this;
+    }
+
+    /**
+     * @param bool $doRemoveDefaultMediaTypeFromStyleAndLinkTag
+     *
+     * @return $this
+     */
+    public function doRemoveDefaultMediaTypeFromStyleAndLinkTag(bool $doRemoveDefaultMediaTypeFromStyleAndLinkTag = true): self
+    {
+        $this->doRemoveDefaultMediaTypeFromStyleAndLinkTag = $doRemoveDefaultMediaTypeFromStyleAndLinkTag;
+
+        return $this;
+    }
+
+    /**
+     * @param bool $doRemoveDefaultTypeFromButton
+     *
+     * @return $this
+     */
+    public function doRemoveDefaultTypeFromButton(bool $doRemoveDefaultTypeFromButton = true): self
+    {
+        $this->doRemoveDefaultTypeFromButton = $doRemoveDefaultTypeFromButton;
 
         return $this;
     }
@@ -1131,6 +1187,30 @@ class HtmlMin implements HtmlMinInterface
     /**
      * @return bool
      */
+    public function isDoRemoveDeprecatedTypeFromStyleAndLinkTag(): bool
+    {
+        return $this->doRemoveDeprecatedTypeFromStyleAndLinkTag;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDoRemoveDefaultMediaTypeFromStyleAndLinkTag(): bool
+    {
+        return $this->doRemoveDefaultMediaTypeFromStyleAndLinkTag;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDoRemoveDefaultTypeFromButton(): bool
+    {
+        return $this->doRemoveDefaultTypeFromButton;
+    }
+
+    /**
+     * @return bool
+     */
     public function isDoRemoveEmptyAttributes(): bool
     {
         return $this->doRemoveEmptyAttributes;
@@ -1438,8 +1518,11 @@ class HtmlMin implements HtmlMinInterface
     {
         // init dom
         $dom = new HtmlDomParser();
-        /** @noinspection UnusedFunctionResultInspection */
         $dom->useKeepBrokenHtml($this->keepBrokenHtml);
+
+        if ($this->templateLogicSyntaxInSpecialScriptTags !== null) {
+            $dom->overwriteTemplateLogicSyntaxInSpecialScriptTags($this->templateLogicSyntaxInSpecialScriptTags);
+        }
 
         $dom->getDocument()->preserveWhiteSpace = false; // remove redundant white space
         $dom->getDocument()->formatOutput = false; // do not formats output with indentation
@@ -1766,6 +1849,24 @@ class HtmlMin implements HtmlMinInterface
     public function useKeepBrokenHtml(bool $keepBrokenHtml): self
     {
         $this->keepBrokenHtml = $keepBrokenHtml;
+
+        return $this;
+    }
+
+    /**
+     * @param string[] $templateLogicSyntaxInSpecialScriptTags
+     *
+     * @return HtmlMin
+     */
+    public function overwriteTemplateLogicSyntaxInSpecialScriptTags(array $templateLogicSyntaxInSpecialScriptTags): self
+    {
+        foreach ($templateLogicSyntaxInSpecialScriptTags as $tmp) {
+            if (!\is_string($tmp)) {
+                throw new \InvalidArgumentException('setTemplateLogicSyntaxInSpecialScriptTags only allows string[]');
+            }
+        }
+
+        $this->templateLogicSyntaxInSpecialScriptTags = $templateLogicSyntaxInSpecialScriptTags;
 
         return $this;
     }

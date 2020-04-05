@@ -183,11 +183,47 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
                 return true;
             }
 
+            if ($tag === 'form' && $attrName === 'autocomplete' && $attrValue === 'on') {
+                return true;
+            }
+
+            if ($tag === 'form' && $attrName === 'enctype' && $attrValue === 'application/x-www-form-urlencoded') {
+                return true;
+            }
+
             if ($tag === 'input' && $attrName === 'type' && $attrValue === 'text') {
                 return true;
             }
 
+            if ($tag === 'textarea' && $attrName === 'wrap' && $attrValue === 'soft') {
+                return true;
+            }
+
             if ($tag === 'area' && $attrName === 'shape' && $attrValue === 'rect') {
+                return true;
+            }
+
+            if ($tag === 'th' && $attrName === 'scope' && $attrValue === 'auto') {
+                return true;
+            }
+
+            if ($tag === 'ol' && $attrName === 'type' && $attrValue === 'decimal') {
+                return true;
+            }
+
+            if ($tag === 'ol' && $attrName === 'start' && $attrValue === '1') {
+                return true;
+            }
+
+            if ($tag === 'track' && $attrName === 'kind' && $attrValue === 'subtitles') {
+                return true;
+            }
+
+            if ($attrName === 'spellcheck' && $attrValue === 'default') {
+                return true;
+            }
+
+            if ($attrName === 'draggable' && $attrValue === 'auto') {
                 return true;
             }
         }
@@ -208,10 +244,24 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
             }
         }
 
-        // remove "type=text/css" for css links
+        if ($htmlMin->isDoRemoveDefaultMediaTypeFromStyleAndLinkTag()) {
+            /** @noinspection NestedPositiveIfStatementsInspection */
+            if (($tag === 'link' || $tag === 'style') && $attrName === 'media' && $attrValue === 'all') {
+                return true;
+            }
+        }
+
+        // remove "type=text/css" for css "stylesheet"-links
         if ($htmlMin->isDoRemoveDeprecatedTypeFromStylesheetLink()) {
             /** @noinspection NestedPositiveIfStatementsInspection */
-            if ($tag === 'link' && $attrName === 'type' && $attrValue === 'text/css' && isset($allAttr['rel']) && $allAttr['rel'] === 'stylesheet') {
+            if ($tag === 'link' && $attrName === 'type' && $attrValue === 'text/css' && isset($allAttr['rel']) && $allAttr['rel'] === 'stylesheet' && $htmlMin->isXHTML() === false && $htmlMin->isHTML4() === false) {
+                return true;
+            }
+        }
+        // remove deprecated css-mime-types
+        if ($htmlMin->isDoRemoveDeprecatedTypeFromStyleAndLinkTag()) {
+            /** @noinspection NestedPositiveIfStatementsInspection */
+            if (($tag === 'link' || $tag === 'style') && $attrName === 'type' && $attrValue === 'text/css' && $htmlMin->isXHTML() === false && $htmlMin->isHTML4() === false) {
                 return true;
             }
         }
@@ -219,7 +269,15 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
         // remove deprecated script-mime-types
         if ($htmlMin->isDoRemoveDeprecatedTypeFromScriptTag()) {
             /** @noinspection NestedPositiveIfStatementsInspection */
-            if ($tag === 'script' && $attrName === 'type' && $htmlMin->isXHTML() === false && $htmlMin->isHTML4() === false && isset(self::$executableScriptsMimeTypes[$attrValue])) {
+            if ($tag === 'script' && $attrName === 'type' && isset(self::$executableScriptsMimeTypes[$attrValue]) && $htmlMin->isXHTML() === false && $htmlMin->isHTML4() === false) {
+                return true;
+            }
+        }
+
+        // remove 'type=submit' from <button type="submit">
+        if ($htmlMin->isDoRemoveDefaultTypeFromButton()) {
+            /** @noinspection NestedPositiveIfStatementsInspection */
+            if ($tag === 'button' && $attrName === 'type' && $attrValue === 'submit') {
                 return true;
             }
         }

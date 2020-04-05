@@ -1,3 +1,12 @@
+# Changelog 4.4.0
+
+- add support for removing more default attributes
+- add "doRemoveDefaultTypeFromButton()"
+- add "doRemoveDefaultMediaTypeFromStyleAndLinkTag()"
+- add "doRemoveDeprecatedTypeFromStyleAndLinkTag()"
+- add "overwriteTemplateLogicSyntaxInSpecialScriptTags()"
+- use a new version of "voku/simple_html_dom" (4.7.15)
+
 # Changelog 4.3.0 (2020-03-22)
 
 - add "isHTML4()"

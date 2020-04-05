@@ -45,6 +45,21 @@ interface HtmlMinInterface
     /**
      * @return bool
      */
+    public function isDoRemoveDeprecatedTypeFromStyleAndLinkTag(): bool;
+
+    /**
+     * @return bool
+     */
+    public function isDoRemoveDefaultMediaTypeFromStyleAndLinkTag(): bool;
+
+    /**
+     * @return bool
+     */
+    public function isDoRemoveDefaultTypeFromButton(): bool;
+
+    /**
+     * @return bool
+     */
     public function isDoRemoveDeprecatedTypeFromScriptTag(): bool;
 
     /**

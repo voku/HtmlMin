@@ -756,12 +756,19 @@ foo
     <div class="alert alert-success">
         Bar
     </div>
+    
+    {{foo}}
+    
+    {{bar}}
+    
+    {{hello}}
 </script>
 ';
 
         $htmlMin = new voku\helper\HtmlMin();
+        $htmlMin->overwriteTemplateLogicSyntaxInSpecialScriptTags(['{%']);
 
-        $expected = '<script type=text/html><p>Foo <div class="alert alert-success"> Bar </div></script>';
+        $expected = '<script type=text/html><p>Foo <div class="alert alert-success"> Bar </div> {{foo}} {{bar}} {{hello}} </script>';
 
         static::assertSame($expected, $htmlMin->minify($html));
     }
@@ -833,6 +840,9 @@ foo
         $htmlMin->doRemoveDeprecatedScriptCharsetAttribute(false); // remove deprecated charset-attribute (the browser will use the charset from the HTTP-Header, anyway)
         $htmlMin->doRemoveDeprecatedTypeFromScriptTag(false);      // remove deprecated script-mime-types
         $htmlMin->doRemoveDeprecatedTypeFromStylesheetLink(false); // remove "type=text/css" for css links
+        $htmlMin->doRemoveDeprecatedTypeFromStyleAndLinkTag(false); // remove "type=text/css" from all links and styles
+        $htmlMin->doRemoveDefaultMediaTypeFromStyleAndLinkTag(false); // remove "media="all" from all links and styles
+        $htmlMin->doRemoveDefaultTypeFromButton(false); // remove type="submit" from button tags
         $htmlMin->doRemoveEmptyAttributes(false);                  // remove some empty attributes
         $htmlMin->doRemoveHttpPrefixFromAttributes(false);         // remove optional "http:"-prefix from attributes
         $htmlMin->doRemoveValueFromEmptyInput(false);              // remove 'value=""' from empty <input>
