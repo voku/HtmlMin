@@ -1,3 +1,7 @@
+# Changelog 4.4.2 (20202-04-06)
+
+- fix "domNodeClosingTagOptional()" -> do not remove "</p>" if there is more content in the parent node
+
 # Changelog 4.4.1 (2020-04-05) 
 
 - use a new version of "voku/simple_html_dom" (4.7.16)
