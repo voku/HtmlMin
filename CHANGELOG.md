@@ -1,3 +1,7 @@
+# Changelog 4.4.3 (20202-04-06)
+
+- fix "domNodeClosingTagOptional()" -> fix logic of detecting next sibling dom node
+
 # Changelog 4.4.2 (20202-04-06)
 
 - fix "domNodeClosingTagOptional()" -> do not remove "</p>" if there is more content in the parent node
