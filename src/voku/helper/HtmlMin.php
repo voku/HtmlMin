@@ -913,6 +913,8 @@ class HtmlMin implements HtmlMinInterface
                        (
                            $nextSibling === null
                            &&
+                           $node->parentNode !== null
+                           &&
                            !\in_array(
                                $node->parentNode->nodeName,
                                [
@@ -1460,7 +1462,7 @@ class HtmlMin implements HtmlMinInterface
     protected function getNextSiblingOfTypeDOMElement(\DOMNode $node)
     {
         do {
-            /** @var \DOMNode|null $node - false-positive error from phpstan */
+            /** @var \DOMNode|null $nodeTmp - false-positive error from phpstan */
             $nodeTmp = $node->nextSibling;
 
             if ($nodeTmp instanceof \DOMText) {
@@ -1471,12 +1473,11 @@ class HtmlMin implements HtmlMinInterface
                 ) {
                     $node = $nodeTmp;
                 } else {
-                    $node = $nodeTmp ? $nodeTmp->nextSibling : null;
+                    $node = $nodeTmp->nextSibling;
                 }
             } else {
                 $node = $nodeTmp;
             }
-
         } while (!($node === null || $node instanceof \DOMElement || $node instanceof \DOMText));
 
         return $node;
