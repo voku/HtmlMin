@@ -811,6 +811,26 @@ foo
         static::assertSame($expected, $result);
     }
 
+    public function testKeepPTagIfNeeded2()
+    {
+        $html = '
+        <div>
+            <p>
+                <span>First Paragraph</span>
+            </p>
+            Loose Text
+            <p>Another Paragraph</p>
+        </div>
+        ';
+
+        $htmlMin = new voku\helper\HtmlMin();
+        $result = $htmlMin->minify($html);
+
+        $expected = '<div><p><span>First Paragraph</span> </p> Loose Text <p>Another Paragraph </div>';
+
+        static::assertSame($expected, $result);
+    }
+
     public function testVueJsExample()
     {
         // init

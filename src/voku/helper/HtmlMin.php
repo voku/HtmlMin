@@ -874,11 +874,7 @@ class HtmlMin implements HtmlMinInterface
                    )
                    &&
                    (
-                       (
-                           $nextSibling === null
-                           &&
-                           $tag_name === 'dd'
-                       )
+                       $nextSibling === null
                        ||
                        (
                            $nextSibling instanceof \DOMElement
@@ -917,32 +913,18 @@ class HtmlMin implements HtmlMinInterface
                        (
                            $nextSibling === null
                            &&
-                           (
-                               $node->parentNode !== null
-                               &&
-                               (
-                                   $node->parentNode->lastChild !== null
-                                    &&
-                                    (
-                                        $node->parentNode->lastChild === $node
-                                        ||
-                                        \trim($node->parentNode->lastChild->textContent) === ''
-                                    )
-                               )
-                               &&
-                               !\in_array(
-                                   $node->parentNode->nodeName,
-                                   [
-                                       'a',
-                                       'audio',
-                                       'del',
-                                       'ins',
-                                       'map',
-                                       'noscript',
-                                       'video',
-                                   ],
-                                   true
-                               )
+                           !\in_array(
+                               $node->parentNode->nodeName,
+                               [
+                                   'a',
+                                   'audio',
+                                   'del',
+                                   'ins',
+                                   'map',
+                                   'noscript',
+                                   'video',
+                               ],
+                               true
                            )
                        )
                        ||
@@ -1479,8 +1461,23 @@ class HtmlMin implements HtmlMinInterface
     {
         do {
             /** @var \DOMNode|null $node - false-positive error from phpstan */
-            $node = $node->nextSibling;
-        } while (!($node === null || $node instanceof \DOMElement));
+            $nodeTmp = $node->nextSibling;
+
+            if ($nodeTmp instanceof \DOMText) {
+                if (
+                    \trim($nodeTmp->textContent) !== ''
+                    &&
+                    \strpos($nodeTmp->textContent, '<') === false
+                ) {
+                    $node = $nodeTmp;
+                } else {
+                    $node = $nodeTmp ? $nodeTmp->nextSibling : null;
+                }
+            } else {
+                $node = $nodeTmp;
+            }
+
+        } while (!($node === null || $node instanceof \DOMElement || $node instanceof \DOMText));
 
         return $node;
     }
