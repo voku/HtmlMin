@@ -375,10 +375,11 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
             <dt>foo
             <dd><span class="bar"></span>
         </dl>
+        User: User-\<wbr>u00d0\<wbr>u009f\<wbr>u00d0\<wbr>u009a\<wbr>User<br>
         <a></a>
-    ';
+        ';
 
-        $expected = '<dl><dt>foo <dd><span class=bar></span></dl> <a></a>';
+        $expected = '<dl><dt>foo <dd><span class=bar></span></dl> User: User-\<wbr>u00d0\<wbr>u009f\<wbr>u00d0\<wbr>u009a\<wbr>User<br> <a></a>';
 
         static::assertSame(
             \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
@@ -393,7 +394,7 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
             <dd><span class="bar">&nbsp;</span></dd>
         </dl>
         <a></a>
-    ';
+        ';
 
         $expected = '<dl><dt>foo <dd><span class=bar>&nbsp;</span></dl> <a></a>';
 
@@ -412,7 +413,7 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
             <dd><span class="bar"></span>
         </dl>
         <a></a>
-    ';
+        ';
 
         $expected = '<dl><dt>foo <dd><span class=bar></span> </dl> <a></a>';
 
