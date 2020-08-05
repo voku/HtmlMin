@@ -1141,6 +1141,19 @@ h1 {
         static::assertSame($expected, $htmlMin->minify($html));
     }
 
+    public function testHtmlWithSpecialHtmlComment()
+    {
+        // init
+        $htmlMin = new HtmlMin();
+        $htmlMin->setSpecialHtmlComments(['INT_SCRIPT'], ['END_INI_SCRIPT']);
+
+        $html = '<p><!--INT_SCRIPT test1 --> lall <!-- test2 --></p> <!-- test2 END_INI_SCRIPT-->';
+
+        $expected = '<p><!--INT_SCRIPT test1--> lall <!--test2 END_INI_SCRIPT-->';
+
+        static::assertSame($expected, $htmlMin->minify($html));
+    }
+
     public function testMultipleHorizontalWhitespaceCharactersCollaps()
     {
         // init

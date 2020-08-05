@@ -203,12 +203,22 @@ class HtmlMin implements HtmlMinInterface
     private $localDomains = [];
 
     /**
-     * @var array
+     * @var string[]
      */
     private $domainsToRemoveHttpPrefixFromAttributes = [
         'google.com',
         'google.de',
     ];
+
+    /**
+     * @var string[]
+     */
+    private $specialHtmlCommentsStaringWith = [];
+
+    /**
+     * @var string[]
+     */
+    private $specialHtmlCommentsEndingWith = [];
 
     /**
      * @var bool
@@ -1518,6 +1528,30 @@ class HtmlMin implements HtmlMinInterface
     }
 
     /**
+     * Check if the current string is an special comment.
+     *
+     * @param string $comment
+     *
+     * @return bool
+     */
+    private function isSpecialComment($comment): bool
+    {
+        foreach ($this->specialHtmlCommentsStaringWith as $search) {
+            if (\strpos($comment, $search) === 0) {
+                return true;
+            }
+        }
+
+        foreach ($this->specialHtmlCommentsEndingWith as $search) {
+            if (\substr($comment, -\strlen($search)) === $search) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * @param string $html
      * @param bool   $multiDecodeNewHtmlEntity
      *
@@ -1698,8 +1732,11 @@ class HtmlMin implements HtmlMinInterface
 
             $text = $element->text();
 
-            // skip normal comments
-            if (!$this->isConditionalComment($text)) {
+            if (
+                !$this->isConditionalComment($text)
+                &&
+                !$this->isSpecialComment($text)
+            ) {
                 continue;
             }
 
@@ -1796,13 +1833,27 @@ class HtmlMin implements HtmlMinInterface
     }
 
     /**
-     * @param array $domainsToRemoveHttpPrefixFromAttributes
+     * @param string[] $domainsToRemoveHttpPrefixFromAttributes
      *
      * @return $this
      */
     public function setDomainsToRemoveHttpPrefixFromAttributes($domainsToRemoveHttpPrefixFromAttributes): self
     {
         $this->domainsToRemoveHttpPrefixFromAttributes = $domainsToRemoveHttpPrefixFromAttributes;
+
+        return $this;
+    }
+
+    /**
+     * @param string[] $startingWith
+     * @param string[] $endingWith
+     *
+     * @return $this
+     */
+    public function setSpecialHtmlComments(array $startingWith, array $endingWith = []): self
+    {
+        $this->specialHtmlCommentsStaringWith = $startingWith;
+        $this->specialHtmlCommentsEndingWith = $endingWith;
 
         return $this;
     }
