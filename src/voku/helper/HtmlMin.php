@@ -1003,11 +1003,12 @@ class HtmlMin implements HtmlMinInterface
                 }
 
                 if (!$this->doRemoveWhitespaceAroundTags) {
-                    /** @noinspection NestedPositiveIfStatementsInspection */
+                    /** @var \DOMText|null $nextSiblingTmp - false-positive error from phpstan */
+                    $nextSiblingTmp = $child->nextSibling;
                     if (
-                        $child->nextSibling instanceof \DOMText
+                        $nextSiblingTmp instanceof \DOMText
                         &&
-                        $child->nextSibling->wholeText === ' '
+                        $nextSiblingTmp->wholeText === ' '
                     ) {
                         if (
                             $emptyStringTmp !== 'last_was_empty'
@@ -1462,7 +1463,7 @@ class HtmlMin implements HtmlMinInterface
     protected function getNextSiblingOfTypeDOMElement(\DOMNode $node)
     {
         do {
-            /** @var \DOMNode|null $nodeTmp - false-positive error from phpstan */
+            /** @var \DOMElement|\DOMText|null $nodeTmp - false-positive error from phpstan */
             $nodeTmp = $node->nextSibling;
 
             if ($nodeTmp instanceof \DOMText) {
