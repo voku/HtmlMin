@@ -1,3 +1,7 @@
+# Changelog 4.4.5 (20202-08-06)
+
+- allow to configure special comments via "setSpecialHtmlComments()"
+
 # Changelog 4.4.4 (20202-08-06)
 
 - fix problems with self-closing-tags e.g. <wbr>
