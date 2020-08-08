@@ -1,8 +1,12 @@
-# Changelog 4.4.5 (20202-08-06)
+# Changelog 4.4.6 (2020-08-08)
+
+-  fix invalid input html
+
+# Changelog 4.4.5 (2020-08-06)
 
 - allow to configure special comments via "setSpecialHtmlComments()"
 
-# Changelog 4.4.4 (20202-08-06)
+# Changelog 4.4.4 (2020-08-06)
 
 - fix problems with self-closing-tags e.g. <wbr>
 
