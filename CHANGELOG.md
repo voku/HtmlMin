@@ -1,3 +1,7 @@
+# Changelog 4.4.7 (2020-08-11) 
+
+- use a new version of "voku/simple_html_dom" (4.7.21)
+
 # Changelog 4.4.6 (2020-08-08)
 
 -  fix invalid input html
