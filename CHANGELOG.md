@@ -1,3 +1,8 @@
+# Changelog 4.4.8 (2020-08-11) 
+
+- remove content before "<!doctype.*>", otherwise DOMDocument cannot handle the input
+- use a new version of "voku/simple_html_dom" (4.7.22)
+
 # Changelog 4.4.7 (2020-08-11) 
 
 - use a new version of "voku/simple_html_dom" (4.7.21)

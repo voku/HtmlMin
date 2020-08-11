@@ -1570,11 +1570,23 @@ class HtmlMin implements HtmlMinInterface
         $dom->getDocument()->preserveWhiteSpace = false; // remove redundant white space
         $dom->getDocument()->formatOutput = false; // do not formats output with indentation
 
+        // Remove content before <!DOCTYPE.*> because otherwise the DOMDocument can not handle the input.
+        if (\stripos($html, '<!DOCTYPE') !== false) {
+            /** @noinspection NestedPositiveIfStatementsInspection */
+            if (
+                \preg_match('/(^.*?)<!(?:DOCTYPE)(?: [^>]*)?>/sui', $html, $matches_before_doctype)
+                &&
+                \trim($matches_before_doctype[1])
+            ) {
+                $html = \str_replace($matches_before_doctype[1], '', $html);
+            }
+        }
+
         // load dom
         /** @noinspection UnusedFunctionResultInspection */
         $dom->loadHtml($html);
 
-        $this->withDocType = (\stripos(\ltrim($html), '<!DOCTYPE') === 0);
+        $this->withDocType = (\stripos($html, '<!DOCTYPE') === 0);
 
         $doctypeStr = $this->getDoctype($dom->getDocument());
 

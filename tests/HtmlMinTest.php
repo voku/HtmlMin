@@ -868,6 +868,30 @@ foo
         static::assertSame($expected, $htmlMin->minify($html));
     }
 
+    public function testContentBeforeDoctypeExample()
+    {
+        // init
+        $htmlMin = new HtmlMin();
+        $htmlMin->useKeepBrokenHtml(true);
+
+        $html = '<!-- === BEGIN TOP === --><!DOCTYPE html>
+        <!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->
+        <!--[if IE 9]> <html lang="en" class="ie9"> <![endif]-->
+        <!--[if !IE]><!-->
+        <html prefix="og: http://ogp.me/ns#" lang="ru">
+        <!--<![endif]-->
+        <head>
+        <!-- Title -->
+        <title>test</title>
+        </head>
+        <body>lall</body></html>
+        ';
+
+        $expected = '<!DOCTYPE html><!--[if IE 8]> <html lang="en" class="ie8"> <![endif]--><!--[if IE 9]> <html lang="en" class="ie9"> <![endif]--><!--[if !IE]><!--><html prefix="og: http://ogp.me/ns#" lang=ru> <!--<![endif]--> <head><title>test</title> <body>lall';
+
+        static::assertSame($expected, $htmlMin->minify($html));
+    }
+
     public function testDoNotCompressTag()
     {
         $minifier = new HtmlMin();
