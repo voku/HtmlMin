@@ -328,6 +328,11 @@ class HtmlMin implements HtmlMinInterface
     private $templateLogicSyntaxInSpecialScriptTags;
 
     /**
+     * @var string[]|null
+     */
+    private $specialScriptTags;
+
+    /**
      * HtmlMin constructor.
      */
     public function __construct()
@@ -1566,6 +1571,10 @@ class HtmlMin implements HtmlMinInterface
         if ($this->templateLogicSyntaxInSpecialScriptTags !== null) {
             $dom->overwriteTemplateLogicSyntaxInSpecialScriptTags($this->templateLogicSyntaxInSpecialScriptTags);
         }
+      
+        if ($this->specialScriptTags !== null) {
+            $dom->overwriteSpecialScriptTags($this->specialScriptTags);
+        }
 
         $dom->getDocument()->preserveWhiteSpace = false; // remove redundant white space
         $dom->getDocument()->formatOutput = false; // do not formats output with indentation
@@ -1939,6 +1948,25 @@ class HtmlMin implements HtmlMinInterface
         }
 
         $this->templateLogicSyntaxInSpecialScriptTags = $templateLogicSyntaxInSpecialScriptTags;
+
+        return $this;
+    }
+
+
+    /**
+     * @param string[] $specialScriptTags
+     *
+     * @return HtmlDomParser
+     */
+    public function overwriteSpecialScriptTags(array $specialScriptTags): self
+    {
+        foreach ($specialScriptTags as $tag) {
+            if (!\is_string($tag)) {
+                throw new \InvalidArgumentException('SpecialScriptTags only allows string[]');
+            }
+        }
+
+        $this->specialScriptTags = $specialScriptTags;
 
         return $this;
     }
