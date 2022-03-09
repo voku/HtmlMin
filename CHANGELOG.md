@@ -1,3 +1,8 @@
+# Changelog 4.4.9 (2022-03-09)
+
+- optimize regex for gigantic inputs
+- use a new version of "voku/simple_html_dom" (4.8.4)
+
 # Changelog 4.4.8 (2020-08-11) 
 
 - remove content before "<!doctype.*>", otherwise DOMDocument cannot handle the input
