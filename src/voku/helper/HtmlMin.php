@@ -1372,13 +1372,25 @@ class HtmlMin implements HtmlMinInterface
 
         // Remove extra white-space(s) between HTML attribute(s)
         if (\strpos($html, ' ') !== false) {
-            $html = (string) \preg_replace_callback(
+            $htmlCleaned = \preg_replace_callback(
                 '#<([^/\s<>!]+)(?:\s+([^<>]*?)\s*|\s*)(/?)>#',
                 static function ($matches) {
                     return '<' . $matches[1] . \preg_replace('#([^\s=]+)(=([\'"]?)(.*?)\3)?(\s+|$)#su', ' $1$2', $matches[2]) . $matches[3] . '>';
                 },
                 $html
             );
+            if ($htmlCleaned !== null) {
+                $html = (string)$htmlCleaned;
+            } else {
+                $htmlCleaned = (string) \preg_replace_callback(
+                    '#<([^/\s<>!]+)(?:\s+([^<>]*)\s*|\s*)(/?)>#',
+                    static function ($matches) {
+                        return '<' . $matches[1] . \preg_replace('#([^\s=]+)(=([\'"]?)(.*?)\3)?(\s+|$)#su', ' $1$2', $matches[2]) . $matches[3] . '>';
+                    },
+                    $html
+                );
+                $html = $htmlCleaned;
+            }
         }
 
         if ($this->doRemoveSpacesBetweenTags) {

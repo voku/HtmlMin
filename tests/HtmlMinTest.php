@@ -14,7 +14,7 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
      */
     private $compressor;
 
-    public function testEmpryResult()
+    public function testEmptyResult()
     {
         static::assertSame('', $this->compressor->minify(null));
         static::assertSame('', $this->compressor->minify(' '));
