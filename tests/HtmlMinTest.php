@@ -76,6 +76,31 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         static::assertSame($expectd, $compressedHtml);
     }
 
+    public function testIssue63()
+    {
+        $html = '
+<p>
+	foo <code>bar</code>. ZIiiii  zzz <code>1.1</code> Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+</p>
+						
+<p>
+	<h3>Vestibulum eget velit arcu.</h3>
+
+	Vestibulum eget velit arcu. Phasellus eget scelerisque dui, nec elementum ante. <code>aoaoaoao</code>
+</p>
+';
+
+        $htmlMin = new voku\helper\HtmlMin();
+
+        $compressedHtml = $htmlMin->minify($html);
+
+        $expectd = '<p>foo <code>bar</code>. ZIiiii  zzz <code>1.1</code> Lorem ipsum dolor sit amet, consectetur adipiscing elit. <p><h3>Vestibulum eget velit arcu.</h3>
+
+	Vestibulum eget velit arcu. Phasellus eget scelerisque dui, nec elementum ante. <code>aoaoaoao</code>';
+
+        static::assertSame($expectd, $compressedHtml);
+    }
+
     /**
      * @return array
      */

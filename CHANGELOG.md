@@ -1,3 +1,7 @@
+# Changelog 4.4.10 (2022-03-13)
+
+- use a new version of "voku/simple_html_dom" (4.8.5)
+
 # Changelog 4.4.9 (2022-03-09)
 
 - optimize regex for gigantic inputs
