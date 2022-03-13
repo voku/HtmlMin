@@ -303,7 +303,7 @@ class HtmlMin implements HtmlMinInterface
     /**
      * @var HtmlMinDomObserverInterface[]|\SplObjectStorage
      *
-     * @psalm-var \SplObjectStorage<HtmlMinDomObserverInterface>
+     * @psalm-var \SplObjectStorage<HtmlMinDomObserverInterface, HtmlMinDomObserverInterface>
      */
     private $domLoopObservers;
 
@@ -767,7 +767,6 @@ class HtmlMin implements HtmlMinInterface
         //
         // <-- However, a start tag must never be omitted if it has any attributes.
 
-        /** @noinspection InArrayCanBeUsedInspection */
         return \in_array($tag_name, self::$optional_end_tags, true)
                ||
                (
@@ -1107,7 +1106,7 @@ class HtmlMin implements HtmlMinInterface
                     $tmpTypePublic = 'PUBLIC';
                 }
 
-                return '<!DOCTYPE ' . $child->name . ''
+                return '<!DOCTYPE ' . $child->name
                        . ($child->publicId ? ' ' . $tmpTypePublic . ' "' . $child->publicId . '"' : '')
                        . ($child->systemId ? ' ' . $tmpTypeSystem . ' "' . $child->systemId . '"' : '')
                        . '>';
@@ -1586,7 +1585,7 @@ class HtmlMin implements HtmlMinInterface
         if (\stripos($html, '<!DOCTYPE') !== false) {
             /** @noinspection NestedPositiveIfStatementsInspection */
             if (
-                \preg_match('/(^.*?)<!(?:DOCTYPE)(?: [^>]*)?>/sui', $html, $matches_before_doctype)
+                \preg_match('/(^.*?)<!DOCTYPE(?: [^>]*)?>/sui', $html, $matches_before_doctype)
                 &&
                 \trim($matches_before_doctype[1])
             ) {
@@ -1595,7 +1594,6 @@ class HtmlMin implements HtmlMinInterface
         }
 
         // load dom
-        /** @noinspection UnusedFunctionResultInspection */
         $dom->loadHtml($html);
 
         $this->withDocType = (\stripos($html, '<!DOCTYPE') === 0);
@@ -1617,7 +1615,7 @@ class HtmlMin implements HtmlMinInterface
         // Notify the Observer before the minification.
         // -------------------------------------------------------------------------
 
-        foreach ($dom->find('*') as $element) {
+        foreach ($dom->findMulti('*') as $element) {
             $this->notifyObserversAboutDomElementBeforeMinification($element);
         }
 
@@ -1643,7 +1641,7 @@ class HtmlMin implements HtmlMinInterface
             $dom = $this->sumUpWhitespace($dom);
         }
 
-        foreach ($dom->find('*') as $element) {
+        foreach ($dom->findMulti('*') as $element) {
 
             // -------------------------------------------------------------------------
             // Remove whitespace around tags. [protected html is still protected]
@@ -1702,7 +1700,7 @@ class HtmlMin implements HtmlMinInterface
      */
     private function protectTagHelper(HtmlDomParser $dom, string $selector): HtmlDomParser
     {
-        foreach ($dom->find($selector) as $element) {
+        foreach ($dom->findMulti($selector) as $element) {
             if ($element->isRemoved()) {
                 continue;
             }
@@ -1730,7 +1728,7 @@ class HtmlMin implements HtmlMinInterface
     {
         $this->protectTagHelper($dom, 'code');
 
-        foreach ($dom->find('script, style') as $element) {
+        foreach ($dom->findMulti('script, style') as $element) {
             if ($element->isRemoved()) {
                 continue;
             }
@@ -1749,7 +1747,7 @@ class HtmlMin implements HtmlMinInterface
             ++$this->protected_tags_counter;
         }
 
-        foreach ($dom->find('//comment()') as $element) {
+        foreach ($dom->findMulti('//comment()') as $element) {
             if ($element->isRemoved()) {
                 continue;
             }
@@ -1789,7 +1787,7 @@ class HtmlMin implements HtmlMinInterface
      */
     private function removeComments(HtmlDomParser $dom): HtmlDomParser
     {
-        foreach ($dom->find('//comment()') as $commentWrapper) {
+        foreach ($dom->findMulti('//comment()') as $commentWrapper) {
             $comment = $commentWrapper->getNode();
             $val = $comment->nodeValue;
             if (\strpos($val, '[') === false) {
@@ -1891,8 +1889,7 @@ class HtmlMin implements HtmlMinInterface
      */
     private function sumUpWhitespace(HtmlDomParser $dom): HtmlDomParser
     {
-        $text_nodes = $dom->find('//text()');
-        foreach ($text_nodes as $text_node_wrapper) {
+        foreach ($dom->findMulti('//text()') as $text_node_wrapper) {
             /* @var $text_node \DOMNode */
             $text_node = $text_node_wrapper->getNode();
             $xp = $text_node->getNodePath();
@@ -1902,7 +1899,7 @@ class HtmlMin implements HtmlMinInterface
 
             $doSkip = false;
             foreach (self::$skipTagsForRemoveWhitespace as $pattern) {
-                if (\strpos($xp, "/${pattern}") !== false) {
+                if (\strpos($xp, '/' . $pattern) !== false) {
                     $doSkip = true;
 
                     break;
