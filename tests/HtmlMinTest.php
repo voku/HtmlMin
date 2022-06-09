@@ -16,9 +16,9 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
 
     public function testEmptyResult()
     {
-        static::assertSame('', $this->compressor->minify(null));
-        static::assertSame('', $this->compressor->minify(' '));
-        static::assertSame('', $this->compressor->minify(''));
+        static::assertSame('', (new HtmlMin())->minify(null));
+        static::assertSame('', (new HtmlMin())->minify(' '));
+        static::assertSame('', (new HtmlMin())->minify(''));
     }
 
     /**
@@ -200,18 +200,7 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
             ],
         ];
     }
-
-    protected function setUp()
-    {
-        parent::setUp();
-        $this->compressor = new HtmlMin();
-    }
-
-    protected function tearDown()
-    {
-        $this->compressor = null;
-    }
-
+    
     /**
      * @dataProvider providerBoolAttr
      *
@@ -219,10 +208,12 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
      */
     public function testBoolAttr($input)
     {
+        $minifier = new HtmlMin();
+
         $html = '<!doctype html><html><body><form>' . $input . '</form></body></html>';
         $expected = '<!DOCTYPE html><html><body><form><input autofocus checked type=checkbox></form>';
 
-        $actual = $this->compressor->minify($html);
+        $actual = $minifier->minify($html);
         static::assertSame($expected, $actual);
 
         // ---
@@ -230,7 +221,7 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         $html = '<html><body><form>' . $input . '</form></body></html>';
         $expected = '<html><body><form><input autofocus checked type=checkbox></form>';
 
-        $actual = $this->compressor->minify($html);
+        $actual = $minifier->minify($html);
         static::assertSame($expected, $actual);
 
         // ---
@@ -238,7 +229,7 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         $html = '<form>' . $input . '</form>';
         $expected = '<form><input autofocus checked type=checkbox></form>';
 
-        $actual = $this->compressor->minify($html);
+        $actual = $minifier->minify($html);
         static::assertSame($expected, $actual);
     }
 
@@ -1388,7 +1379,7 @@ h1 {
      */
     public function testMultipleSpaces($input, $expected)
     {
-        $actual = $this->compressor->minify($input);
+        $actual = (new HtmlMin())->minify($input);
         static::assertSame($expected, $actual);
     }
 
@@ -1400,7 +1391,7 @@ h1 {
      */
     public function testNewLinesTabsReturns($input, $expected)
     {
-        $actual = $this->compressor->minify($input);
+        $actual = (new HtmlMin())->minify($input);
         static::assertSame($expected, $actual);
     }
 
@@ -1412,7 +1403,7 @@ h1 {
      */
     public function testSpaceAfterGt($input, $expected)
     {
-        $actual = $this->compressor->minify($input);
+        $actual = (new HtmlMin())->minify($input);
         static::assertSame($expected, $actual);
     }
 
@@ -1424,7 +1415,7 @@ h1 {
      */
     public function testSpaceBeforeLt($input, $expected)
     {
-        $actual = $this->compressor->minify($input);
+        $actual = (new HtmlMin())->minify($input);
         static::assertSame($expected, $actual, 'tested: ' . $input);
     }
 
@@ -1436,7 +1427,7 @@ h1 {
      */
     public function testSpecialCharacterEncoding($input, $expected)
     {
-        $actual = $this->compressor->minify($input, true);
+        $actual = (new HtmlMin())->minify($input, true);
         static::assertSame($expected, $actual);
     }
 
@@ -1448,13 +1439,15 @@ h1 {
      */
     public function testTrim($input, $expected)
     {
-        $actual = $this->compressor->minify($input);
+        $actual = (new HtmlMin())->minify($input);
         static::assertSame($expected, $actual);
     }
 
     public function testDoRemoveCommentsWithFalse()
     {
-        $this->compressor->doRemoveComments(false);
+        $minifier = new HtmlMin();
+
+        $minifier->doRemoveComments(false);
 
         $html = <<<'HTML'
 <!DOCTYPE html>
@@ -1473,7 +1466,7 @@ do not remove comment
 
 HTML;
 
-        $actual = $this->compressor->minify($html);
+        $actual = $minifier->minify($html);
 
         $expectedHtml = <<<'HTML'
 <!DOCTYPE html><html><head><title>Test</title> <body><!-- do not remove comment --> <hr> <!--
