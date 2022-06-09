@@ -812,6 +812,64 @@ foo
         static::assertSame($expected, $htmlMin->minify($html));
     }
 
+    public function testOverwriteSpecialScriptTags()
+    {
+        $html = <<<HTML
+<!doctype html>
+    <html lang="nl">
+        <head></head>
+        <body>
+        <script type="text/x-custom">
+        <ul class="prices-tier items">
+          <% _.each(tierPrices, function(item, key) { %>
+          <%  var priceStr = '<span class="price-container price-tier_price">'
+                  + '<span data-price-amount="' + priceUtils.formatPrice(item.price, currencyFormat) + '"'
+                  + ' data-price-type=""' + ' class="price-wrapper ">'
+                  + '<span class="price">' + priceUtils.formatPrice(item.price, currencyFormat) + '</span>'
+                  + '</span>'
+              + '</span>'; %>
+          <li class="item">
+              <%= 'some text %1 %2'.replace('%1', item.qty).replace('%2', priceStr) %>
+              <strong class="benefit">
+                 save <span class="percent tier-<%= key %>">&nbsp;<%= item.percentage %></span>%
+              </strong>
+          </li>
+          <% }); %>
+        </ul>
+        </script>
+        <div data-role="tier-price-block">
+            <div> Some Content </div>
+        </div>
+        </body>
+</html>
+HTML;
+        $htmlMin = new voku\helper\HtmlMin();
+        $htmlMin->overwriteSpecialScriptTags(['text/x-custom']);
+        $expected = <<<HTML
+<!DOCTYPE html><html lang=nl><head> <body><script type=text/x-custom>
+        <ul class="prices-tier items">
+          <% _.each(tierPrices, function(item, key) { %>
+          <%  var priceStr = '<span class="price-container price-tier_price">'
+                  + '<span data-price-amount="' + priceUtils.formatPrice(item.price, currencyFormat) + '"'
+                  + ' data-price-type=""' + ' class="price-wrapper ">'
+                  + '<span class="price">' + priceUtils.formatPrice(item.price, currencyFormat) + '</span>'
+                  + '</span>'
+              + '</span>'; %>
+          <li class="item">
+              <%= 'some text %1 %2'.replace('%1', item.qty).replace('%2', priceStr) %>
+              <strong class="benefit">
+                 save <span class="percent tier-<%= key %>">&nbsp;<%= item.percentage %></span>%
+              </strong>
+          </li>
+          <% }); %>
+        </ul>
+        </script> <div data-role=tier-price-block><div> Some Content </div> </div>
+HTML;
+
+
+        static::assertSame($expected, $htmlMin->minify($html));
+    }
+
     public function testHtmlClosingTagInSpecialScript()
     {
         $htmlMin = new \voku\helper\HtmlMin();
