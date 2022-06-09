@@ -92,7 +92,7 @@ PS: you can use the "nocompress"-tag to keep the html e.g.: "<nocompress>\n foob
 1) [Composer](https://getcomposer.org) is a prerequisite for running the tests.
 
 ```
-composer install voku/html-min
+composer require voku/html-min
 ```
 
 2) The tests can be executed by running this command from the root directory:
