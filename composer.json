@@ -18,7 +18,7 @@
     }
   ],
   "require": {
-    "php": ">=7.0.0",
+    "php": "^8.0 || ^8.1 || ^8.2",
     "voku/simple_html_dom": "~4.8.5",
     "ext-dom": "*"
   },
@@ -27,7 +27,7 @@
   },
   "autoload": {
     "psr-4": {
-      "voku\\": "src/voku/"
+      "Voku\\": "src/voku/"
     }
   }
 }

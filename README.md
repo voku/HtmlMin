@@ -23,7 +23,7 @@ composer require voku/html-min
 ### Quick Start
 
 ```php
-use voku\helper\HtmlMin;
+use Voku\Helper\HtmlMin;
 
 $html = "
 <html>
@@ -50,7 +50,7 @@ echo $htmlMin->minify($html);
 ### Options
 
 ```php
-use voku\helper\HtmlMin;
+use Voku\Helper\HtmlMin;
 
 $htmlMin = new HtmlMin();
 
