@@ -704,6 +704,7 @@ class HtmlMin implements HtmlMinInterface
                     )
                 ) {
                     $attr_val = \preg_replace(self::$regExSpace, ' ', $attribute->value);
+                    $attr_val = trim($attr_val);
                 } else {
                     $attr_val = $attribute->value;
                 }
