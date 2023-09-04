@@ -1651,7 +1651,6 @@ class HtmlMin implements HtmlMinInterface
         }
 
         foreach ($dom->findMulti('*') as $element) {
-
             // -------------------------------------------------------------------------
             // Remove whitespace around tags. [protected html is still protected]
             // -------------------------------------------------------------------------
