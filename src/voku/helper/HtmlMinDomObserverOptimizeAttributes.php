@@ -58,7 +58,6 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
         $tagName = $element->getNode()->nodeName;
         $attrs = [];
         foreach ((array) $attributes as $attrName => $attrValue) {
-
             // -------------------------------------------------------------------------
             // Remove local domains from attributes.
             // -------------------------------------------------------------------------
