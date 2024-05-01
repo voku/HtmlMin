@@ -1713,9 +1713,9 @@ class HtmlMin implements HtmlMinInterface
                 continue;
             }
 
-            $this->protectedChildNodes[$this->protected_tags_counter] = $element->parentNode()->innerHtml();
-            $parentNode = $element->getNode()->parentNode;
+            $parentNode = $element->parentNode();
             if ($parentNode !== null) {
+                $this->protectedChildNodes[$this->protected_tags_counter] = $parentNode->innerHtml();
                 $parentNode->nodeValue = '<' . $this->protectedChildNodesHelper . ' data-' . $this->protectedChildNodesHelper . '="' . $this->protected_tags_counter . '"></' . $this->protectedChildNodesHelper . '>';
             }
 
