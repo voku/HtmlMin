@@ -1,3 +1,7 @@
+# Changelog 4.5.1 (2024-05-25)
+
+- "fix SimpleHtmlDom::__construct(): Argument #1 ($node) must be of type DOMNode, null given" (thanks @frugan-dev)
+
 # Changelog 4.5.0 (2022-06-09)
 
 - added possibility overwrite special script tags on minify process (thanks @hryvinskyi)
