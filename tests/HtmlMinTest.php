@@ -1668,4 +1668,23 @@ HTML;
         $htmlMin->doKeepHttpAndHttpsPrefixOnExternalAttributes(false);
         static::assertSame($expected, $htmlMin->minify($html));
     }
+
+    public function testNullParentNode()
+    {
+        $html = " <nocompress>foo</nocompress> ";
+        $expected = "<nocompress>foo</nocompress>";
+        
+        $htmlMin = new HtmlMin();
+        $htmlMin->doOptimizeViaHtmlDomParser(true);
+        static::assertSame($expected, $htmlMin->minify($html));
+
+        // --
+
+        $html = "<><code>foo</code><>";
+        $expected = "<code>foo</code>";
+
+        $htmlMin = new HtmlMin();
+        $htmlMin->doOptimizeViaHtmlDomParser(true);
+        static::assertSame($expected, $htmlMin->minify($html));
+    }
 }
