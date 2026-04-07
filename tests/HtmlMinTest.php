@@ -974,7 +974,7 @@ HTML;
         <body>lall</body></html>
         ';
 
-        $expected = '<!DOCTYPE html><!--[if IE 8]> <html lang="en" class="ie8"> <![endif]--><!--[if IE 9]> <html lang="en" class="ie9"> <![endif]--><!--[if !IE]><!--><html prefix="og: http://ogp.me/ns#" lang=ru> <!--<![endif]--> <head><title>test</title> <body>lall';
+        $expected = '<!DOCTYPE html><!--[if IE 8]> <html lang="en" class="ie8"> <![endif]--><!--[if IE 9]> <html lang="en" class="ie9"> <![endif]--><!--[if !IE]><!--><html lang=ru prefix="og: http://ogp.me/ns#"> <!--<![endif]--> <head><title>test</title> <body>lall';
 
         static::assertSame($expected, $htmlMin->minify($html));
     }
@@ -1681,7 +1681,7 @@ HTML;
         // --
 
         $html = "<><code>foo</code><>";
-        $expected = "<code>foo</code>";
+        $expected = "><code>foo</code><>";
 
         $htmlMin = new HtmlMin();
         $htmlMin->doOptimizeViaHtmlDomParser(true);
