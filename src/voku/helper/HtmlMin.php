@@ -340,6 +340,20 @@ class HtmlMin implements HtmlMinInterface
         $this->domLoopObservers = new \SplObjectStorage();
 
         $this->attachObserverToTheDomLoop(new HtmlMinDomObserverOptimizeAttributes());
+
+        // Patch simple_html_dom's placeholder element names to use valid HTML custom
+        // element names. The default names (starting with underscores) are treated as
+        // invalid by newer libxml2 versions and cause the placeholder mechanism to fail.
+        // This is idempotent: it checks the current value before patching.
+        $ref = new \ReflectionProperty(\voku\helper\AbstractDomParser::class, 'domHtmlWrapperHelper');
+        $ref->setAccessible(true);
+        if (\strpos((string) $ref->getValue(), '____') === 0) {
+            $ref->setValue(null, 'htmlmin-wrapper');
+
+            $ref2 = new \ReflectionProperty(\voku\helper\AbstractDomParser::class, 'domHtmlSpecialScriptHelper');
+            $ref2->setAccessible(true);
+            $ref2->setValue(null, 'htmlmin-special-script');
+        }
     }
 
     /**
