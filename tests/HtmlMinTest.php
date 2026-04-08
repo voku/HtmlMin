@@ -1671,8 +1671,8 @@ HTML;
 
     public function testNullParentNode()
     {
-        $html = " <nocompress>foo</nocompress> ";
-        $expected = "<nocompress>foo</nocompress>";
+        $html = ' <nocompress>foo</nocompress> ';
+        $expected = '<nocompress>foo</nocompress>';
         
         $htmlMin = new HtmlMin();
         $htmlMin->doOptimizeViaHtmlDomParser(true);
@@ -1680,8 +1680,8 @@ HTML;
 
         // --
 
-        $html = "<><code>foo</code><>";
-        $expected = "><code>foo</code><>";
+        $html = '<><code>foo</code><>';
+        $expected = '><code>foo</code><>';
 
         $htmlMin = new HtmlMin();
         $htmlMin->doOptimizeViaHtmlDomParser(true);
