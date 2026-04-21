@@ -1536,6 +1536,50 @@ HTML;
         static::assertSame($expectedHtml, $actual);
     }
 
+    public function testDoRemoveCommentsOnlyWithoutChangingOtherHtml()
+    {
+        $minifier = new HtmlMin();
+        $minifier->doRemoveCommentsOnly();
+
+        $html = <<<'HTML'
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test</title>
+</head>
+<body>
+<!-- remove this -->
+<hr />
+<!--[if IE]>
+keep this
+<![endif]-->
+</body>
+</html>
+
+HTML;
+
+        $actual = $minifier->minify($html);
+
+        $expectedHtml = <<<'HTML'
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test</title>
+</head>
+<body>
+
+<hr />
+<!--[if IE]>
+keep this
+<![endif]-->
+</body>
+</html>
+
+HTML;
+
+        static::assertSame($expectedHtml, $actual);
+    }
+
     public function testSelfClosingInput()
     {
         $html = '

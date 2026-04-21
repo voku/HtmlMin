@@ -105,6 +105,11 @@ interface HtmlMinInterface
     /**
      * @return bool
      */
+    public function isDoRemoveCommentsOnly(): bool;
+
+    /**
+     * @return bool
+     */
     public function isDoRemoveWhitespaceAroundTags(): bool;
 
     /**

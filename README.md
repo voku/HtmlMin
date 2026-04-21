@@ -61,6 +61,7 @@ $htmlMin = new HtmlMin();
 
 $htmlMin->doOptimizeViaHtmlDomParser();               // optimize html via "HtmlDomParser()"
 $htmlMin->doRemoveComments();                         // remove default HTML comments (depends on "doOptimizeViaHtmlDomParser(true)")
+$htmlMin->doRemoveCommentsOnly();                     // remove HTML comments only, without changing any other HTML
 $htmlMin->doSumUpWhitespace();                        // sum-up extra whitespace from the Dom (depends on "doOptimizeViaHtmlDomParser(true)")
 $htmlMin->doRemoveWhitespaceAroundTags();             // remove whitespace around tags (depends on "doOptimizeViaHtmlDomParser(true)")
 $htmlMin->doOptimizeAttributes();                     // optimize html attributes (depends on "doOptimizeViaHtmlDomParser(true)")

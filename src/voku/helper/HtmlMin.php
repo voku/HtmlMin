@@ -165,6 +165,11 @@ class HtmlMin implements HtmlMinInterface
     /**
      * @var bool
      */
+    private $doRemoveCommentsOnly = false;
+
+    /**
+     * @var bool
+     */
     private $doRemoveWhitespaceAroundTags = false;
 
     /**
@@ -389,6 +394,18 @@ class HtmlMin implements HtmlMinInterface
     public function doRemoveComments(bool $doRemoveComments = true): self
     {
         $this->doRemoveComments = $doRemoveComments;
+
+        return $this;
+    }
+
+    /**
+     * @param bool $doRemoveCommentsOnly
+     *
+     * @return $this
+     */
+    public function doRemoveCommentsOnly(bool $doRemoveCommentsOnly = true): self
+    {
+        $this->doRemoveCommentsOnly = $doRemoveCommentsOnly;
 
         return $this;
     }
@@ -1178,6 +1195,14 @@ class HtmlMin implements HtmlMinInterface
     /**
      * @return bool
      */
+    public function isDoRemoveCommentsOnly(): bool
+    {
+        return $this->doRemoveCommentsOnly;
+    }
+
+    /**
+     * @return bool
+     */
     public function isDoRemoveDefaultAttributes(): bool
     {
         return $this->doRemoveDefaultAttributes;
@@ -1378,6 +1403,14 @@ class HtmlMin implements HtmlMinInterface
         $html = (string) $html;
         if (!isset($html[0])) {
             return '';
+        }
+
+        if ($this->doRemoveCommentsOnly) {
+            if (!$this->doRemoveComments) {
+                return $html;
+            }
+
+            return $this->removeCommentsOnlyFromHtmlString($html);
         }
 
         $html = \trim($html);
@@ -1922,6 +1955,52 @@ class HtmlMin implements HtmlMinInterface
         $dom->getDocument()->normalizeDocument();
 
         return $dom;
+    }
+
+    /**
+     * Remove comments from html-string and keep all other content untouched.
+     *
+     * @param string $html
+     *
+     * @return string
+     */
+    private function removeCommentsOnlyFromHtmlString(string $html): string
+    {
+        $parts = \preg_split(
+            '#(<(?:script|style|textarea|pre|code)\b[^>]*>.*?</(?:script|style|textarea|pre|code)>)#is',
+            $html,
+            -1,
+            \PREG_SPLIT_DELIM_CAPTURE
+        );
+
+        if ($parts === false) {
+            return $html;
+        }
+
+        foreach ($parts as $index => $part) {
+            if ($index % 2 === 1) {
+                continue;
+            }
+
+            $parts[$index] = (string) \preg_replace_callback(
+                '/<!--(?<comment>.*?)-->/su',
+                function ($matches): string {
+                    $comment = $matches['comment'];
+                    if (
+                        $this->isConditionalComment($comment)
+                        ||
+                        $this->isSpecialComment($comment)
+                    ) {
+                        return $matches[0];
+                    }
+
+                    return '';
+                },
+                $part
+            );
+        }
+
+        return \implode('', $parts);
     }
 
     /**
