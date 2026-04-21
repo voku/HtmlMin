@@ -1892,11 +1892,11 @@ class HtmlMin implements HtmlMinInterface
                 &&
                 $this->isInlineJavaScriptType($scriptType)
             ) {
-                $innerHtmlBeforeMinification = $innerHtml;
+                $originalInnerHtml = $innerHtml;
                 try {
                     $innerHtml = \JShrink\Minifier::minify($innerHtml);
                 } catch (\Exception $e) {
-                    $innerHtml = $innerHtmlBeforeMinification;
+                    $innerHtml = $originalInnerHtml;
                 }
             }
 
