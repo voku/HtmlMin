@@ -1892,9 +1892,11 @@ class HtmlMin implements HtmlMinInterface
                 &&
                 $this->isInlineJavaScriptType($scriptType)
             ) {
+                $innerHtmlBeforeMinification = $innerHtml;
                 try {
                     $innerHtml = \JShrink\Minifier::minify($innerHtml);
                 } catch (\Exception $e) {
+                    $innerHtml = $innerHtmlBeforeMinification;
                 }
             }
 
@@ -1950,7 +1952,7 @@ class HtmlMin implements HtmlMinInterface
             return true;
         }
 
-        return \strpos($scriptType, 'javascript') !== false || \strpos($scriptType, 'ecmascript') !== false;
+        return \stripos($scriptType, 'javascript') !== false || \stripos($scriptType, 'ecmascript') !== false;
     }
 
     /**
