@@ -989,6 +989,35 @@ HTML;
         static::assertSame($expected, $html);
     }
 
+    public function testDoNotCompressTagWithLeadingAndTrailingWhitespace()
+    {
+        $minifier = new HtmlMin();
+        $minifier->doRemoveOmittedHtmlTags(false);
+        $html = $minifier->minify("
+<nocompress>
+  \r\n\t
+  
+    <ul>
+      <li>
+        à
+      </li>
+      
+      <li>
+        á
+      </li>
+      
+    </ul>
+  
+  \r\n\t
+
+</nocompress>
+");
+
+        $expected = '<nocompress><ul><li> à </li> <li> á </li></ul> </nocompress>';
+
+        static::assertSame($expected, $html);
+    }
+
     public function testDoNotDecodeHtmlEnteties()
     {
         $minifier = new HtmlMin();
