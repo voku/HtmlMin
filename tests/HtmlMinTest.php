@@ -586,14 +586,24 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
 
     public function testKeepWhitespaceBeforeAnchorWrappedInStrongTag()
     {
-        $html = 'Get a <strong>complimentary</strong> organic lawn fertilizer with a lawn maintenance or bi-weekly subscription.<strong> <a href="https://domain.com/qgq8/contact-us">Contact us to schedule!</a></strong>';
-        $expected = 'Get a <strong>complimentary</strong> organic lawn fertilizer with a lawn maintenance or bi-weekly subscription.<strong> <a href=https://domain.com/qgq8/contact-us>Contact us to schedule!</a></strong>';
+        $fixtures = [
+            [
+                'html' => 'Get a <strong>complimentary</strong> organic lawn fertilizer with a lawn maintenance or bi-weekly subscription.<strong> <a href="https://domain.com/qgq8/contact-us">Contact us to schedule!</a></strong>',
+                'expected' => 'Get a <strong>complimentary</strong> organic lawn fertilizer with a lawn maintenance or bi-weekly subscription.<strong> <a href=https://domain.com/qgq8/contact-us>Contact us to schedule!</a></strong>',
+            ],
+            [
+                'html' => 'Foo<em> <a href="https://example.com">bar</a></em>',
+                'expected' => 'Foo<em> <a href=https://example.com>bar</a></em>',
+            ],
+        ];
 
-        foreach ([true, false] as $removeWhitespaceAroundTags) {
-            $htmlMin = new HtmlMin();
-            $htmlMin->doRemoveWhitespaceAroundTags($removeWhitespaceAroundTags);
+        foreach ($fixtures as $fixture) {
+            foreach ([true, false] as $removeWhitespaceAroundTags) {
+                $htmlMin = new HtmlMin();
+                $htmlMin->doRemoveWhitespaceAroundTags($removeWhitespaceAroundTags);
 
-            static::assertSame($expected, $htmlMin->minify($html));
+                static::assertSame($fixture['expected'], $htmlMin->minify($fixture['html']));
+            }
         }
     }
 

@@ -80,6 +80,17 @@ class HtmlMin implements HtmlMinInterface
     ];
 
     /**
+     * @var array<string, string>
+     */
+    private static $inlineSpaceSensitiveTags = [
+        'b'      => '',
+        'em'     => '',
+        'i'      => '',
+        'strong' => '',
+        'u'      => '',
+    ];
+
+    /**
      * @var array
      */
     private static $booleanAttributes = [
@@ -1082,7 +1093,7 @@ class HtmlMin implements HtmlMinInterface
                             &&
                             $child->parentNode instanceof \DOMElement
                             &&
-                            $child->parentNode->tagName === 'strong'
+                            isset(self::$inlineSpaceSensitiveTags[$child->parentNode->tagName])
                         )
                     ) {
                         if (
