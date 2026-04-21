@@ -142,7 +142,7 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
 
             if ($htmlMin->isDoSortHtmlAttributes()) {
                 $attrs[$attrName] = $attrValue;
-                $element->{$attrName} = null;
+                $element->removeAttribute($attrName);
             }
         }
 

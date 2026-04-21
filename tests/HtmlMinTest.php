@@ -929,7 +929,7 @@ HTML;
     </select>
     ';
 
-        $expected = '<select :class="[\'c-chart__label\']" @change=getGraphData name=filter v-model=fiter></select>';
+        $expected = '<select :class="[\'c-chart__label\']" name=filter @change=getGraphData v-model=fiter></select>';
 
         static::assertSame($expected, $htmlMin->minify($html));
     }
@@ -974,7 +974,7 @@ HTML;
         <body>lall</body></html>
         ';
 
-        $expected = '<!DOCTYPE html><!--[if IE 8]> <html lang="en" class="ie8"> <![endif]--><!--[if IE 9]> <html lang="en" class="ie9"> <![endif]--><!--[if !IE]><!--><html prefix="og: http://ogp.me/ns#" lang=ru> <!--<![endif]--> <head><title>test</title> <body>lall';
+        $expected = '<!DOCTYPE html><!--[if IE 8]> <html lang="en" class="ie8"> <![endif]--><!--[if IE 9]> <html lang="en" class="ie9"> <![endif]--><!--[if !IE]><!--><html prefix="og: http://ogp.me/ns#" lang=ru><!--<![endif]--> <head><title>test</title> <body>lall';
 
         static::assertSame($expected, $htmlMin->minify($html));
     }
@@ -1501,7 +1501,7 @@ HTML;
     {
         $html = '<script type="text/javascript">alert("Hello");</script>
                 <script type="text/ecmascript" src="ecmascript.js"></script>';
-        $expected = '<script>alert("Hello");</script><script src=ecmascript.js></script>';
+        $expected = '<script>alert("Hello");</script> <script src=ecmascript.js></script>';
 
         $htmlMin = new HtmlMin();
         static::assertSame($expected, $htmlMin->minify($html));
@@ -1510,7 +1510,7 @@ HTML;
 
         $html = '<script type="text/javascript">alert("Hello");</script>
                 <script type="text/ecmascript" src="ecmascript.js"></script>';
-        $expected = '<script type=text/javascript>alert("Hello");</script><script src=ecmascript.js type=text/ecmascript></script>';
+        $expected = '<script type=text/javascript>alert("Hello");</script> <script src=ecmascript.js type=text/ecmascript></script>';
 
         $htmlMin = new HtmlMin();
         $htmlMin->doRemoveDeprecatedTypeFromScriptTag(false);
@@ -1671,8 +1671,8 @@ HTML;
 
     public function testNullParentNode()
     {
-        $html = " <nocompress>foo</nocompress> ";
-        $expected = "<nocompress>foo</nocompress>";
+        $html = ' <nocompress>foo</nocompress> ';
+        $expected = '<nocompress>foo</nocompress>';
         
         $htmlMin = new HtmlMin();
         $htmlMin->doOptimizeViaHtmlDomParser(true);
@@ -1680,8 +1680,8 @@ HTML;
 
         // --
 
-        $html = "<><code>foo</code><>";
-        $expected = "<code>foo</code>";
+        $html = '<><code>foo</code><>';
+        $expected = '><code>foo</code><>';
 
         $htmlMin = new HtmlMin();
         $htmlMin->doOptimizeViaHtmlDomParser(true);

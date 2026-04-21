@@ -679,7 +679,12 @@ class HtmlMin implements HtmlMinInterface
                                &&
                                $attribute->value !== ''
                                &&
-                               \strpos($attribute->name, '____SIMPLE_HTML_DOM__VOKU') !== 0
+                               // simple_html_dom v5 serializes <html ⚡> as <html SHDOM_GOOGLE_AMP="true">.
+                               // libxml lowercases this attribute name to "shdom_google_amp". If we strip
+                               // the quotes (producing shdom_google_amp=true), putReplacedBackToPreserveHtmlEntities
+                               // cannot match the full "<html SHDOM_GOOGLE_AMP=\"true\"" pattern and the ⚡
+                               // is never restored. Keep quotes for this specific token attribute.
+                               \strtolower($attribute->name) !== 'shdom_google_amp'
                                &&
                                \strpos($attribute->name, ' ') === false
                                &&
@@ -1488,9 +1493,23 @@ class HtmlMin implements HtmlMinInterface
      */
     protected function getNextSiblingOfTypeDOMElement(\DOMNode $node)
     {
-        do {
+        while (true) {
             /** @var \DOMElement|\DOMText|null $nodeTmp - false-positive error from phpstan */
             $nodeTmp = $node->nextSibling;
+
+            if ($nodeTmp === null) {
+                return null;
+            }
+
+            if (
+                $nodeTmp instanceof \DOMElement
+                &&
+                $nodeTmp->tagName === $this->protectedChildNodesHelper
+            ) {
+                $node = $nodeTmp;
+
+                continue;
+            }
 
             if ($nodeTmp instanceof \DOMText) {
                 if (
@@ -1498,16 +1517,16 @@ class HtmlMin implements HtmlMinInterface
                     &&
                     \strpos($nodeTmp->textContent, '<') === false
                 ) {
-                    $node = $nodeTmp;
-                } else {
-                    $node = $nodeTmp->nextSibling;
+                    return $nodeTmp;
                 }
-            } else {
-                $node = $nodeTmp;
-            }
-        } while (!($node === null || $node instanceof \DOMElement || $node instanceof \DOMText));
 
-        return $node;
+                $node = $nodeTmp;
+
+                continue;
+            }
+
+            return $nodeTmp;
+        }
     }
 
     /**
@@ -1602,6 +1621,40 @@ class HtmlMin implements HtmlMinInterface
             }
         }
 
+        // -------------------------------------------------------------------------
+        // Protect xml:lang attributes from being stripped or mangled by the libxml
+        // HTML parser on PHP < 8.0.  Namespace-prefixed attributes like xml:lang are
+        // silently discarded when libxml loads HTML in older versions, resulting in
+        // duplicate plain `lang` attributes in the output.
+        //
+        // Strategy: replace xml:lang="VAL" with a plain placeholder attribute name
+        // and, when no lang="VAL" already exists on the same element, also inject
+        // lang="VAL" so the output is the same on all PHP versions.
+        //
+        // Restoration below converts the lowercased placeholder back to xml:lang.
+        // -------------------------------------------------------------------------
+
+        $hasXmlLang = \stripos($html, 'xml:lang') !== false;
+        if ($hasXmlLang) {
+            $html = (string) \preg_replace_callback(
+                '/<([a-zA-Z][^>]*)\s+xml:lang=(["\']?)([^"\'>\s]+)\2([^>]*)>/si',
+                static function ($m) {
+                    $attrsBefore = $m[1];
+                    $quote       = $m[2];
+                    $value       = $m[3];
+                    $attrsAfter  = $m[4];
+                    // Only inject lang=VAL when no lang attribute is already present.
+                    $hasLang = (bool) \preg_match('/\blang=/i', $attrsBefore . $attrsAfter);
+                    $out = '<' . $attrsBefore . ' HTMLMINXMLLANG=' . $quote . $value . $quote . $attrsAfter;
+                    if (!$hasLang) {
+                        $out .= ' lang=' . $quote . $value . $quote;
+                    }
+                    return $out . '>';
+                },
+                $html
+            );
+        }
+
         // load dom
         $dom->loadHtml($html);
 
@@ -1670,10 +1723,18 @@ class HtmlMin implements HtmlMinInterface
         // Convert the Dom into a string.
         // -------------------------------------------------------------------------
 
-        return $dom->fixHtmlOutput(
+        $result = $dom->fixHtmlOutput(
             $doctypeStr . $this->domNodeToString($dom->getDocument()),
             $multiDecodeNewHtmlEntity
         );
+
+        // Restore xml:lang from its placeholder. libxml lowercases attribute names,
+        // so the stored placeholder comes back as htmlminxmllang in the DOM output.
+        if ($hasXmlLang) {
+            $result = \str_ireplace(' htmlminxmllang=', ' xml:lang=', $result);
+        }
+
+        return $result;
     }
 
     /**
@@ -1714,7 +1775,7 @@ class HtmlMin implements HtmlMinInterface
             }
 
             $parentNode = $element->parentNode();
-            if ($parentNode->nodeValue !== null) {
+            if ($parentNode !== null && $parentNode->nodeValue !== null) {
                 $this->protectedChildNodes[$this->protected_tags_counter] = $parentNode->innerHtml();
                 $parentNode->nodeValue = '<' . $this->protectedChildNodesHelper . ' data-' . $this->protectedChildNodesHelper . '="' . $this->protected_tags_counter . '"></' . $this->protectedChildNodesHelper . '>';
             }
@@ -1749,7 +1810,30 @@ class HtmlMin implements HtmlMinInterface
                 }
             }
 
-            $this->protectedChildNodes[$this->protected_tags_counter] = $element->innerhtml;
+            $innerHtml = $element->innerhtml;
+
+            // On PHP < 8.0 the simplevokubroken-hash mechanism restores content
+            // (including surrounding newlines/spaces) AFTER fixHtmlOutput's trim
+            // has already run, so regular scripts would carry extra whitespace.
+            // On PHP >= 8.0 innerhtml already returns trimmed content for regular
+            // scripts, so this trim is a no-op there.
+            //
+            // Template-type scripts (text/x-custom-template, etc.) are hashed via
+            // the EJS/ERB path on ALL PHP versions, and their tests intentionally
+            // expect leading/trailing whitespace to be preserved – so skip trim for
+            // those types.
+            $activeSpecialTypes = $this->specialScriptTags ?? [
+                'text/html',
+                'text/template',
+                'text/x-custom-template',
+                'text/x-handlebars-template',
+            ];
+            $scriptType = isset($attributes) ? \strtolower(\trim((string) ($attributes['type'] ?? ''))) : '';
+            if ($element->tag !== 'script' || !\in_array($scriptType, $activeSpecialTypes, true)) {
+                $innerHtml = \trim($innerHtml);
+            }
+
+            $this->protectedChildNodes[$this->protected_tags_counter] = $innerHtml;
             $element->getNode()->nodeValue = '<' . $this->protectedChildNodesHelper . ' data-' . $this->protectedChildNodesHelper . '="' . $this->protected_tags_counter . '"></' . $this->protectedChildNodesHelper . '>';
 
             ++$this->protected_tags_counter;
@@ -1770,14 +1854,18 @@ class HtmlMin implements HtmlMinInterface
                 continue;
             }
 
-            $this->protectedChildNodes[$this->protected_tags_counter] = '<!--' . $text . '-->';
+            $this->protectedChildNodes[$this->protected_tags_counter] = '<!--' . \trim($text) . '-->';
 
             /* @var $node \DOMComment */
             $node = $element->getNode();
-            $child = new \DOMText('<' . $this->protectedChildNodesHelper . ' data-' . $this->protectedChildNodesHelper . '="' . $this->protected_tags_counter . '"></' . $this->protectedChildNodesHelper . '>');
-            $parentNode = $element->getNode()->parentNode;
-            if ($parentNode !== null) {
-                $parentNode->replaceChild($child, $node);
+            $doc = $node->ownerDocument;
+            if ($doc !== null) {
+                $child = $doc->createElement($this->protectedChildNodesHelper);
+                $child->setAttribute('data-' . $this->protectedChildNodesHelper, (string) $this->protected_tags_counter);
+                $parentNode = $node->parentNode;
+                if ($parentNode !== null) {
+                    $parentNode->replaceChild($child, $node);
+                }
             }
 
             ++$this->protected_tags_counter;
@@ -1857,7 +1945,7 @@ class HtmlMin implements HtmlMinInterface
      */
     private function restoreProtectedHtml($matches): string
     {
-        \preg_match('/.*"(?<id>\d*)"/', $matches['attributes'], $matchesInner);
+        \preg_match('/=["\']*(?<id>\d+)/', $matches['attributes'], $matchesInner);
 
         return $this->protectedChildNodes[$matchesInner['id']] ?? '';
     }
