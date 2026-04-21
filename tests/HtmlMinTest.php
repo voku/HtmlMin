@@ -83,11 +83,25 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         static::assertSame('<head>this is a test</head>', $minifier->minify('<head>this is a test</head>'));
     }
 
+    public function testHeadClosingTagForStandaloneHeadFragmentWithElement()
+    {
+        $minifier = new HtmlMin();
+
+        static::assertSame('<head><title>test</title></head>', $minifier->minify('<head><title>test</title></head>'));
+    }
+
     public function testBodyClosingTagForStandaloneBodyFragment()
     {
         $minifier = new HtmlMin();
 
         static::assertSame('<body>this is a test</body>', $minifier->minify('<body>this is a test</body>'));
+    }
+
+    public function testBodyClosingTagForStandaloneBodyFragmentWithAttributes()
+    {
+        $minifier = new HtmlMin();
+
+        static::assertSame('<body class=main>this is a test</body>', $minifier->minify('<body class="main">this is a test</body>'));
     }
 
     public function testIssue63()
