@@ -1073,6 +1073,16 @@ HTML;
         static::assertSame($expected, $html);
     }
 
+    public function testDoNotCorruptUtf8NonBreakingSpace()
+    {
+        $minifier = new HtmlMin();
+        $minifier->doRemoveOmittedHtmlTags(false);
+        $html = $minifier->minify("<span>\u{00A0}</span>");
+        $expected = '<span>' . "\u{00A0}" . '</span>';
+
+        static::assertSame($expected, $html);
+    }
+
     public function testIdAttributeDoesNotTriggerTypeError()
     {
         $minifier = new HtmlMin();
