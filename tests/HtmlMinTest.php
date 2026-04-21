@@ -992,6 +992,7 @@ HTML;
     public function testDoNotCompressTagWithLeadingAndTrailingWhitespace()
     {
         $minifier = new HtmlMin();
+        $minifier->doRemoveOmittedHtmlTags(false);
         $html = $minifier->minify("
 <nocompress>
   \r\n\t
@@ -1012,7 +1013,7 @@ HTML;
 </nocompress>
 ");
 
-        $expected = '<nocompress><ul><li> à <li> á </ul> </nocompress>';
+        $expected = '<nocompress><ul><li> à </li> <li> á </li></ul> </nocompress>';
 
         static::assertSame($expected, $html);
     }
