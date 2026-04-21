@@ -80,6 +80,17 @@ class HtmlMin implements HtmlMinInterface
     ];
 
     /**
+     * @var array<string, string>
+     */
+    private static $inlineSpaceSensitiveTags = [
+        'b'      => '',
+        'em'     => '',
+        'i'      => '',
+        'strong' => '',
+        'u'      => '',
+    ];
+
+    /**
      * @var array
      */
     private static $booleanAttributes = [
@@ -811,7 +822,29 @@ class HtmlMin implements HtmlMinInterface
         //
         // <-- However, a start tag must never be omitted if it has any attributes.
 
-        return \in_array($tag_name, self::$optional_end_tags, true)
+        return (
+            \in_array($tag_name, self::$optional_end_tags, true)
+            &&
+            (
+                (
+                    $tag_name === 'head'
+                    &&
+                    $parent_tag_name === 'html'
+                )
+                ||
+                (
+                    $tag_name === 'body'
+                    &&
+                    $parent_tag_name === 'html'
+                )
+                ||
+                (
+                    $tag_name === 'html'
+                    &&
+                    $parent_node instanceof \DOMDocument
+                )
+            )
+        )
                ||
                (
                    $tag_name === 'li'
@@ -1084,9 +1117,23 @@ class HtmlMin implements HtmlMinInterface
             } elseif ($child instanceof \DOMText) {
                 if ($child->isElementContentWhitespace()) {
                     if (
-                        $child->previousSibling !== null
-                        &&
-                        $child->nextSibling !== null
+                        (
+                            $child->previousSibling !== null
+                            &&
+                            $child->nextSibling !== null
+                        )
+                        ||
+                        (
+                            $child->wholeText === ' '
+                            &&
+                            $child->previousSibling === null
+                            &&
+                            $child->nextSibling !== null
+                            &&
+                            $child->parentNode instanceof \DOMElement
+                            &&
+                            isset(self::$inlineSpaceSensitiveTags[$child->parentNode->tagName])
+                        )
                     ) {
                         if (
                             (
@@ -1158,6 +1205,17 @@ class HtmlMin implements HtmlMinInterface
         }
 
         return '';
+    }
+
+    private function minifyJsonString(string $json): string
+    {
+        $json = \trim($json);
+
+        return (string) \preg_replace(
+            '#(?s)("(?:[^"\\\\]|\\\\.)*"|[^" \n\r\t]+)|[ \n\r\t]+#u',
+            '$1',
+            $json
+        );
     }
 
     /**
@@ -1464,7 +1522,7 @@ class HtmlMin implements HtmlMinInterface
         // Restore protected HTML-code.
         // -------------------------------------------------------------------------
 
-        if (\strpos($html, $this->protectedChildNodesHelper) !== false) {
+        while (\strpos($html, $this->protectedChildNodesHelper) !== false) {
             $html = (string) \preg_replace_callback(
                 '/<(?<element>' . $this->protectedChildNodesHelper . ')(?<attributes> [^>]*)?>(?<value>.*?)<\/' . $this->protectedChildNodesHelper . '>/',
                 [$this, 'restoreProtectedHtml'],
@@ -1879,7 +1937,10 @@ class HtmlMin implements HtmlMinInterface
                 'text/x-handlebars-template',
             ];
             $scriptType = isset($attributes) ? \strtolower(\trim((string) ($attributes['type'] ?? ''))) : '';
-            if ($element->tag !== 'script' || !\in_array($scriptType, $activeSpecialTypes, true)) {
+            $isJsonLdScript = $element->tag === 'script' && \strpos($scriptType, 'application/ld+json') === 0;
+            if ($isJsonLdScript) {
+                $innerHtml = $this->minifyJsonString($innerHtml);
+            } elseif ($element->tag !== 'script' || !\in_array($scriptType, $activeSpecialTypes, true)) {
                 $innerHtml = \trim($innerHtml);
             }
 

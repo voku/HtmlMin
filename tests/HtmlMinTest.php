@@ -76,6 +76,34 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         static::assertSame($expectd, $compressedHtml);
     }
 
+    public function testHeadClosingTagForStandaloneHeadFragment()
+    {
+        $minifier = new HtmlMin();
+
+        static::assertSame('<head>this is a test</head>', $minifier->minify('<head>this is a test</head>'));
+    }
+
+    public function testHeadClosingTagForStandaloneHeadFragmentWithElement()
+    {
+        $minifier = new HtmlMin();
+
+        static::assertSame('<head><title>test</title></head>', $minifier->minify('<head><title>test</title></head>'));
+    }
+
+    public function testBodyClosingTagForStandaloneBodyFragment()
+    {
+        $minifier = new HtmlMin();
+
+        static::assertSame('<body>this is a test</body>', $minifier->minify('<body>this is a test</body>'));
+    }
+
+    public function testBodyClosingTagForStandaloneBodyFragmentWithAttributes()
+    {
+        $minifier = new HtmlMin();
+
+        static::assertSame('<body class=main>this is a test</body>', $minifier->minify('<body class="main">this is a test</body>'));
+    }
+
     public function testIssue63()
     {
         $html = '
@@ -99,6 +127,14 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
 	Vestibulum eget velit arcu. Phasellus eget scelerisque dui, nec elementum ante. <code>aoaoaoao</code>';
 
         static::assertSame($expectd, $compressedHtml);
+    }
+
+    public function testMinifySimpleHtmlDoesNotThrowParseError()
+    {
+        $html = '<html></html>';
+        $htmlMin = new HtmlMin();
+
+        static::assertSame('<html>', $htmlMin->minify($html));
     }
 
     /**
@@ -322,6 +358,72 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
 
         $htmlMin = new HtmlMin();
         $htmlMin->doMinifyJavaScript();
+
+        static::assertSame($expected, $htmlMin->minify($html));
+    }
+
+    public function testMinifyJsonLdScriptTag()
+    {
+        $html = '<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Example Inc."
+}
+</script>';
+
+        $expected = '<script type=application/ld+json>{"@context":"https://schema.org","@type":"Organization","name":"Example Inc."}</script>';
+
+        $htmlMin = new HtmlMin();
+
+        static::assertSame($expected, $htmlMin->minify($html));
+
+        // Escaped double-quote inside a JSON string value must be preserved.
+        $html = '<script type="application/ld+json">
+{
+  "@type": "Organization",
+  "description": "He said \"hello\" to us"
+}
+</script>';
+
+        $expected = '<script type=application/ld+json>{"@type":"Organization","description":"He said \"hello\" to us"}</script>';
+
+        $htmlMin = new HtmlMin();
+
+        static::assertSame($expected, $htmlMin->minify($html));
+
+        // Whitespace characters embedded in a string value must NOT be removed.
+        $html = '<script type="application/ld+json">
+{
+  "name": "New  York",
+  "city": "Los\tAngeles"
+}
+</script>';
+
+        $expected = '<script type=application/ld+json>{"name":"New  York","city":"Los\tAngeles"}</script>';
+
+        $htmlMin = new HtmlMin();
+
+        static::assertSame($expected, $htmlMin->minify($html));
+
+        // Nested objects and arrays.
+        $html = '<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://example.com/?q={search}"
+  },
+  "sameAs": [
+    "https://www.facebook.com/example",
+    "https://twitter.com/example"
+  ]
+}
+</script>';
+
+        $expected = '<script type=application/ld+json>{"@context":"https://schema.org","potentialAction":{"@type":"SearchAction","target":"https://example.com/?q={search}"},"sameAs":["https://www.facebook.com/example","https://twitter.com/example"]}</script>';
+
+        $htmlMin = new HtmlMin();
 
         static::assertSame($expected, $htmlMin->minify($html));
     }
@@ -615,6 +717,29 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         );
     }
 
+    public function testKeepWhitespaceBeforeAnchorWrappedInStrongTag()
+    {
+        $fixtures = [
+            [
+                'html' => 'Get a <strong>complimentary</strong> organic lawn fertilizer with a lawn maintenance or bi-weekly subscription.<strong> <a href="https://domain.com/qgq8/contact-us">Contact us to schedule!</a></strong>',
+                'expected' => 'Get a <strong>complimentary</strong> organic lawn fertilizer with a lawn maintenance or bi-weekly subscription.<strong> <a href=https://domain.com/qgq8/contact-us>Contact us to schedule!</a></strong>',
+            ],
+            [
+                'html' => 'Foo<em> <a href="https://example.com">bar</a></em>',
+                'expected' => 'Foo<em> <a href=https://example.com>bar</a></em>',
+            ],
+        ];
+
+        foreach ($fixtures as $fixture) {
+            foreach ([true, false] as $removeWhitespaceAroundTags) {
+                $htmlMin = new HtmlMin();
+                $htmlMin->doRemoveWhitespaceAroundTags($removeWhitespaceAroundTags);
+
+                static::assertSame($fixture['expected'], $htmlMin->minify($fixture['html']));
+            }
+        }
+    }
+
     public function testMinifyCodeTag()
     {
         // init
@@ -808,6 +933,17 @@ foo
         static::assertSame($expected, $htmlMin->minify($htmlWithJs));
     }
 
+    public function testRestoreNestedProtectedChildNodes()
+    {
+        $html = '<div><code><nocompress><code><nocompress>N</nocompress></code><code><nocompress>N</nocompress></code></nocompress></code></div>';
+
+        $htmlMin = new voku\helper\HtmlMin();
+
+        $expected = '<div><code><nocompress><code><nocompress>N</nocompress></code><code><nocompress>N</nocompress></code></nocompress></code></div>';
+
+        static::assertSame($expected, $htmlMin->minify($html));
+    }
+
     public function testHtmlInsideJavaScriptTemplates()
     {
         $html = '
@@ -832,6 +968,20 @@ foo
         $expected = '<script type=text/html><p>Foo <div class="alert alert-success"> Bar </div> {{foo}} {{bar}} {{hello}} </script>';
 
         static::assertSame($expected, $htmlMin->minify($html));
+    }
+
+    public function testTextHtmlScriptTemplateTagDoesNotLeakInternalPlaceholder()
+    {
+        $html = "<script id=\"foo\" type=\"text/html\">\n\n';\n</script>";
+
+        $htmlMin = new HtmlMin();
+        $htmlMin->doOptimizeViaHtmlDomParser(true);
+
+        $actual = $htmlMin->minify($html);
+
+        static::assertSame('<script id=foo type=text/html> \'; </script>', $actual);
+        static::assertStringNotContainsString('simple_html_dom__voku__html_special_script', $actual);
+        static::assertStringNotContainsString('____simple_html_dom__voku__html_special_script____', $actual);
     }
 
     public function testOverwriteSpecialScriptTags()
@@ -1055,6 +1205,16 @@ HTML;
         $html = $minifier->minify('<span>&lt;</span>');
 
         $expected = '<span>&lt;</span>';
+
+        static::assertSame($expected, $html);
+    }
+
+    public function testDoNotCorruptUtf8NonBreakingSpace()
+    {
+        $minifier = new HtmlMin();
+        $minifier->doRemoveOmittedHtmlTags(false);
+        $html = $minifier->minify("<span>\u{00A0}</span>");
+        $expected = '<span>' . "\u{00A0}" . '</span>';
 
         static::assertSame($expected, $html);
     }
