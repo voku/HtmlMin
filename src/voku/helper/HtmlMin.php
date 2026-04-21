@@ -1067,9 +1067,23 @@ class HtmlMin implements HtmlMinInterface
             } elseif ($child instanceof \DOMText) {
                 if ($child->isElementContentWhitespace()) {
                     if (
-                        $child->previousSibling !== null
-                        &&
-                        $child->nextSibling !== null
+                        (
+                            $child->previousSibling !== null
+                            &&
+                            $child->nextSibling !== null
+                        )
+                        ||
+                        (
+                            $child->wholeText === ' '
+                            &&
+                            $child->previousSibling === null
+                            &&
+                            $child->nextSibling !== null
+                            &&
+                            $child->parentNode instanceof \DOMElement
+                            &&
+                            $child->parentNode->tagName === 'strong'
+                        )
                     ) {
                         if (
                             (

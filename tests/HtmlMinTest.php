@@ -584,6 +584,19 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         );
     }
 
+    public function testKeepWhitespaceBeforeAnchorWrappedInStrongTag()
+    {
+        $html = 'Get a <strong>complimentary</strong> organic lawn fertilizer with a lawn maintenance or bi-weekly subscription.<strong> <a href="https://domain.com/qgq8/contact-us">Contact us to schedule!</a></strong>';
+        $expected = 'Get a <strong>complimentary</strong> organic lawn fertilizer with a lawn maintenance or bi-weekly subscription.<strong> <a href=https://domain.com/qgq8/contact-us>Contact us to schedule!</a></strong>';
+
+        foreach ([true, false] as $removeWhitespaceAroundTags) {
+            $htmlMin = new HtmlMin();
+            $htmlMin->doRemoveWhitespaceAroundTags($removeWhitespaceAroundTags);
+
+            static::assertSame($expected, $htmlMin->minify($html));
+        }
+    }
+
     public function testMinifyCodeTag()
     {
         // init
