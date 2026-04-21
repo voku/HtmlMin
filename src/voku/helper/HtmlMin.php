@@ -679,8 +679,6 @@ class HtmlMin implements HtmlMinInterface
                                &&
                                $attribute->value !== ''
                                &&
-                               \strpos($attribute->name, '____SIMPLE_HTML_DOM__VOKU') !== 0
-                               &&
                                // simple_html_dom v5 serializes <html ⚡> as <html SHDOM_GOOGLE_AMP="true">.
                                // libxml lowercases this attribute name to "shdom_google_amp". If we strip
                                // the quotes (producing shdom_google_amp=true), putReplacedBackToPreserveHtmlEntities
