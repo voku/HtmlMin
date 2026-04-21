@@ -1036,7 +1036,6 @@ HTML;
         $expected = '<span>' . "\u{00A0}" . '</span>';
 
         static::assertSame($expected, $html);
-        static::assertSame(\bin2hex($expected), \bin2hex($html));
     }
 
     public function testIdAttributeDoesNotTriggerTypeError()
