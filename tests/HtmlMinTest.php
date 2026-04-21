@@ -803,6 +803,20 @@ foo
         static::assertSame($expected, $htmlMin->minify($html));
     }
 
+    public function testTextHtmlScriptTemplateTagDoesNotLeakInternalPlaceholder()
+    {
+        $html = "<script id=\"foo\" type=\"text/html\">\n\n';\n</script>";
+
+        $htmlMin = new HtmlMin();
+        $htmlMin->doOptimizeViaHtmlDomParser(true);
+
+        $actual = $htmlMin->minify($html);
+
+        static::assertSame('<script id=foo type=text/html> \'; </script>', $actual);
+        static::assertStringNotContainsString('simple_html_dom__voku__html_special_script', $actual);
+        static::assertStringNotContainsString('____simple_html_dom__voku__html_special_script____', $actual);
+    }
+
     public function testOverwriteSpecialScriptTags()
     {
         $html = <<<HTML
