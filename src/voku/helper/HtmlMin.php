@@ -1129,59 +1129,12 @@ class HtmlMin implements HtmlMinInterface
     private function minifyJsonString(string $json): string
     {
         $json = \trim($json);
-        $jsonMinified = '';
-        $inString = false;
-        $isEscaped = false;
 
-        $length = \strlen($json);
-        for ($i = 0; $i < $length; ++$i) {
-            $char = $json[$i];
-
-            if ($inString) {
-                $jsonMinified .= $char;
-
-                if ($isEscaped) {
-                    $isEscaped = false;
-
-                    continue;
-                }
-
-                if ($char === '\\') {
-                    $isEscaped = true;
-
-                    continue;
-                }
-
-                if ($char === '"') {
-                    $inString = false;
-                }
-
-                continue;
-            }
-
-            if ($char === '"') {
-                $inString = true;
-                $jsonMinified .= $char;
-
-                continue;
-            }
-
-            if (
-                $char === ' '
-                ||
-                $char === "\n"
-                ||
-                $char === "\r"
-                ||
-                $char === "\t"
-            ) {
-                continue;
-            }
-
-            $jsonMinified .= $char;
-        }
-
-        return $jsonMinified;
+        return (string) \preg_replace(
+            '#(?s)("(?:[^"\\\\]|\\\\.)*"|[^" \n\r\t]+)|[ \n\r\t]+#u',
+            '$1',
+            $json
+        );
     }
 
     /**
