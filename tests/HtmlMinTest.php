@@ -999,6 +999,14 @@ HTML;
         static::assertSame($expected, $html);
     }
 
+    public function testIdAttributeDoesNotTriggerTypeError()
+    {
+        $minifier = new HtmlMin();
+        $html = $minifier->minify('<div id="test"></div>');
+
+        static::assertSame('<div id=test></div>', $html);
+    }
+
     public function testOptionsFalse()
     {
         // init
