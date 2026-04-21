@@ -794,7 +794,29 @@ class HtmlMin implements HtmlMinInterface
         //
         // <-- However, a start tag must never be omitted if it has any attributes.
 
-        return \in_array($tag_name, self::$optional_end_tags, true)
+        return (
+                   \in_array($tag_name, self::$optional_end_tags, true)
+                   &&
+                   (
+                       (
+                           $tag_name === 'head'
+                           &&
+                           $parent_tag_name === 'html'
+                       )
+                       ||
+                       (
+                           $tag_name === 'body'
+                           &&
+                           $parent_tag_name === 'html'
+                       )
+                       ||
+                       (
+                           $tag_name === 'html'
+                           &&
+                           $parent_node instanceof \DOMDocument
+                       )
+                   )
+               )
                ||
                (
                    $tag_name === 'li'
