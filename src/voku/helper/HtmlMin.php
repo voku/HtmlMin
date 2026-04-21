@@ -1966,7 +1966,7 @@ class HtmlMin implements HtmlMinInterface
     private function removeCommentsOnlyFromHtmlString(string $html): string
     {
         $parts = \preg_split(
-            '#(<(?:script|style|textarea|pre|code)\b[^>]*>.*?</(?:script|style|textarea|pre|code)>)#is',
+            '#(<(?<tag>script|style|textarea|pre|code)\b[^>]*+>(?:(?!</\k<tag>\s*>).)*</\k<tag>\s*>)#is',
             $html,
             -1,
             \PREG_SPLIT_DELIM_CAPTURE
@@ -1982,7 +1982,7 @@ class HtmlMin implements HtmlMinInterface
             }
 
             $parts[$index] = (string) \preg_replace_callback(
-                '/<!--(?<comment>.*?)-->/su',
+                '/<!--(?<comment>(?:(?!-->).)*)-->/su',
                 function ($matches): string {
                     $comment = $matches['comment'];
                     if (
