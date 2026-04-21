@@ -340,45 +340,6 @@ class HtmlMin implements HtmlMinInterface
         $this->domLoopObservers = new \SplObjectStorage();
 
         $this->attachObserverToTheDomLoop(new HtmlMinDomObserverOptimizeAttributes());
-
-        self::patchSimpleHtmlDomPlaceholders();
-    }
-
-    /**
-     * Patch simple_html_dom's placeholder element names to use valid HTML custom element names.
-     *
-     * The default names (e.g. "____simple_html_dom__voku__html_wrapper____") start with underscores
-     * which are invalid in HTML element names. libxml2 >= 2.9.14 treats them as broken text nodes,
-     * silently corrupting the placeholder round-trip.
-     *
-     * Reflection is required because the vendor accesses these via self:: (compile-time binding),
-     * which makes subclassing ineffective. The patch is idempotent — it checks the current value
-     * before applying.
-     *
-     * TODO: Remove once voku/simple_html_dom uses valid element names natively.
-     *
-     * @return void
-     */
-    private static function patchSimpleHtmlDomPlaceholders()
-    {
-        try {
-            $ref = new \ReflectionProperty(\voku\helper\AbstractDomParser::class, 'domHtmlWrapperHelper');
-            $ref->setAccessible(true);
-            if (\strpos((string) $ref->getValue(), '____') === 0) {
-                $ref->setValue(null, 'htmlmin-wrapper');
-
-                $ref2 = new \ReflectionProperty(\voku\helper\AbstractDomParser::class, 'domHtmlSpecialScriptHelper');
-                $ref2->setAccessible(true);
-                $ref2->setValue(null, 'htmlmin-special-script');
-            }
-        } catch (\ReflectionException $e) {
-            // The vendor may have been updated and renamed or removed the properties.
-            // Re-evaluate whether this patch is still needed when updating simple_html_dom.
-            \trigger_error(
-                'HtmlMin: could not patch simple_html_dom placeholder names — ' . $e->getMessage(),
-                \E_USER_WARNING
-            );
-        }
     }
 
     /**
@@ -719,6 +680,13 @@ class HtmlMin implements HtmlMinInterface
                                $attribute->value !== ''
                                &&
                                \strpos($attribute->name, '____SIMPLE_HTML_DOM__VOKU') !== 0
+                               &&
+                               // simple_html_dom v5 serializes <html ⚡> as <html SHDOM_GOOGLE_AMP="true">.
+                               // libxml lowercases this attribute name to "shdom_google_amp". If we strip
+                               // the quotes (producing shdom_google_amp=true), putReplacedBackToPreserveHtmlEntities
+                               // cannot match the full "<html SHDOM_GOOGLE_AMP=\"true\"" pattern and the ⚡
+                               // is never restored. Keep quotes for this specific token attribute.
+                               \strtolower($attribute->name) !== 'shdom_google_amp'
                                &&
                                \strpos($attribute->name, ' ') === false
                                &&
@@ -1809,14 +1777,18 @@ class HtmlMin implements HtmlMinInterface
                 continue;
             }
 
-            $this->protectedChildNodes[$this->protected_tags_counter] = '<!--' . $text . '-->';
+            $this->protectedChildNodes[$this->protected_tags_counter] = '<!--' . \trim($text) . '-->';
 
             /* @var $node \DOMComment */
             $node = $element->getNode();
-            $child = new \DOMText('<' . $this->protectedChildNodesHelper . ' data-' . $this->protectedChildNodesHelper . '="' . $this->protected_tags_counter . '"></' . $this->protectedChildNodesHelper . '>');
-            $parentNode = $element->getNode()->parentNode;
-            if ($parentNode !== null) {
-                $parentNode->replaceChild($child, $node);
+            $doc = $node->ownerDocument;
+            if ($doc !== null) {
+                $child = $doc->createElement($this->protectedChildNodesHelper);
+                $child->setAttribute('data-' . $this->protectedChildNodesHelper, (string) $this->protected_tags_counter);
+                $parentNode = $node->parentNode;
+                if ($parentNode !== null) {
+                    $parentNode->replaceChild($child, $node);
+                }
             }
 
             ++$this->protected_tags_counter;
@@ -1896,7 +1868,7 @@ class HtmlMin implements HtmlMinInterface
      */
     private function restoreProtectedHtml($matches): string
     {
-        \preg_match('/.*"(?<id>\d*)"/', $matches['attributes'], $matchesInner);
+        \preg_match('/=["\']*(?<id>\d+)/', $matches['attributes'], $matchesInner);
 
         return $this->protectedChildNodes[$matchesInner['id']] ?? '';
     }

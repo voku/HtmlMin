@@ -929,7 +929,7 @@ HTML;
     </select>
     ';
 
-        $expected = '<select :class="[\'c-chart__label\']" @change=getGraphData name=filter v-model=fiter></select>';
+        $expected = '<select :class="[\'c-chart__label\']" name=filter @change=getGraphData v-model=fiter></select>';
 
         static::assertSame($expected, $htmlMin->minify($html));
     }
@@ -1501,7 +1501,7 @@ HTML;
     {
         $html = '<script type="text/javascript">alert("Hello");</script>
                 <script type="text/ecmascript" src="ecmascript.js"></script>';
-        $expected = '<script>alert("Hello");</script><script src=ecmascript.js></script>';
+        $expected = '<script>alert("Hello");</script> <script src=ecmascript.js></script>';
 
         $htmlMin = new HtmlMin();
         static::assertSame($expected, $htmlMin->minify($html));
@@ -1510,7 +1510,7 @@ HTML;
 
         $html = '<script type="text/javascript">alert("Hello");</script>
                 <script type="text/ecmascript" src="ecmascript.js"></script>';
-        $expected = '<script type=text/javascript>alert("Hello");</script><script src=ecmascript.js type=text/ecmascript></script>';
+        $expected = '<script type=text/javascript>alert("Hello");</script> <script src=ecmascript.js type=text/ecmascript></script>';
 
         $htmlMin = new HtmlMin();
         $htmlMin->doRemoveDeprecatedTypeFromScriptTag(false);
