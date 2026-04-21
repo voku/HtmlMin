@@ -1965,41 +1965,144 @@ class HtmlMin implements HtmlMinInterface
      */
     private function removeCommentsOnlyFromHtmlString(string $html): string
     {
-        $parts = \preg_split(
-            '#(<(?<tag>script|style|textarea|pre|code)\b[^>]*+>(?:(?!</\k<tag>\s*>).)*</\k<tag>\s*>)#is',
-            $html,
-            -1,
-            \PREG_SPLIT_DELIM_CAPTURE
-        );
+        $length = \strlen($html);
+        $offset = 0;
+        $result = '';
 
-        if ($parts === false) {
-            return $html;
-        }
+        while ($offset < $length) {
+            $nextTagOffset = \strpos($html, '<', $offset);
+            if ($nextTagOffset === false) {
+                $result .= \substr($html, $offset);
+                break;
+            }
 
-        foreach ($parts as $index => $part) {
-            if ($index % 2 === 1) {
+            if ($nextTagOffset > $offset) {
+                $result .= \substr($html, $offset, $nextTagOffset - $offset);
+                $offset = $nextTagOffset;
+            }
+
+            if (\substr($html, $offset, 4) === '<!--') {
+                $commentEnd = \strpos($html, '-->', $offset + 4);
+                if ($commentEnd === false) {
+                    $result .= \substr($html, $offset);
+                    break;
+                }
+
+                $comment = \substr($html, $offset + 4, $commentEnd - ($offset + 4));
+                if (
+                    $this->isConditionalComment($comment)
+                    ||
+                    $this->isSpecialComment($comment)
+                ) {
+                    $result .= \substr($html, $offset, $commentEnd + 3 - $offset);
+                }
+
+                $offset = $commentEnd + 3;
                 continue;
             }
 
-            $parts[$index] = (string) \preg_replace_callback(
-                '/<!--(?<comment>(?:(?!-->).)*)-->/su',
-                function ($matches): string {
-                    $comment = $matches['comment'];
-                    if (
-                        $this->isConditionalComment($comment)
-                        ||
-                        $this->isSpecialComment($comment)
-                    ) {
-                        return $matches[0];
-                    }
+            $protectedTag = $this->getProtectedTagNameAtOffset($html, $offset);
+            if ($protectedTag !== null) {
+                $openTagEnd = $this->getHtmlTagEndPosition($html, $offset);
+                if ($openTagEnd === null) {
+                    $result .= \substr($html, $offset);
+                    break;
+                }
 
-                    return '';
-                },
-                $part
-            );
+                $closingTagOffset = \stripos($html, '</' . $protectedTag, $openTagEnd + 1);
+                if ($closingTagOffset === false) {
+                    $result .= \substr($html, $offset);
+                    break;
+                }
+
+                $closingTagEnd = $this->getHtmlTagEndPosition($html, $closingTagOffset);
+                if ($closingTagEnd === null) {
+                    $result .= \substr($html, $offset);
+                    break;
+                }
+
+                $result .= \substr($html, $offset, $closingTagEnd + 1 - $offset);
+                $offset = $closingTagEnd + 1;
+
+                continue;
+            }
+
+            $result .= '<';
+            ++$offset;
         }
 
-        return \implode('', $parts);
+        return $result;
+    }
+
+    /**
+     * @param string $html
+     * @param int    $offset
+     *
+     * @return string|null
+     */
+    private function getProtectedTagNameAtOffset(string $html, int $offset): ?string
+    {
+        foreach (['script', 'style', 'textarea', 'pre', 'code'] as $tagName) {
+            $tagNameLength = \strlen($tagName);
+
+            if (
+                \strncasecmp(
+                    \substr($html, $offset, $tagNameLength + 1),
+                    '<' . $tagName,
+                    $tagNameLength + 1
+                ) !== 0
+            ) {
+                continue;
+            }
+
+            $nextChar = $html[$offset + $tagNameLength + 1] ?? '';
+            if (
+                $nextChar === ''
+                ||
+                $nextChar === '>'
+                ||
+                $nextChar === '/'
+                ||
+                \ctype_space($nextChar)
+            ) {
+                return $tagName;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param string $html
+     * @param int    $offset
+     *
+     * @return int|null
+     */
+    private function getHtmlTagEndPosition(string $html, int $offset): ?int
+    {
+        $length = \strlen($html);
+        $singleQuote = false;
+        $doubleQuote = false;
+
+        for ($i = $offset; $i < $length; ++$i) {
+            $char = $html[$i];
+
+            if ($char === "'" && !$doubleQuote) {
+                $singleQuote = !$singleQuote;
+                continue;
+            }
+
+            if ($char === '"' && !$singleQuote) {
+                $doubleQuote = !$doubleQuote;
+                continue;
+            }
+
+            if ($char === '>' && !$singleQuote && !$doubleQuote) {
+                return $i;
+            }
+        }
+
+        return null;
     }
 
     /**
