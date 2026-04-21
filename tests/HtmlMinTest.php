@@ -101,7 +101,7 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         static::assertSame($expectd, $compressedHtml);
     }
 
-    public function testIssueParseErrorOnSimpleHtmlInput()
+    public function testMinifySimpleHtmlDoesNotThrowParseError()
     {
         $html = '<html></html>';
         $htmlMin = new HtmlMin();
