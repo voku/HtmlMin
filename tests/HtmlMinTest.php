@@ -1028,6 +1028,17 @@ HTML;
         static::assertSame($expected, $html);
     }
 
+    public function testDoNotCorruptUtf8NonBreakingSpace()
+    {
+        $minifier = new HtmlMin();
+        $minifier->doRemoveOmittedHtmlTags(false);
+        $html = $minifier->minify("<span>\u{00A0}</span>");
+
+        static::assertSame('<span>' . "\u{00A0}" . '</span>', $html);
+        static::assertStringNotContainsString('Â', $html);
+        static::assertStringNotContainsString('â', $html);
+    }
+
     public function testIdAttributeDoesNotTriggerTypeError()
     {
         $minifier = new HtmlMin();
