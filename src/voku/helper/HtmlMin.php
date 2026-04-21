@@ -406,6 +406,9 @@ class HtmlMin implements HtmlMinInterface
     public function doRemoveCommentsOnly(bool $doRemoveCommentsOnly = true): self
     {
         $this->doRemoveCommentsOnly = $doRemoveCommentsOnly;
+        if ($doRemoveCommentsOnly) {
+            $this->doRemoveComments = true;
+        }
 
         return $this;
     }
