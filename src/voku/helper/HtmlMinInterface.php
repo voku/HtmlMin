@@ -75,6 +75,11 @@ interface HtmlMinInterface
     /**
      * @return bool
      */
+    public function isDoRemoveDataAttributes(): bool;
+
+    /**
+     * @return bool
+     */
     public function isDoSumUpWhitespace(): bool;
 
     /**

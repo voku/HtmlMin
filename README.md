@@ -77,6 +77,7 @@ $htmlMin->doRemoveDeprecatedTypeFromStyleAndLinkTag(); // remove "type=text/css"
 $htmlMin->doRemoveDefaultMediaTypeFromStyleAndLinkTag(); // remove "media="all" from all links and styles
 $htmlMin->doRemoveDefaultTypeFromButton();            // remove type="submit" from button tags 
 $htmlMin->doRemoveEmptyAttributes();                  // remove some empty attributes (depends on "doOptimizeAttributes(true)")
+$htmlMin->doRemoveDataAttributes();                   // remove all "data-*" attributes (depends on "doOptimizeAttributes(true)" | disabled by default)
 $htmlMin->doRemoveValueFromEmptyInput();              // remove 'value=""' from empty <input> (depends on "doOptimizeAttributes(true)")
 $htmlMin->doSortCssClassNames();                      // sort css-class-names, for better gzip results (depends on "doOptimizeAttributes(true)")
 $htmlMin->doSortHtmlAttributes();                     // sort html-attributes, for better gzip results (depends on "doOptimizeAttributes(true)")
