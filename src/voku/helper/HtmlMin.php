@@ -1168,6 +1168,17 @@ class HtmlMin implements HtmlMinInterface
         return '';
     }
 
+    private function minifyJsonString(string $json): string
+    {
+        $json = \trim($json);
+
+        return (string) \preg_replace(
+            '#(?s)("(?:[^"\\\\]|\\\\.)*"|[^" \n\r\t]+)|[ \n\r\t]+#u',
+            '$1',
+            $json
+        );
+    }
+
     /**
      * @return array
      */
@@ -1879,7 +1890,10 @@ class HtmlMin implements HtmlMinInterface
                 'text/x-handlebars-template',
             ];
             $scriptType = isset($attributes) ? \strtolower(\trim((string) ($attributes['type'] ?? ''))) : '';
-            if ($element->tag !== 'script' || !\in_array($scriptType, $activeSpecialTypes, true)) {
+            $isJsonLdScript = $element->tag === 'script' && \strpos($scriptType, 'application/ld+json') === 0;
+            if ($isJsonLdScript) {
+                $innerHtml = $this->minifyJsonString($innerHtml);
+            } elseif ($element->tag !== 'script' || !\in_array($scriptType, $activeSpecialTypes, true)) {
                 $innerHtml = \trim($innerHtml);
             }
 

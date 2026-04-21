@@ -303,6 +303,72 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         static::assertSame(\trim($expected), $htmlMin->minify($html));
     }
 
+    public function testMinifyJsonLdScriptTag()
+    {
+        $html = '<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Example Inc."
+}
+</script>';
+
+        $expected = '<script type=application/ld+json>{"@context":"https://schema.org","@type":"Organization","name":"Example Inc."}</script>';
+
+        $htmlMin = new HtmlMin();
+
+        static::assertSame($expected, $htmlMin->minify($html));
+
+        // Escaped double-quote inside a JSON string value must be preserved.
+        $html = '<script type="application/ld+json">
+{
+  "@type": "Organization",
+  "description": "He said \"hello\" to us"
+}
+</script>';
+
+        $expected = '<script type=application/ld+json>{"@type":"Organization","description":"He said \"hello\" to us"}</script>';
+
+        $htmlMin = new HtmlMin();
+
+        static::assertSame($expected, $htmlMin->minify($html));
+
+        // Whitespace characters embedded in a string value must NOT be removed.
+        $html = '<script type="application/ld+json">
+{
+  "name": "New  York",
+  "city": "Los\tAngeles"
+}
+</script>';
+
+        $expected = '<script type=application/ld+json>{"name":"New  York","city":"Los\tAngeles"}</script>';
+
+        $htmlMin = new HtmlMin();
+
+        static::assertSame($expected, $htmlMin->minify($html));
+
+        // Nested objects and arrays.
+        $html = '<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://example.com/?q={search}"
+  },
+  "sameAs": [
+    "https://www.facebook.com/example",
+    "https://twitter.com/example"
+  ]
+}
+</script>';
+
+        $expected = '<script type=application/ld+json>{"@context":"https://schema.org","potentialAction":{"@type":"SearchAction","target":"https://example.com/?q={search}"},"sameAs":["https://www.facebook.com/example","https://twitter.com/example"]}</script>';
+
+        $htmlMin = new HtmlMin();
+
+        static::assertSame($expected, $htmlMin->minify($html));
+    }
+
     public function testMinifyBase()
     {
         // init
