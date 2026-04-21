@@ -1033,10 +1033,10 @@ HTML;
         $minifier = new HtmlMin();
         $minifier->doRemoveOmittedHtmlTags(false);
         $html = $minifier->minify("<span>\u{00A0}</span>");
+        $expected = '<span>' . "\u{00A0}" . '</span>';
 
-        static::assertSame('<span>' . "\u{00A0}" . '</span>', $html);
-        static::assertStringNotContainsString('Â', $html);
-        static::assertStringNotContainsString('â', $html);
+        static::assertSame($expected, $html);
+        static::assertSame(\bin2hex($expected), \bin2hex($html));
     }
 
     public function testIdAttributeDoesNotTriggerTypeError()
