@@ -1578,6 +1578,13 @@ keep this
 HTML;
 
         static::assertSame($expectedHtml, $actual);
+
+        $actualWithCommentsDisabledFirst = (new HtmlMin())
+            ->doRemoveComments(false)
+            ->doRemoveCommentsOnly()
+            ->minify($html);
+
+        static::assertSame($expectedHtml, $actualWithCommentsDisabledFirst);
     }
 
     public function testSelfClosingInput()

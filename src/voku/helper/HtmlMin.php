@@ -1406,10 +1406,6 @@ class HtmlMin implements HtmlMinInterface
         }
 
         if ($this->doRemoveCommentsOnly) {
-            if (!$this->doRemoveComments) {
-                return $html;
-            }
-
             return $this->removeCommentsOnlyFromHtmlString($html);
         }
 
