@@ -19,8 +19,6 @@ jobs:
       fail-fast: false
       matrix:
         php: [
-            7.1,
-            7.2,
             7.3,
             7.4,
             8.0,
@@ -83,6 +81,7 @@ jobs:
           php vendor/bin/phpstan analyse
 
       - name: Upload coverage results to Coveralls
+        continue-on-error: true
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -90,6 +89,7 @@ jobs:
           php-coveralls --coverage_clover=build/logs/clover.xml -v
 
       - name: Upload coverage results to Codecov
+        continue-on-error: true
         uses: codecov/codecov-action@v4
         with:
           files: build/logs/clover.xml
