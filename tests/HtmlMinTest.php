@@ -1140,6 +1140,18 @@ HTML;
         static::assertSame($expected, $htmlMin->minify($html));
     }
 
+    public function testRemoveDataAttributesOption()
+    {
+        $html = '<img src="http://path/to/png" data-role="image" data-id="1">';
+
+        $htmlMin = new HtmlMin();
+        static::assertSame('<img data-id=1 data-role=image src=http://path/to/png>', $htmlMin->minify($html));
+
+        $htmlMin = new HtmlMin();
+        $htmlMin->doRemoveDataAttributes();
+        static::assertSame('<img src=http://path/to/png>', $htmlMin->minify($html));
+    }
+
     public function testOptionsTrue()
     {
         // init

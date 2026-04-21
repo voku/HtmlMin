@@ -283,6 +283,11 @@ class HtmlMin implements HtmlMinInterface
     /**
      * @var bool
      */
+    private $doRemoveDataAttributes = false;
+
+    /**
+     * @var bool
+     */
     private $doSumUpWhitespace = true;
 
     /**
@@ -492,6 +497,18 @@ class HtmlMin implements HtmlMinInterface
     public function doRemoveEmptyAttributes(bool $doRemoveEmptyAttributes = true): self
     {
         $this->doRemoveEmptyAttributes = $doRemoveEmptyAttributes;
+
+        return $this;
+    }
+
+    /**
+     * @param bool $doRemoveDataAttributes
+     *
+     * @return $this
+     */
+    public function doRemoveDataAttributes(bool $doRemoveDataAttributes = true): self
+    {
+        $this->doRemoveDataAttributes = $doRemoveDataAttributes;
 
         return $this;
     }
@@ -1228,6 +1245,14 @@ class HtmlMin implements HtmlMinInterface
     public function isDoRemoveEmptyAttributes(): bool
     {
         return $this->doRemoveEmptyAttributes;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDoRemoveDataAttributes(): bool
+    {
+        return $this->doRemoveDataAttributes;
     }
 
     /**
