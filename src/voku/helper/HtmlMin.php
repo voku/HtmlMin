@@ -1464,7 +1464,7 @@ class HtmlMin implements HtmlMinInterface
         // Restore protected HTML-code.
         // -------------------------------------------------------------------------
 
-        if (\strpos($html, $this->protectedChildNodesHelper) !== false) {
+        while (\strpos($html, $this->protectedChildNodesHelper) !== false) {
             $html = (string) \preg_replace_callback(
                 '/<(?<element>' . $this->protectedChildNodesHelper . ')(?<attributes> [^>]*)?>(?<value>.*?)<\/' . $this->protectedChildNodesHelper . '>/',
                 [$this, 'restoreProtectedHtml'],

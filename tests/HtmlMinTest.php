@@ -808,6 +808,17 @@ foo
         static::assertSame($expected, $htmlMin->minify($htmlWithJs));
     }
 
+    public function testRestoreNestedProtectedChildNodes()
+    {
+        $html = '<div><code><nocompress><code><nocompress>N</nocompress></code><code><nocompress>N</nocompress></code></nocompress></code></div>';
+
+        $htmlMin = new voku\helper\HtmlMin();
+
+        $expected = '<div><code><nocompress><code><nocompress>N</nocompress></code><code><nocompress>N</nocompress></code></nocompress></code></div>';
+
+        static::assertSame($expected, $htmlMin->minify($html));
+    }
+
     public function testHtmlInsideJavaScriptTemplates()
     {
         $html = '
