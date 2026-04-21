@@ -1219,6 +1219,16 @@ HTML;
         static::assertSame($expected, $htmlMin->minify($html));
     }
 
+    public function testOmitPTagDoesNotAddTrailingWhitespace()
+    {
+        $htmlMin = new HtmlMin();
+
+        $html = '<div><p>Text</p></div>';
+        $expected = '<div><p>Text</div>';
+
+        static::assertSame($expected, $htmlMin->minify($html));
+    }
+
     public function testMinifyKeepWhitespace()
     {
         // init
