@@ -1621,6 +1621,40 @@ class HtmlMin implements HtmlMinInterface
             }
         }
 
+        // -------------------------------------------------------------------------
+        // Protect xml:lang attributes from being stripped or mangled by the libxml
+        // HTML parser on PHP < 8.0.  Namespace-prefixed attributes like xml:lang are
+        // silently discarded when libxml loads HTML in older versions, resulting in
+        // duplicate plain `lang` attributes in the output.
+        //
+        // Strategy: replace xml:lang="VAL" with a plain placeholder attribute name
+        // and, when no lang="VAL" already exists on the same element, also inject
+        // lang="VAL" so the output is the same on all PHP versions.
+        //
+        // Restoration below converts the lowercased placeholder back to xml:lang.
+        // -------------------------------------------------------------------------
+
+        $hasXmlLang = \stripos($html, 'xml:lang') !== false;
+        if ($hasXmlLang) {
+            $html = (string) \preg_replace_callback(
+                '/<([a-zA-Z][^>]*)\s+xml:lang=(["\']?)([^"\'>\s]+)\2([^>]*)>/si',
+                static function ($m) {
+                    $attrsBefore = $m[1];
+                    $quote       = $m[2];
+                    $value       = $m[3];
+                    $attrsAfter  = $m[4];
+                    // Only inject lang=VAL when no lang attribute is already present.
+                    $hasLang = (bool) \preg_match('/\blang=/i', $attrsBefore . $attrsAfter);
+                    $out = '<' . $attrsBefore . ' HTMLMINXMLLANG=' . $quote . $value . $quote . $attrsAfter;
+                    if (!$hasLang) {
+                        $out .= ' lang=' . $quote . $value . $quote;
+                    }
+                    return $out . '>';
+                },
+                $html
+            );
+        }
+
         // load dom
         $dom->loadHtml($html);
 
@@ -1689,10 +1723,18 @@ class HtmlMin implements HtmlMinInterface
         // Convert the Dom into a string.
         // -------------------------------------------------------------------------
 
-        return $dom->fixHtmlOutput(
+        $result = $dom->fixHtmlOutput(
             $doctypeStr . $this->domNodeToString($dom->getDocument()),
             $multiDecodeNewHtmlEntity
         );
+
+        // Restore xml:lang from its placeholder. libxml lowercases attribute names,
+        // so the stored placeholder comes back as htmlminxmllang in the DOM output.
+        if ($hasXmlLang) {
+            $result = \str_ireplace(' htmlminxmllang=', ' xml:lang=', $result);
+        }
+
+        return $result;
     }
 
     /**
@@ -1768,7 +1810,30 @@ class HtmlMin implements HtmlMinInterface
                 }
             }
 
-            $this->protectedChildNodes[$this->protected_tags_counter] = $element->innerhtml;
+            $innerHtml = $element->innerhtml;
+
+            // On PHP < 8.0 the simplevokubroken-hash mechanism restores content
+            // (including surrounding newlines/spaces) AFTER fixHtmlOutput's trim
+            // has already run, so regular scripts would carry extra whitespace.
+            // On PHP >= 8.0 innerhtml already returns trimmed content for regular
+            // scripts, so this trim is a no-op there.
+            //
+            // Template-type scripts (text/x-custom-template, etc.) are hashed via
+            // the EJS/ERB path on ALL PHP versions, and their tests intentionally
+            // expect leading/trailing whitespace to be preserved – so skip trim for
+            // those types.
+            $activeSpecialTypes = $this->specialScriptTags ?? [
+                'text/html',
+                'text/template',
+                'text/x-custom-template',
+                'text/x-handlebars-template',
+            ];
+            $scriptType = isset($attributes) ? \strtolower(\trim((string) ($attributes['type'] ?? ''))) : '';
+            if ($element->tag !== 'script' || !\in_array($scriptType, $activeSpecialTypes, true)) {
+                $innerHtml = \trim($innerHtml);
+            }
+
+            $this->protectedChildNodes[$this->protected_tags_counter] = $innerHtml;
             $element->getNode()->nodeValue = '<' . $this->protectedChildNodesHelper . ' data-' . $this->protectedChildNodesHelper . '="' . $this->protected_tags_counter . '"></' . $this->protectedChildNodesHelper . '>';
 
             ++$this->protected_tags_counter;
