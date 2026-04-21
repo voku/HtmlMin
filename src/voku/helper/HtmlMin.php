@@ -1495,9 +1495,23 @@ class HtmlMin implements HtmlMinInterface
      */
     protected function getNextSiblingOfTypeDOMElement(\DOMNode $node)
     {
-        do {
+        while (true) {
             /** @var \DOMElement|\DOMText|null $nodeTmp - false-positive error from phpstan */
             $nodeTmp = $node->nextSibling;
+
+            if ($nodeTmp === null) {
+                return null;
+            }
+
+            if (
+                $nodeTmp instanceof \DOMElement
+                &&
+                $nodeTmp->tagName === $this->protectedChildNodesHelper
+            ) {
+                $node = $nodeTmp;
+
+                continue;
+            }
 
             if ($nodeTmp instanceof \DOMText) {
                 if (
@@ -1505,16 +1519,16 @@ class HtmlMin implements HtmlMinInterface
                     &&
                     \strpos($nodeTmp->textContent, '<') === false
                 ) {
-                    $node = $nodeTmp;
-                } else {
-                    $node = $nodeTmp->nextSibling;
+                    return $nodeTmp;
                 }
-            } else {
-                $node = $nodeTmp;
-            }
-        } while (!($node === null || $node instanceof \DOMElement || $node instanceof \DOMText));
 
-        return $node;
+                $node = $nodeTmp;
+
+                continue;
+            }
+
+            return $nodeTmp;
+        }
     }
 
     /**
