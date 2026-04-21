@@ -1647,7 +1647,7 @@ HTML;
         static::assertSame($html, $htmlMin->minify($html));
     }
 
-    public function testRelativeLinksWithSeparateConfiguration()
+    public function testDoMakeSameDomainsLinksRelativeWithSeparateConfiguration()
     {
         $html = '<a href="https://www.example.com/foo/bar">Just an example</a>';
         $expected = '<a href=/foo/bar>Just an example</a>';
