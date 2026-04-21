@@ -80,6 +80,17 @@ class HtmlMin implements HtmlMinInterface
     ];
 
     /**
+     * @var array<string, string>
+     */
+    private static $inlineSpaceSensitiveTags = [
+        'b'      => '',
+        'em'     => '',
+        'i'      => '',
+        'strong' => '',
+        'u'      => '',
+    ];
+
+    /**
      * @var array
      */
     private static $booleanAttributes = [
@@ -1067,9 +1078,23 @@ class HtmlMin implements HtmlMinInterface
             } elseif ($child instanceof \DOMText) {
                 if ($child->isElementContentWhitespace()) {
                     if (
-                        $child->previousSibling !== null
-                        &&
-                        $child->nextSibling !== null
+                        (
+                            $child->previousSibling !== null
+                            &&
+                            $child->nextSibling !== null
+                        )
+                        ||
+                        (
+                            $child->wholeText === ' '
+                            &&
+                            $child->previousSibling === null
+                            &&
+                            $child->nextSibling !== null
+                            &&
+                            $child->parentNode instanceof \DOMElement
+                            &&
+                            isset(self::$inlineSpaceSensitiveTags[$child->parentNode->tagName])
+                        )
                     ) {
                         if (
                             (
