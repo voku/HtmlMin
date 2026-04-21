@@ -1126,6 +1126,64 @@ class HtmlMin implements HtmlMinInterface
         return '';
     }
 
+    private function minifyJsonString(string $json): string
+    {
+        $json = \trim($json);
+        $jsonMinified = '';
+        $inString = false;
+        $isEscaped = false;
+
+        $length = \strlen($json);
+        for ($i = 0; $i < $length; ++$i) {
+            $char = $json[$i];
+
+            if ($inString) {
+                $jsonMinified .= $char;
+
+                if ($isEscaped) {
+                    $isEscaped = false;
+
+                    continue;
+                }
+
+                if ($char === '\\') {
+                    $isEscaped = true;
+
+                    continue;
+                }
+
+                if ($char === '"') {
+                    $inString = false;
+                }
+
+                continue;
+            }
+
+            if ($char === '"') {
+                $inString = true;
+                $jsonMinified .= $char;
+
+                continue;
+            }
+
+            if (
+                $char === ' '
+                ||
+                $char === "\n"
+                ||
+                $char === "\r"
+                ||
+                $char === "\t"
+            ) {
+                continue;
+            }
+
+            $jsonMinified .= $char;
+        }
+
+        return $jsonMinified;
+    }
+
     /**
      * @return array
      */
@@ -1829,7 +1887,10 @@ class HtmlMin implements HtmlMinInterface
                 'text/x-handlebars-template',
             ];
             $scriptType = isset($attributes) ? \strtolower(\trim((string) ($attributes['type'] ?? ''))) : '';
-            if ($element->tag !== 'script' || !\in_array($scriptType, $activeSpecialTypes, true)) {
+            $isJsonLdScript = $element->tag === 'script' && \strpos($scriptType, 'application/ld+json') === 0;
+            if ($isJsonLdScript) {
+                $innerHtml = $this->minifyJsonString($innerHtml);
+            } elseif ($element->tag !== 'script' || !\in_array($scriptType, $activeSpecialTypes, true)) {
                 $innerHtml = \trim($innerHtml);
             }
 

@@ -295,6 +295,23 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         static::assertSame(\trim($expected), $htmlMin->minify($html));
     }
 
+    public function testMinifyJsonLdScriptTag()
+    {
+        $html = '<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Example Inc."
+}
+</script>';
+
+        $expected = '<script type=application/ld+json>{"@context":"https://schema.org","@type":"Organization","name":"Example Inc."}</script>';
+
+        $htmlMin = new HtmlMin();
+
+        static::assertSame($expected, $htmlMin->minify($html));
+    }
+
     public function testMinifyBase()
     {
         // init
