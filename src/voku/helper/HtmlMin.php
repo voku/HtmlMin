@@ -578,11 +578,30 @@ class HtmlMin implements HtmlMinInterface
     }
 
     /**
+     * @param bool|string[] $doMakeSameDomainsLinksRelative
+     *
+     * @return $this
+     */
+    public function doMakeSameDomainsLinksRelative($doMakeSameDomainsLinksRelative = true): self
+    {
+        if (\is_array($doMakeSameDomainsLinksRelative)) {
+            $this->setLocalDomains($doMakeSameDomainsLinksRelative);
+            $this->doMakeSameDomainsLinksRelative = \count($this->localDomains) > 0;
+
+            return $this;
+        }
+
+        $this->doMakeSameDomainsLinksRelative = (bool) $doMakeSameDomainsLinksRelative;
+
+        return $this;
+    }
+
+    /**
      * @param string[] $localDomains
      *
      * @return $this
      */
-    public function doMakeSameDomainsLinksRelative(array $localDomains): self
+    public function setLocalDomains(array $localDomains): self
     {
         /** @noinspection AlterInForeachInspection */
         foreach ($localDomains as &$localDomain) {
@@ -590,7 +609,6 @@ class HtmlMin implements HtmlMinInterface
         }
 
         $this->localDomains = $localDomains;
-        $this->doMakeSameDomainsLinksRelative = \count($this->localDomains) > 0;
 
         return $this;
     }

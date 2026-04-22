@@ -1838,6 +1838,26 @@ HTML;
         static::assertSame($html, $htmlMin->minify($html));
     }
 
+    public function testDoMakeSameDomainsLinksRelativeWithSeparateConfiguration()
+    {
+        $html = '<a href="https://www.example.com/foo/bar">Just an example</a>';
+        $expected = '<a href=/foo/bar>Just an example</a>';
+
+        $htmlMin = new HtmlMin();
+        $htmlMin->setLocalDomains(['https://www.example.com/']);
+        static::assertFalse($htmlMin->isDoMakeSameDomainsLinksRelative());
+        static::assertSame(['www.example.com'], $htmlMin->getLocalDomains());
+        $htmlMin->doMakeSameDomainsLinksRelative();
+        static::assertTrue($htmlMin->isDoMakeSameDomainsLinksRelative());
+        static::assertSame($expected, $htmlMin->minify($html));
+
+        // --
+
+        $htmlMin->doMakeSameDomainsLinksRelative(false);
+        static::assertFalse($htmlMin->isDoMakeSameDomainsLinksRelative());
+        static::assertSame((new HtmlMin())->minify($html), $htmlMin->minify($html));
+    }
+
     public function testdoKeepHttpAndHttpsPrefixOnExternalAttributes()
     {
         $html = '<a href="http://www.example.com/">No remove</a><img src="http://www.example.com/" />';
