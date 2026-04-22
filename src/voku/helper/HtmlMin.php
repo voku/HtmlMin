@@ -1965,6 +1965,99 @@ class HtmlMin implements HtmlMinInterface
      */
     private function removeCommentsOnlyFromHtmlString(string $html): string
     {
+        $htmlWithoutComments = $this->removeCommentsOnlyViaHtmlDomParser($html);
+        if ($htmlWithoutComments !== null) {
+            return $htmlWithoutComments;
+        }
+
+        return $this->removeCommentsOnlyFromHtmlStringFallback($html);
+    }
+
+    /**
+     * Remove comments from html-string via the DOM parser when the input can be
+     * round-tripped without unrelated changes.
+     *
+     * @param string $html
+     *
+     * @return string|null
+     */
+    private function removeCommentsOnlyViaHtmlDomParser(string $html): ?string
+    {
+        $dom = new HtmlDomParser();
+        $dom->useKeepBrokenHtml($this->keepBrokenHtml);
+
+        if ($this->templateLogicSyntaxInSpecialScriptTags !== null) {
+            $dom->overwriteTemplateLogicSyntaxInSpecialScriptTags($this->templateLogicSyntaxInSpecialScriptTags);
+        }
+
+        if ($this->specialScriptTags !== null) {
+            $dom->overwriteSpecialScriptTags($this->specialScriptTags);
+        }
+
+        try {
+            $dom->loadHtml($html);
+        } catch (\Throwable $throwable) {
+            return null;
+        }
+
+        $roundTrippedHtml = $this->renderCommentsOnlyHtmlDom($dom, $html);
+        if ($roundTrippedHtml !== $html) {
+            return null;
+        }
+
+        foreach ($dom->findMulti('//comment()') as $commentWrapper) {
+            $comment = $commentWrapper->getNode();
+            $commentValue = $comment->nodeValue;
+            if (
+                $this->isConditionalComment($commentValue)
+                ||
+                $this->isSpecialComment($commentValue)
+            ) {
+                continue;
+            }
+
+            $parentNode = $comment->parentNode;
+            if ($parentNode !== null) {
+                $parentNode->removeChild($comment);
+            }
+        }
+
+        $dom->getDocument()->normalizeDocument();
+
+        return $this->renderCommentsOnlyHtmlDom($dom, $html);
+    }
+
+    /**
+     * Render the DOM for comments-only mode without changing instance state.
+     *
+     * @param HtmlDomParser $dom
+     * @param string        $html
+     *
+     * @return string
+     */
+    private function renderCommentsOnlyHtmlDom(HtmlDomParser $dom, string $html): string
+    {
+        $previousWithDocType = $this->withDocType;
+        $this->withDocType = (\stripos($html, '<!DOCTYPE') === 0);
+
+        try {
+            return $dom->fixHtmlOutput(
+                $this->getDoctype($dom->getDocument()) . $dom->html()
+            );
+        } finally {
+            $this->withDocType = $previousWithDocType;
+        }
+    }
+
+    /**
+     * Remove comments from html-string and keep all other content untouched.
+     *
+     * @param string $html
+     *
+     * @return string
+     */
+    private function removeCommentsOnlyFromHtmlStringFallback(string $html): string
+    {
         $length = \strlen($html);
         $offset = 0;
         $result = '';
