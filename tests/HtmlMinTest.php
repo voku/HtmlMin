@@ -331,6 +331,37 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         static::assertSame(\trim($expected), $htmlMin->minify($html));
     }
 
+    public function testMinifyInlineJavaScript()
+    {
+        $html = '<script>
+            var foo = 1; // foo
+            var bar = 2;
+            console.log(foo + bar);
+        </script>';
+
+        $expected = '<script>var foo=1;var bar=2;console.log(foo+bar);</script>';
+
+        $htmlMin = new HtmlMin();
+        $htmlMin->doMinifyJavaScript();
+
+        static::assertSame($expected, $htmlMin->minify($html));
+    }
+
+    public function testDoNotMinifySpecialScriptTypes()
+    {
+        $html = '<script type="text/x-custom-template">
+            var foo = 1;
+            var bar = 2;
+        </script>';
+
+        $expected = '<script type=text/x-custom-template> var foo = 1; var bar = 2; </script>';
+
+        $htmlMin = new HtmlMin();
+        $htmlMin->doMinifyJavaScript();
+
+        static::assertSame($expected, $htmlMin->minify($html));
+    }
+
     public function testMinifyJsonLdScriptTag()
     {
         $html = '<script type="application/ld+json">

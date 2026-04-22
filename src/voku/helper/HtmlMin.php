@@ -284,6 +284,11 @@ class HtmlMin implements HtmlMinInterface
     /**
      * @var bool
      */
+    private $doMinifyJavaScript = false;
+
+    /**
+     * @var bool
+     */
     private $doRemoveValueFromEmptyInput = true;
 
     /**
@@ -448,6 +453,18 @@ class HtmlMin implements HtmlMinInterface
     public function doRemoveDeprecatedTypeFromScriptTag(bool $doRemoveDeprecatedTypeFromScriptTag = true): self
     {
         $this->doRemoveDeprecatedTypeFromScriptTag = $doRemoveDeprecatedTypeFromScriptTag;
+
+        return $this;
+    }
+
+    /**
+     * @param bool $doMinifyJavaScript
+     *
+     * @return $this
+     */
+    public function doMinifyJavaScript(bool $doMinifyJavaScript = true): self
+    {
+        $this->doMinifyJavaScript = $doMinifyJavaScript;
 
         return $this;
     }
@@ -1268,6 +1285,14 @@ class HtmlMin implements HtmlMinInterface
     /**
      * @return bool
      */
+    public function isDoMinifyJavaScript(): bool
+    {
+        return $this->doMinifyJavaScript;
+    }
+
+    /**
+     * @return bool
+     */
     public function isDoRemoveDeprecatedTypeFromStylesheetLink(): bool
     {
         return $this->doRemoveDeprecatedTypeFromStylesheetLink;
@@ -1919,6 +1944,23 @@ class HtmlMin implements HtmlMinInterface
                 $innerHtml = \trim($innerHtml);
             }
 
+            if (
+                $this->doMinifyJavaScript
+                &&
+                $element->tag === 'script'
+                &&
+                !\in_array($scriptType, $activeSpecialTypes, true)
+                &&
+                $this->isInlineJavaScriptType($scriptType)
+            ) {
+                $originalInnerHtml = $innerHtml;
+                try {
+                    $innerHtml = \JShrink\Minifier::minify($innerHtml);
+                } catch (\Exception $e) {
+                    $innerHtml = $originalInnerHtml;
+                }
+            }
+
             $this->protectedChildNodes[$this->protected_tags_counter] = $innerHtml;
             $element->getNode()->nodeValue = '<' . $this->protectedChildNodesHelper . ' data-' . $this->protectedChildNodesHelper . '="' . $this->protected_tags_counter . '"></' . $this->protectedChildNodesHelper . '>';
 
@@ -1958,6 +2000,20 @@ class HtmlMin implements HtmlMinInterface
         }
 
         return $dom;
+    }
+
+    /**
+     * @param string $scriptType
+     *
+     * @return bool
+     */
+    private function isInlineJavaScriptType(string $scriptType): bool
+    {
+        if ($scriptType === '' || $scriptType === 'module') {
+            return true;
+        }
+
+        return \stripos($scriptType, 'javascript') !== false || \stripos($scriptType, 'ecmascript') !== false;
     }
 
     /**
