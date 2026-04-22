@@ -1727,6 +1727,105 @@ HTML;
         static::assertSame($expectedHtml, $actual);
     }
 
+    public function testDoRemoveCommentsOnlyWithoutChangingOtherHtml()
+    {
+        $minifier = new HtmlMin();
+        $minifier->doRemoveCommentsOnly();
+
+        $html = <<<'HTML'
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test</title>
+</head>
+<body>
+<!-- remove this -->
+<hr />
+<!--[if IE]>
+keep this
+<![endif]-->
+</body>
+</html>
+
+HTML;
+
+        $actual = $minifier->minify($html);
+
+        $expectedHtml = '<!DOCTYPE html>
+<html>
+<head>
+    <title>Test</title>
+</head>
+<body>
+
+<hr>
+<!--[if IE]>
+keep this
+<![endif]-->
+</body>
+</html>';
+
+        static::assertSame($expectedHtml, $actual);
+
+        $actualWithCommentsDisabledFirst = (new HtmlMin())
+            ->doRemoveComments(false)
+            ->doRemoveCommentsOnly()
+            ->minify($html);
+
+        static::assertSame($expectedHtml, $actualWithCommentsDisabledFirst);
+
+        $defaultMinifiedHtml = (new HtmlMin())->minify($html);
+        $actualWithCommentsOnlyDisabled = (new HtmlMin())
+            ->doRemoveCommentsOnly()
+            ->doRemoveCommentsOnly(false)
+            ->minify($html);
+
+        static::assertSame($defaultMinifiedHtml, $actualWithCommentsOnlyDisabled);
+    }
+
+    public function testDoRemoveCommentsOnlyPreservesCommentLikeAttributeValues()
+    {
+        $html = <<<'HTML'
+<div data-test="before <!-- keep this --> after" title="1 > 0">Text</div><!-- remove this --><span data-other="<!-- keep this too -->"></span>
+HTML;
+
+        $expected = '<div data-test="before <!-- keep this --> after" title="1 > 0">Text</div><span data-other="<!-- keep this too -->"></span>';
+
+        $actual = (new HtmlMin())
+            ->doRemoveCommentsOnly()
+            ->minify($html);
+
+        static::assertSame($expected, $actual);
+    }
+
+    public function testDoRemoveCommentsOnlyProcessesMalformedInputViaDom()
+    {
+        $html = '<div data-test="before <!-- keep this --> after" title="1 >';
+
+        $actual = (new HtmlMin())
+            ->doRemoveCommentsOnly()
+            ->minify($html);
+
+        static::assertSame('<div data-test="before <!-- keep this --> after" title="1 >"></div>', $actual);
+    }
+
+    public function testDoRemoveCommentsOnlyHandlesQuotedAttributeClosedLater()
+    {
+        $html = <<<'HTML'
+<div data-test="before <!-- keep this --> after" title="1 >
+still inside the title">Text</div><!-- remove this -->
+HTML;
+
+        $expected = '<div data-test="before <!-- keep this --> after" title="1 >
+still inside the title">Text</div>';
+
+        $actual = (new HtmlMin())
+            ->doRemoveCommentsOnly()
+            ->minify($html);
+
+        static::assertSame($expected, $actual);
+    }
+
     public function testSelfClosingInput()
     {
         $html = '

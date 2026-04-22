@@ -176,6 +176,11 @@ class HtmlMin implements HtmlMinInterface
     /**
      * @var bool
      */
+    private $doRemoveCommentsOnly = false;
+
+    /**
+     * @var bool
+     */
     private $doRemoveWhitespaceAroundTags = false;
 
     /**
@@ -405,6 +410,21 @@ class HtmlMin implements HtmlMinInterface
     public function doRemoveComments(bool $doRemoveComments = true): self
     {
         $this->doRemoveComments = $doRemoveComments;
+
+        return $this;
+    }
+
+    /**
+     * @param bool $doRemoveCommentsOnly
+     *
+     * @return $this
+     */
+    public function doRemoveCommentsOnly(bool $doRemoveCommentsOnly = true): self
+    {
+        $this->doRemoveCommentsOnly = $doRemoveCommentsOnly;
+        if ($doRemoveCommentsOnly) {
+            $this->doRemoveComments = true;
+        }
 
         return $this;
     }
@@ -1271,6 +1291,14 @@ class HtmlMin implements HtmlMinInterface
     /**
      * @return bool
      */
+    public function isDoRemoveCommentsOnly(): bool
+    {
+        return $this->doRemoveCommentsOnly;
+    }
+
+    /**
+     * @return bool
+     */
     public function isDoRemoveDefaultAttributes(): bool
     {
         return $this->doRemoveDefaultAttributes;
@@ -1479,6 +1507,10 @@ class HtmlMin implements HtmlMinInterface
         $html = (string) $html;
         if (!isset($html[0])) {
             return '';
+        }
+
+        if ($this->doRemoveCommentsOnly) {
+            return $this->removeCommentsOnlyFromHtmlString($html);
         }
 
         $html = \trim($html);
@@ -2057,6 +2089,50 @@ class HtmlMin implements HtmlMinInterface
         $dom->getDocument()->normalizeDocument();
 
         return $dom;
+    }
+
+    /**
+     * Remove comments from html-string using the DOM and keep all other content untouched.
+     *
+     * @param string $html
+     *
+     * @return string
+     */
+    private function removeCommentsOnlyFromHtmlString(string $html): string
+    {
+        $dom = new HtmlDomParser();
+        $dom->useKeepBrokenHtml($this->keepBrokenHtml);
+
+        if ($this->templateLogicSyntaxInSpecialScriptTags !== null) {
+            $dom->overwriteTemplateLogicSyntaxInSpecialScriptTags($this->templateLogicSyntaxInSpecialScriptTags);
+        }
+
+        if ($this->specialScriptTags !== null) {
+            $dom->overwriteSpecialScriptTags($this->specialScriptTags);
+        }
+
+        $dom->loadHtml($html);
+
+        foreach ($dom->findMulti('//comment()') as $commentWrapper) {
+            $comment = $commentWrapper->getNode();
+            $commentValue = $comment->nodeValue;
+            if (
+                $this->isConditionalComment($commentValue)
+                ||
+                $this->isSpecialComment($commentValue)
+            ) {
+                continue;
+            }
+
+            $parentNode = $comment->parentNode;
+            if ($parentNode !== null) {
+                $parentNode->removeChild($comment);
+            }
+        }
+
+        $dom->getDocument()->normalizeDocument();
+
+        return $dom->fixHtmlOutput($dom->html());
     }
 
     /**
