@@ -1,3 +1,13 @@
+# Changelog 4.5.1..master
+
+- add `doRemoveCommentsOnly()` for removing regular HTML comments without applying other minification changes
+- add inline JavaScript minification support via `doMinifyJavaScript()`
+- add `doRemoveDataAttributes()` option to drop `data-*` attributes during attribute optimization
+- improve same-domain URL handling via `setLocalDomains()` + `doMakeSameDomainsLinksRelative()`
+- fix multiple HTML minification edge cases (standalone `<head>/<body>` fragments, nested protected child-node restoration, whitespace around inline tags, malformed input handling, UTF-8 non-breaking spaces, and comment-like attribute values)
+- update dependencies and compatibility (`voku/simple_html_dom` to `^5.0`, add `tedivm/jshrink`, require PHP `>=7.1`)
+- update CI/QA configuration (extended PHP matrix up to 8.5, refreshed workflow actions, updated phpunit config)
+
 # Changelog 4.5.1 (2024-05-25)
 
 - "fix SimpleHtmlDom::__construct(): Argument #1 ($node) must be of type DOMNode, null given" (thanks @frugan-dev)
