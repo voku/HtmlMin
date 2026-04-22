@@ -1612,6 +1612,19 @@ HTML;
         static::assertSame($expected, $actual);
     }
 
+    public function testDoRemoveCommentsOnlyKeepsMalformedTagContentUntouched()
+    {
+        $html = <<<'HTML'
+<div data-test="before <!-- keep this --> after" title="1 >
+HTML;
+
+        $actual = (new HtmlMin())
+            ->doRemoveCommentsOnly()
+            ->minify($html);
+
+        static::assertSame($html, $actual);
+    }
+
     public function testSelfClosingInput()
     {
         $html = '
