@@ -2027,6 +2027,30 @@ class HtmlMin implements HtmlMinInterface
                 continue;
             }
 
+            $nextChar = $html[$offset + 1] ?? '';
+            if (
+                ($nextChar >= 'a' && $nextChar <= 'z')
+                ||
+                ($nextChar >= 'A' && $nextChar <= 'Z')
+                ||
+                $nextChar === '/'
+                ||
+                $nextChar === '!'
+                ||
+                $nextChar === '?'
+            ) {
+                $tagEnd = $this->getHtmlTagEndPosition($html, $offset);
+                if ($tagEnd === null) {
+                    $result .= \substr($html, $offset);
+                    break;
+                }
+
+                $result .= \substr($html, $offset, $tagEnd + 1 - $offset);
+                $offset = $tagEnd + 1;
+
+                continue;
+            }
+
             $result .= '<';
             ++$offset;
         }
@@ -2042,20 +2066,15 @@ class HtmlMin implements HtmlMinInterface
      */
     private function getProtectedTagNameAtOffset(string $html, int $offset): ?string
     {
-        foreach (['script', 'style', 'textarea', 'pre', 'code'] as $tagName) {
-            $tagNameLength = \strlen($tagName);
+        foreach (self::$skipTagsForRemoveWhitespace as $tagName) {
+            $tagNameWithLt = '<' . $tagName;
+            $tagNameLength = \strlen($tagNameWithLt);
 
-            if (
-                \strncasecmp(
-                    \substr($html, $offset, $tagNameLength + 1),
-                    '<' . $tagName,
-                    $tagNameLength + 1
-                ) !== 0
-            ) {
+            if (\substr_compare($html, $tagNameWithLt, $offset, $tagNameLength, true) !== 0) {
                 continue;
             }
 
-            $nextChar = $html[$offset + $tagNameLength + 1] ?? '';
+            $nextChar = $html[$offset + $tagNameLength] ?? '';
             if (
                 $nextChar === ''
                 ||

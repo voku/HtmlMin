@@ -1595,6 +1595,23 @@ HTML;
         static::assertSame($defaultMinifiedHtml, $actualWithCommentsOnlyDisabled);
     }
 
+    public function testDoRemoveCommentsOnlyPreservesCommentLikeAttributeValues()
+    {
+        $html = <<<'HTML'
+<div data-test="before <!-- keep this --> after" title="1 > 0">Text</div><!-- remove this --><span data-other="<!-- keep this too -->"></span>
+HTML;
+
+        $expected = <<<'HTML'
+<div data-test="before <!-- keep this --> after" title="1 > 0">Text</div><span data-other="<!-- keep this too -->"></span>
+HTML;
+
+        $actual = (new HtmlMin())
+            ->doRemoveCommentsOnly()
+            ->minify($html);
+
+        static::assertSame($expected, $actual);
+    }
+
     public function testSelfClosingInput()
     {
         $html = '
