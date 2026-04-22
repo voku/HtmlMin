@@ -65,12 +65,22 @@ interface HtmlMinInterface
     /**
      * @return bool
      */
+    public function isDoMinifyJavaScript(): bool;
+
+    /**
+     * @return bool
+     */
     public function isDoRemoveValueFromEmptyInput(): bool;
 
     /**
      * @return bool
      */
     public function isDoRemoveEmptyAttributes(): bool;
+
+    /**
+     * @return bool
+     */
+    public function isDoRemoveDataAttributes(): bool;
 
     /**
      * @return bool
@@ -96,6 +106,11 @@ interface HtmlMinInterface
      * @return bool
      */
     public function isDoRemoveComments(): bool;
+
+    /**
+     * @return bool
+     */
+    public function isDoRemoveCommentsOnly(): bool;
 
     /**
      * @return bool

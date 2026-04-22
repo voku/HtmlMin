@@ -297,6 +297,17 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
             }
         }
 
+        // remove all "data-*" attributes
+        if (
+            $htmlMin->isDoRemoveDataAttributes()
+            &&
+            \strpos($attrName, 'data-') === 0
+            &&
+            $tag !== 'html-min--voku--saved-content'
+        ) {
+            return true;
+        }
+
         return false;
     }
 

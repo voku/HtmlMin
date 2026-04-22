@@ -76,6 +76,34 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         static::assertSame($expectd, $compressedHtml);
     }
 
+    public function testHeadClosingTagForStandaloneHeadFragment()
+    {
+        $minifier = new HtmlMin();
+
+        static::assertSame('<head>this is a test</head>', $minifier->minify('<head>this is a test</head>'));
+    }
+
+    public function testHeadClosingTagForStandaloneHeadFragmentWithElement()
+    {
+        $minifier = new HtmlMin();
+
+        static::assertSame('<head><title>test</title></head>', $minifier->minify('<head><title>test</title></head>'));
+    }
+
+    public function testBodyClosingTagForStandaloneBodyFragment()
+    {
+        $minifier = new HtmlMin();
+
+        static::assertSame('<body>this is a test</body>', $minifier->minify('<body>this is a test</body>'));
+    }
+
+    public function testBodyClosingTagForStandaloneBodyFragmentWithAttributes()
+    {
+        $minifier = new HtmlMin();
+
+        static::assertSame('<body class=main>this is a test</body>', $minifier->minify('<body class="main">this is a test</body>'));
+    }
+
     public function testIssue63()
     {
         $html = '
@@ -99,6 +127,14 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
 	Vestibulum eget velit arcu. Phasellus eget scelerisque dui, nec elementum ante. <code>aoaoaoao</code>';
 
         static::assertSame($expectd, $compressedHtml);
+    }
+
+    public function testMinifySimpleHtmlDoesNotThrowParseError()
+    {
+        $html = '<html></html>';
+        $htmlMin = new HtmlMin();
+
+        static::assertSame('<html>', $htmlMin->minify($html));
     }
 
     /**
@@ -293,6 +329,103 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         $expected = \str_replace(["\r\n", "\r", "\n"], "\n", $expected);
 
         static::assertSame(\trim($expected), $htmlMin->minify($html));
+    }
+
+    public function testMinifyInlineJavaScript()
+    {
+        $html = '<script>
+            var foo = 1; // foo
+            var bar = 2;
+            console.log(foo + bar);
+        </script>';
+
+        $expected = '<script>var foo=1;var bar=2;console.log(foo+bar);</script>';
+
+        $htmlMin = new HtmlMin();
+        $htmlMin->doMinifyJavaScript();
+
+        static::assertSame($expected, $htmlMin->minify($html));
+    }
+
+    public function testDoNotMinifySpecialScriptTypes()
+    {
+        $html = '<script type="text/x-custom-template">
+            var foo = 1;
+            var bar = 2;
+        </script>';
+
+        $expected = '<script type=text/x-custom-template> var foo = 1; var bar = 2; </script>';
+
+        $htmlMin = new HtmlMin();
+        $htmlMin->doMinifyJavaScript();
+
+        static::assertSame($expected, $htmlMin->minify($html));
+    }
+
+    public function testMinifyJsonLdScriptTag()
+    {
+        $html = '<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Example Inc."
+}
+</script>';
+
+        $expected = '<script type=application/ld+json>{"@context":"https://schema.org","@type":"Organization","name":"Example Inc."}</script>';
+
+        $htmlMin = new HtmlMin();
+
+        static::assertSame($expected, $htmlMin->minify($html));
+
+        // Escaped double-quote inside a JSON string value must be preserved.
+        $html = '<script type="application/ld+json">
+{
+  "@type": "Organization",
+  "description": "He said \"hello\" to us"
+}
+</script>';
+
+        $expected = '<script type=application/ld+json>{"@type":"Organization","description":"He said \"hello\" to us"}</script>';
+
+        $htmlMin = new HtmlMin();
+
+        static::assertSame($expected, $htmlMin->minify($html));
+
+        // Whitespace characters embedded in a string value must NOT be removed.
+        $html = '<script type="application/ld+json">
+{
+  "name": "New  York",
+  "city": "Los\tAngeles"
+}
+</script>';
+
+        $expected = '<script type=application/ld+json>{"name":"New  York","city":"Los\tAngeles"}</script>';
+
+        $htmlMin = new HtmlMin();
+
+        static::assertSame($expected, $htmlMin->minify($html));
+
+        // Nested objects and arrays.
+        $html = '<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://example.com/?q={search}"
+  },
+  "sameAs": [
+    "https://www.facebook.com/example",
+    "https://twitter.com/example"
+  ]
+}
+</script>';
+
+        $expected = '<script type=application/ld+json>{"@context":"https://schema.org","potentialAction":{"@type":"SearchAction","target":"https://example.com/?q={search}"},"sameAs":["https://www.facebook.com/example","https://twitter.com/example"]}</script>';
+
+        $htmlMin = new HtmlMin();
+
+        static::assertSame($expected, $htmlMin->minify($html));
     }
 
     public function testMinifyBase()
@@ -584,6 +717,29 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         );
     }
 
+    public function testKeepWhitespaceBeforeAnchorWrappedInStrongTag()
+    {
+        $fixtures = [
+            [
+                'html' => 'Get a <strong>complimentary</strong> organic lawn fertilizer with a lawn maintenance or bi-weekly subscription.<strong> <a href="https://domain.com/qgq8/contact-us">Contact us to schedule!</a></strong>',
+                'expected' => 'Get a <strong>complimentary</strong> organic lawn fertilizer with a lawn maintenance or bi-weekly subscription.<strong> <a href=https://domain.com/qgq8/contact-us>Contact us to schedule!</a></strong>',
+            ],
+            [
+                'html' => 'Foo<em> <a href="https://example.com">bar</a></em>',
+                'expected' => 'Foo<em> <a href=https://example.com>bar</a></em>',
+            ],
+        ];
+
+        foreach ($fixtures as $fixture) {
+            foreach ([true, false] as $removeWhitespaceAroundTags) {
+                $htmlMin = new HtmlMin();
+                $htmlMin->doRemoveWhitespaceAroundTags($removeWhitespaceAroundTags);
+
+                static::assertSame($fixture['expected'], $htmlMin->minify($fixture['html']));
+            }
+        }
+    }
+
     public function testMinifyCodeTag()
     {
         // init
@@ -777,6 +933,17 @@ foo
         static::assertSame($expected, $htmlMin->minify($htmlWithJs));
     }
 
+    public function testRestoreNestedProtectedChildNodes()
+    {
+        $html = '<div><code><nocompress><code><nocompress>N</nocompress></code><code><nocompress>N</nocompress></code></nocompress></code></div>';
+
+        $htmlMin = new voku\helper\HtmlMin();
+
+        $expected = '<div><code><nocompress><code><nocompress>N</nocompress></code><code><nocompress>N</nocompress></code></nocompress></code></div>';
+
+        static::assertSame($expected, $htmlMin->minify($html));
+    }
+
     public function testHtmlInsideJavaScriptTemplates()
     {
         $html = '
@@ -801,6 +968,20 @@ foo
         $expected = '<script type=text/html><p>Foo <div class="alert alert-success"> Bar </div> {{foo}} {{bar}} {{hello}} </script>';
 
         static::assertSame($expected, $htmlMin->minify($html));
+    }
+
+    public function testTextHtmlScriptTemplateTagDoesNotLeakInternalPlaceholder()
+    {
+        $html = "<script id=\"foo\" type=\"text/html\">\n\n';\n</script>";
+
+        $htmlMin = new HtmlMin();
+        $htmlMin->doOptimizeViaHtmlDomParser(true);
+
+        $actual = $htmlMin->minify($html);
+
+        static::assertSame('<script id=foo type=text/html> \'; </script>', $actual);
+        static::assertStringNotContainsString('simple_html_dom__voku__html_special_script', $actual);
+        static::assertStringNotContainsString('____simple_html_dom__voku__html_special_script____', $actual);
     }
 
     public function testOverwriteSpecialScriptTags()
@@ -929,7 +1110,7 @@ HTML;
     </select>
     ';
 
-        $expected = '<select :class="[\'c-chart__label\']" @change=getGraphData name=filter v-model=fiter></select>';
+        $expected = '<select :class="[\'c-chart__label\']" name=filter @change=getGraphData v-model=fiter></select>';
 
         static::assertSame($expected, $htmlMin->minify($html));
     }
@@ -974,7 +1155,7 @@ HTML;
         <body>lall</body></html>
         ';
 
-        $expected = '<!DOCTYPE html><!--[if IE 8]> <html lang="en" class="ie8"> <![endif]--><!--[if IE 9]> <html lang="en" class="ie9"> <![endif]--><!--[if !IE]><!--><html prefix="og: http://ogp.me/ns#" lang=ru> <!--<![endif]--> <head><title>test</title> <body>lall';
+        $expected = '<!DOCTYPE html><!--[if IE 8]> <html lang="en" class="ie8"> <![endif]--><!--[if IE 9]> <html lang="en" class="ie9"> <![endif]--><!--[if !IE]><!--><html prefix="og: http://ogp.me/ns#" lang=ru><!--<![endif]--> <head><title>test</title> <body>lall';
 
         static::assertSame($expected, $htmlMin->minify($html));
     }
@@ -989,6 +1170,35 @@ HTML;
         static::assertSame($expected, $html);
     }
 
+    public function testDoNotCompressTagWithLeadingAndTrailingWhitespace()
+    {
+        $minifier = new HtmlMin();
+        $minifier->doRemoveOmittedHtmlTags(false);
+        $html = $minifier->minify("
+<nocompress>
+  \r\n\t
+  
+    <ul>
+      <li>
+        à
+      </li>
+      
+      <li>
+        á
+      </li>
+      
+    </ul>
+  
+  \r\n\t
+
+</nocompress>
+");
+
+        $expected = '<nocompress><ul><li> à </li> <li> á </li></ul> </nocompress>';
+
+        static::assertSame($expected, $html);
+    }
+
     public function testDoNotDecodeHtmlEnteties()
     {
         $minifier = new HtmlMin();
@@ -997,6 +1207,24 @@ HTML;
         $expected = '<span>&lt;</span>';
 
         static::assertSame($expected, $html);
+    }
+
+    public function testDoNotCorruptUtf8NonBreakingSpace()
+    {
+        $minifier = new HtmlMin();
+        $minifier->doRemoveOmittedHtmlTags(false);
+        $html = $minifier->minify("<span>\u{00A0}</span>");
+        $expected = '<span>' . "\u{00A0}" . '</span>';
+
+        static::assertSame($expected, $html);
+    }
+
+    public function testIdAttributeDoesNotTriggerTypeError()
+    {
+        $minifier = new HtmlMin();
+        $html = $minifier->minify('<div id="test"></div>');
+
+        static::assertSame('<div id=test></div>', $html);
     }
 
     public function testOptionsFalse()
@@ -1140,6 +1368,18 @@ HTML;
         static::assertSame($expected, $htmlMin->minify($html));
     }
 
+    public function testRemoveDataAttributesOption()
+    {
+        $html = '<img src="http://path/to/png" data-role="image" data-id="1">';
+
+        $htmlMin = new HtmlMin();
+        static::assertSame('<img data-id=1 data-role=image src=http://path/to/png>', $htmlMin->minify($html));
+
+        $htmlMin = new HtmlMin();
+        $htmlMin->doRemoveDataAttributes();
+        static::assertSame('<img src=http://path/to/png>', $htmlMin->minify($html));
+    }
+
     public function testOptionsTrue()
     {
         // init
@@ -1215,6 +1455,16 @@ HTML;
     ';
 
         $expected = '<html><head> <body><p class=foo id=text>foo</p> <br> <ul><li><p class=foo>lall </ul> <ul><li>1 <li>2 <li>3</ul> <table><tr><th>1 <th>2 <tr><td>foo <td><dl><dt>Coffee <dd>Black hot drink <dt>Milk <dd>White cold drink</dl> </table>';
+
+        static::assertSame($expected, $htmlMin->minify($html));
+    }
+
+    public function testOmitPTagDoesNotAddTrailingWhitespace()
+    {
+        $htmlMin = new HtmlMin();
+
+        $html = '<div><p>Text</p></div>';
+        $expected = '<div><p>Text</div>';
 
         static::assertSame($expected, $htmlMin->minify($html));
     }
@@ -1477,6 +1727,105 @@ HTML;
         static::assertSame($expectedHtml, $actual);
     }
 
+    public function testDoRemoveCommentsOnlyWithoutChangingOtherHtml()
+    {
+        $minifier = new HtmlMin();
+        $minifier->doRemoveCommentsOnly();
+
+        $html = <<<'HTML'
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test</title>
+</head>
+<body>
+<!-- remove this -->
+<hr />
+<!--[if IE]>
+keep this
+<![endif]-->
+</body>
+</html>
+
+HTML;
+
+        $actual = $minifier->minify($html);
+
+        $expectedHtml = '<!DOCTYPE html>
+<html>
+<head>
+    <title>Test</title>
+</head>
+<body>
+
+<hr>
+<!--[if IE]>
+keep this
+<![endif]-->
+</body>
+</html>';
+
+        static::assertSame($expectedHtml, $actual);
+
+        $actualWithCommentsDisabledFirst = (new HtmlMin())
+            ->doRemoveComments(false)
+            ->doRemoveCommentsOnly()
+            ->minify($html);
+
+        static::assertSame($expectedHtml, $actualWithCommentsDisabledFirst);
+
+        $defaultMinifiedHtml = (new HtmlMin())->minify($html);
+        $actualWithCommentsOnlyDisabled = (new HtmlMin())
+            ->doRemoveCommentsOnly()
+            ->doRemoveCommentsOnly(false)
+            ->minify($html);
+
+        static::assertSame($defaultMinifiedHtml, $actualWithCommentsOnlyDisabled);
+    }
+
+    public function testDoRemoveCommentsOnlyPreservesCommentLikeAttributeValues()
+    {
+        $html = <<<'HTML'
+<div data-test="before <!-- keep this --> after" title="1 > 0">Text</div><!-- remove this --><span data-other="<!-- keep this too -->"></span>
+HTML;
+
+        $expected = '<div data-test="before <!-- keep this --> after" title="1 > 0">Text</div><span data-other="<!-- keep this too -->"></span>';
+
+        $actual = (new HtmlMin())
+            ->doRemoveCommentsOnly()
+            ->minify($html);
+
+        static::assertSame($expected, $actual);
+    }
+
+    public function testDoRemoveCommentsOnlyProcessesMalformedInputViaDom()
+    {
+        $html = '<div data-test="before <!-- keep this --> after" title="1 >';
+
+        $actual = (new HtmlMin())
+            ->doRemoveCommentsOnly()
+            ->minify($html);
+
+        static::assertSame('<div data-test="before <!-- keep this --> after" title="1 >"></div>', $actual);
+    }
+
+    public function testDoRemoveCommentsOnlyHandlesQuotedAttributeClosedLater()
+    {
+        $html = <<<'HTML'
+<div data-test="before <!-- keep this --> after" title="1 >
+still inside the title">Text</div><!-- remove this -->
+HTML;
+
+        $expected = '<div data-test="before <!-- keep this --> after" title="1 >
+still inside the title">Text</div>';
+
+        $actual = (new HtmlMin())
+            ->doRemoveCommentsOnly()
+            ->minify($html);
+
+        static::assertSame($expected, $actual);
+    }
+
     public function testSelfClosingInput()
     {
         $html = '
@@ -1501,7 +1850,7 @@ HTML;
     {
         $html = '<script type="text/javascript">alert("Hello");</script>
                 <script type="text/ecmascript" src="ecmascript.js"></script>';
-        $expected = '<script>alert("Hello");</script><script src=ecmascript.js></script>';
+        $expected = '<script>alert("Hello");</script> <script src=ecmascript.js></script>';
 
         $htmlMin = new HtmlMin();
         static::assertSame($expected, $htmlMin->minify($html));
@@ -1510,7 +1859,7 @@ HTML;
 
         $html = '<script type="text/javascript">alert("Hello");</script>
                 <script type="text/ecmascript" src="ecmascript.js"></script>';
-        $expected = '<script type=text/javascript>alert("Hello");</script><script src=ecmascript.js type=text/ecmascript></script>';
+        $expected = '<script type=text/javascript>alert("Hello");</script> <script src=ecmascript.js type=text/ecmascript></script>';
 
         $htmlMin = new HtmlMin();
         $htmlMin->doRemoveDeprecatedTypeFromScriptTag(false);
@@ -1586,6 +1935,26 @@ HTML;
         $htmlMin = new HtmlMin();
         $htmlMin->doMakeSameDomainsLinksRelative(['موقع.وزارة-الاتصالات.مصر']);
         static::assertSame($html, $htmlMin->minify($html));
+    }
+
+    public function testDoMakeSameDomainsLinksRelativeWithSeparateConfiguration()
+    {
+        $html = '<a href="https://www.example.com/foo/bar">Just an example</a>';
+        $expected = '<a href=/foo/bar>Just an example</a>';
+
+        $htmlMin = new HtmlMin();
+        $htmlMin->setLocalDomains(['https://www.example.com/']);
+        static::assertFalse($htmlMin->isDoMakeSameDomainsLinksRelative());
+        static::assertSame(['www.example.com'], $htmlMin->getLocalDomains());
+        $htmlMin->doMakeSameDomainsLinksRelative();
+        static::assertTrue($htmlMin->isDoMakeSameDomainsLinksRelative());
+        static::assertSame($expected, $htmlMin->minify($html));
+
+        // --
+
+        $htmlMin->doMakeSameDomainsLinksRelative(false);
+        static::assertFalse($htmlMin->isDoMakeSameDomainsLinksRelative());
+        static::assertSame((new HtmlMin())->minify($html), $htmlMin->minify($html));
     }
 
     public function testdoKeepHttpAndHttpsPrefixOnExternalAttributes()
@@ -1671,8 +2040,8 @@ HTML;
 
     public function testNullParentNode()
     {
-        $html = " <nocompress>foo</nocompress> ";
-        $expected = "<nocompress>foo</nocompress>";
+        $html = ' <nocompress>foo</nocompress> ';
+        $expected = '<nocompress>foo</nocompress>';
         
         $htmlMin = new HtmlMin();
         $htmlMin->doOptimizeViaHtmlDomParser(true);
@@ -1680,8 +2049,8 @@ HTML;
 
         // --
 
-        $html = "<><code>foo</code><>";
-        $expected = "<code>foo</code>";
+        $html = '<><code>foo</code><>';
+        $expected = '><code>foo</code><>';
 
         $htmlMin = new HtmlMin();
         $htmlMin->doOptimizeViaHtmlDomParser(true);

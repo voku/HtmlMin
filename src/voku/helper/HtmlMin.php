@@ -80,6 +80,17 @@ class HtmlMin implements HtmlMinInterface
     ];
 
     /**
+     * @var array<string, string>
+     */
+    private static $inlineSpaceSensitiveTags = [
+        'b'      => '',
+        'em'     => '',
+        'i'      => '',
+        'strong' => '',
+        'u'      => '',
+    ];
+
+    /**
      * @var array
      */
     private static $booleanAttributes = [
@@ -161,6 +172,11 @@ class HtmlMin implements HtmlMinInterface
      * @var bool
      */
     private $doRemoveComments = true;
+
+    /**
+     * @var bool
+     */
+    private $doRemoveCommentsOnly = false;
 
     /**
      * @var bool
@@ -273,12 +289,22 @@ class HtmlMin implements HtmlMinInterface
     /**
      * @var bool
      */
+    private $doMinifyJavaScript = false;
+
+    /**
+     * @var bool
+     */
     private $doRemoveValueFromEmptyInput = true;
 
     /**
      * @var bool
      */
     private $doRemoveEmptyAttributes = true;
+
+    /**
+     * @var bool
+     */
+    private $doRemoveDataAttributes = false;
 
     /**
      * @var bool
@@ -389,6 +415,21 @@ class HtmlMin implements HtmlMinInterface
     }
 
     /**
+     * @param bool $doRemoveCommentsOnly
+     *
+     * @return $this
+     */
+    public function doRemoveCommentsOnly(bool $doRemoveCommentsOnly = true): self
+    {
+        $this->doRemoveCommentsOnly = $doRemoveCommentsOnly;
+        if ($doRemoveCommentsOnly) {
+            $this->doRemoveComments = true;
+        }
+
+        return $this;
+    }
+
+    /**
      * @param bool $doRemoveDefaultAttributes
      *
      * @return $this
@@ -432,6 +473,18 @@ class HtmlMin implements HtmlMinInterface
     public function doRemoveDeprecatedTypeFromScriptTag(bool $doRemoveDeprecatedTypeFromScriptTag = true): self
     {
         $this->doRemoveDeprecatedTypeFromScriptTag = $doRemoveDeprecatedTypeFromScriptTag;
+
+        return $this;
+    }
+
+    /**
+     * @param bool $doMinifyJavaScript
+     *
+     * @return $this
+     */
+    public function doMinifyJavaScript(bool $doMinifyJavaScript = true): self
+    {
+        $this->doMinifyJavaScript = $doMinifyJavaScript;
 
         return $this;
     }
@@ -497,6 +550,18 @@ class HtmlMin implements HtmlMinInterface
     }
 
     /**
+     * @param bool $doRemoveDataAttributes
+     *
+     * @return $this
+     */
+    public function doRemoveDataAttributes(bool $doRemoveDataAttributes = true): self
+    {
+        $this->doRemoveDataAttributes = $doRemoveDataAttributes;
+
+        return $this;
+    }
+
+    /**
      * @param bool $doRemoveHttpPrefixFromAttributes
      *
      * @return $this
@@ -533,11 +598,30 @@ class HtmlMin implements HtmlMinInterface
     }
 
     /**
+     * @param bool|string[] $doMakeSameDomainsLinksRelative
+     *
+     * @return $this
+     */
+    public function doMakeSameDomainsLinksRelative($doMakeSameDomainsLinksRelative = true): self
+    {
+        if (\is_array($doMakeSameDomainsLinksRelative)) {
+            $this->setLocalDomains($doMakeSameDomainsLinksRelative);
+            $this->doMakeSameDomainsLinksRelative = \count($this->localDomains) > 0;
+
+            return $this;
+        }
+
+        $this->doMakeSameDomainsLinksRelative = (bool) $doMakeSameDomainsLinksRelative;
+
+        return $this;
+    }
+
+    /**
      * @param string[] $localDomains
      *
      * @return $this
      */
-    public function doMakeSameDomainsLinksRelative(array $localDomains): self
+    public function setLocalDomains(array $localDomains): self
     {
         /** @noinspection AlterInForeachInspection */
         foreach ($localDomains as &$localDomain) {
@@ -545,7 +629,6 @@ class HtmlMin implements HtmlMinInterface
         }
 
         $this->localDomains = $localDomains;
-        $this->doMakeSameDomainsLinksRelative = \count($this->localDomains) > 0;
 
         return $this;
     }
@@ -679,7 +762,12 @@ class HtmlMin implements HtmlMinInterface
                                &&
                                $attribute->value !== ''
                                &&
-                               \strpos($attribute->name, '____SIMPLE_HTML_DOM__VOKU') !== 0
+                               // simple_html_dom v5 serializes <html ⚡> as <html SHDOM_GOOGLE_AMP="true">.
+                               // libxml lowercases this attribute name to "shdom_google_amp". If we strip
+                               // the quotes (producing shdom_google_amp=true), putReplacedBackToPreserveHtmlEntities
+                               // cannot match the full "<html SHDOM_GOOGLE_AMP=\"true\"" pattern and the ⚡
+                               // is never restored. Keep quotes for this specific token attribute.
+                               \strtolower($attribute->name) !== 'shdom_google_amp'
                                &&
                                \strpos($attribute->name, ' ') === false
                                &&
@@ -772,7 +860,29 @@ class HtmlMin implements HtmlMinInterface
         //
         // <-- However, a start tag must never be omitted if it has any attributes.
 
-        return \in_array($tag_name, self::$optional_end_tags, true)
+        return (
+            \in_array($tag_name, self::$optional_end_tags, true)
+            &&
+            (
+                (
+                    $tag_name === 'head'
+                    &&
+                    $parent_tag_name === 'html'
+                )
+                ||
+                (
+                    $tag_name === 'body'
+                    &&
+                    $parent_tag_name === 'html'
+                )
+                ||
+                (
+                    $tag_name === 'html'
+                    &&
+                    $parent_node instanceof \DOMDocument
+                )
+            )
+        )
                ||
                (
                    $tag_name === 'li'
@@ -1045,9 +1155,23 @@ class HtmlMin implements HtmlMinInterface
             } elseif ($child instanceof \DOMText) {
                 if ($child->isElementContentWhitespace()) {
                     if (
-                        $child->previousSibling !== null
-                        &&
-                        $child->nextSibling !== null
+                        (
+                            $child->previousSibling !== null
+                            &&
+                            $child->nextSibling !== null
+                        )
+                        ||
+                        (
+                            $child->wholeText === ' '
+                            &&
+                            $child->previousSibling === null
+                            &&
+                            $child->nextSibling !== null
+                            &&
+                            $child->parentNode instanceof \DOMElement
+                            &&
+                            isset(self::$inlineSpaceSensitiveTags[$child->parentNode->tagName])
+                        )
                     ) {
                         if (
                             (
@@ -1121,6 +1245,17 @@ class HtmlMin implements HtmlMinInterface
         return '';
     }
 
+    private function minifyJsonString(string $json): string
+    {
+        $json = \trim($json);
+
+        return (string) \preg_replace(
+            '#(?s)("(?:[^"\\\\]|\\\\.)*"|[^" \n\r\t]+)|[ \n\r\t]+#u',
+            '$1',
+            $json
+        );
+    }
+
     /**
      * @return array
      */
@@ -1156,6 +1291,14 @@ class HtmlMin implements HtmlMinInterface
     /**
      * @return bool
      */
+    public function isDoRemoveCommentsOnly(): bool
+    {
+        return $this->doRemoveCommentsOnly;
+    }
+
+    /**
+     * @return bool
+     */
     public function isDoRemoveDefaultAttributes(): bool
     {
         return $this->doRemoveDefaultAttributes;
@@ -1183,6 +1326,14 @@ class HtmlMin implements HtmlMinInterface
     public function isDoRemoveDeprecatedTypeFromScriptTag(): bool
     {
         return $this->doRemoveDeprecatedTypeFromScriptTag;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDoMinifyJavaScript(): bool
+    {
+        return $this->doMinifyJavaScript;
     }
 
     /**
@@ -1223,6 +1374,14 @@ class HtmlMin implements HtmlMinInterface
     public function isDoRemoveEmptyAttributes(): bool
     {
         return $this->doRemoveEmptyAttributes;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDoRemoveDataAttributes(): bool
+    {
+        return $this->doRemoveDataAttributes;
     }
 
     /**
@@ -1350,6 +1509,10 @@ class HtmlMin implements HtmlMinInterface
             return '';
         }
 
+        if ($this->doRemoveCommentsOnly) {
+            return $this->removeCommentsOnlyFromHtmlString($html);
+        }
+
         $html = \trim($html);
         if (!$html) {
             return '';
@@ -1409,7 +1572,7 @@ class HtmlMin implements HtmlMinInterface
         // Restore protected HTML-code.
         // -------------------------------------------------------------------------
 
-        if (\strpos($html, $this->protectedChildNodesHelper) !== false) {
+        while (\strpos($html, $this->protectedChildNodesHelper) !== false) {
             $html = (string) \preg_replace_callback(
                 '/<(?<element>' . $this->protectedChildNodesHelper . ')(?<attributes> [^>]*)?>(?<value>.*?)<\/' . $this->protectedChildNodesHelper . '>/',
                 [$this, 'restoreProtectedHtml'],
@@ -1488,9 +1651,23 @@ class HtmlMin implements HtmlMinInterface
      */
     protected function getNextSiblingOfTypeDOMElement(\DOMNode $node)
     {
-        do {
+        while (true) {
             /** @var \DOMElement|\DOMText|null $nodeTmp - false-positive error from phpstan */
             $nodeTmp = $node->nextSibling;
+
+            if ($nodeTmp === null) {
+                return null;
+            }
+
+            if (
+                $nodeTmp instanceof \DOMElement
+                &&
+                $nodeTmp->tagName === $this->protectedChildNodesHelper
+            ) {
+                $node = $nodeTmp;
+
+                continue;
+            }
 
             if ($nodeTmp instanceof \DOMText) {
                 if (
@@ -1498,16 +1675,16 @@ class HtmlMin implements HtmlMinInterface
                     &&
                     \strpos($nodeTmp->textContent, '<') === false
                 ) {
-                    $node = $nodeTmp;
-                } else {
-                    $node = $nodeTmp->nextSibling;
+                    return $nodeTmp;
                 }
-            } else {
-                $node = $nodeTmp;
-            }
-        } while (!($node === null || $node instanceof \DOMElement || $node instanceof \DOMText));
 
-        return $node;
+                $node = $nodeTmp;
+
+                continue;
+            }
+
+            return $nodeTmp;
+        }
     }
 
     /**
@@ -1602,6 +1779,40 @@ class HtmlMin implements HtmlMinInterface
             }
         }
 
+        // -------------------------------------------------------------------------
+        // Protect xml:lang attributes from being stripped or mangled by the libxml
+        // HTML parser on PHP < 8.0.  Namespace-prefixed attributes like xml:lang are
+        // silently discarded when libxml loads HTML in older versions, resulting in
+        // duplicate plain `lang` attributes in the output.
+        //
+        // Strategy: replace xml:lang="VAL" with a plain placeholder attribute name
+        // and, when no lang="VAL" already exists on the same element, also inject
+        // lang="VAL" so the output is the same on all PHP versions.
+        //
+        // Restoration below converts the lowercased placeholder back to xml:lang.
+        // -------------------------------------------------------------------------
+
+        $hasXmlLang = \stripos($html, 'xml:lang') !== false;
+        if ($hasXmlLang) {
+            $html = (string) \preg_replace_callback(
+                '/<([a-zA-Z][^>]*)\s+xml:lang=(["\']?)([^"\'>\s]+)\2([^>]*)>/si',
+                static function ($m) {
+                    $attrsBefore = $m[1];
+                    $quote       = $m[2];
+                    $value       = $m[3];
+                    $attrsAfter  = $m[4];
+                    // Only inject lang=VAL when no lang attribute is already present.
+                    $hasLang = (bool) \preg_match('/\blang=/i', $attrsBefore . $attrsAfter);
+                    $out = '<' . $attrsBefore . ' HTMLMINXMLLANG=' . $quote . $value . $quote . $attrsAfter;
+                    if (!$hasLang) {
+                        $out .= ' lang=' . $quote . $value . $quote;
+                    }
+                    return $out . '>';
+                },
+                $html
+            );
+        }
+
         // load dom
         $dom->loadHtml($html);
 
@@ -1670,10 +1881,18 @@ class HtmlMin implements HtmlMinInterface
         // Convert the Dom into a string.
         // -------------------------------------------------------------------------
 
-        return $dom->fixHtmlOutput(
+        $result = $dom->fixHtmlOutput(
             $doctypeStr . $this->domNodeToString($dom->getDocument()),
             $multiDecodeNewHtmlEntity
         );
+
+        // Restore xml:lang from its placeholder. libxml lowercases attribute names,
+        // so the stored placeholder comes back as htmlminxmllang in the DOM output.
+        if ($hasXmlLang) {
+            $result = \str_ireplace(' htmlminxmllang=', ' xml:lang=', $result);
+        }
+
+        return $result;
     }
 
     /**
@@ -1714,7 +1933,7 @@ class HtmlMin implements HtmlMinInterface
             }
 
             $parentNode = $element->parentNode();
-            if (!is_null($parentNode) && $parentNode->nodeValue !== null) {
+            if ($parentNode !== null && $parentNode->nodeValue !== null) {
                 $this->protectedChildNodes[$this->protected_tags_counter] = $parentNode->innerHtml();
                 $parentNode->nodeValue = '<' . $this->protectedChildNodesHelper . ' data-' . $this->protectedChildNodesHelper . '="' . $this->protected_tags_counter . '"></' . $this->protectedChildNodesHelper . '>';
             }
@@ -1749,7 +1968,50 @@ class HtmlMin implements HtmlMinInterface
                 }
             }
 
-            $this->protectedChildNodes[$this->protected_tags_counter] = $element->innerhtml;
+            $innerHtml = $element->innerhtml;
+
+            // On PHP < 8.0 the simplevokubroken-hash mechanism restores content
+            // (including surrounding newlines/spaces) AFTER fixHtmlOutput's trim
+            // has already run, so regular scripts would carry extra whitespace.
+            // On PHP >= 8.0 innerhtml already returns trimmed content for regular
+            // scripts, so this trim is a no-op there.
+            //
+            // Template-type scripts (text/x-custom-template, etc.) are hashed via
+            // the EJS/ERB path on ALL PHP versions, and their tests intentionally
+            // expect leading/trailing whitespace to be preserved – so skip trim for
+            // those types.
+            $activeSpecialTypes = $this->specialScriptTags ?? [
+                'text/html',
+                'text/template',
+                'text/x-custom-template',
+                'text/x-handlebars-template',
+            ];
+            $scriptType = isset($attributes) ? \strtolower(\trim((string) ($attributes['type'] ?? ''))) : '';
+            $isJsonLdScript = $element->tag === 'script' && \strpos($scriptType, 'application/ld+json') === 0;
+            if ($isJsonLdScript) {
+                $innerHtml = $this->minifyJsonString($innerHtml);
+            } elseif ($element->tag !== 'script' || !\in_array($scriptType, $activeSpecialTypes, true)) {
+                $innerHtml = \trim($innerHtml);
+            }
+
+            if (
+                $this->doMinifyJavaScript
+                &&
+                $element->tag === 'script'
+                &&
+                !\in_array($scriptType, $activeSpecialTypes, true)
+                &&
+                $this->isInlineJavaScriptType($scriptType)
+            ) {
+                $originalInnerHtml = $innerHtml;
+                try {
+                    $innerHtml = \JShrink\Minifier::minify($innerHtml);
+                } catch (\Exception $e) {
+                    $innerHtml = $originalInnerHtml;
+                }
+            }
+
+            $this->protectedChildNodes[$this->protected_tags_counter] = $innerHtml;
             $element->getNode()->nodeValue = '<' . $this->protectedChildNodesHelper . ' data-' . $this->protectedChildNodesHelper . '="' . $this->protected_tags_counter . '"></' . $this->protectedChildNodesHelper . '>';
 
             ++$this->protected_tags_counter;
@@ -1770,20 +2032,38 @@ class HtmlMin implements HtmlMinInterface
                 continue;
             }
 
-            $this->protectedChildNodes[$this->protected_tags_counter] = '<!--' . $text . '-->';
+            $this->protectedChildNodes[$this->protected_tags_counter] = '<!--' . \trim($text) . '-->';
 
             /* @var $node \DOMComment */
             $node = $element->getNode();
-            $child = new \DOMText('<' . $this->protectedChildNodesHelper . ' data-' . $this->protectedChildNodesHelper . '="' . $this->protected_tags_counter . '"></' . $this->protectedChildNodesHelper . '>');
-            $parentNode = $element->getNode()->parentNode;
-            if ($parentNode !== null) {
-                $parentNode->replaceChild($child, $node);
+            $doc = $node->ownerDocument;
+            if ($doc !== null) {
+                $child = $doc->createElement($this->protectedChildNodesHelper);
+                $child->setAttribute('data-' . $this->protectedChildNodesHelper, (string) $this->protected_tags_counter);
+                $parentNode = $node->parentNode;
+                if ($parentNode !== null) {
+                    $parentNode->replaceChild($child, $node);
+                }
             }
 
             ++$this->protected_tags_counter;
         }
 
         return $dom;
+    }
+
+    /**
+     * @param string $scriptType
+     *
+     * @return bool
+     */
+    private function isInlineJavaScriptType(string $scriptType): bool
+    {
+        if ($scriptType === '' || $scriptType === 'module') {
+            return true;
+        }
+
+        return \stripos($scriptType, 'javascript') !== false || \stripos($scriptType, 'ecmascript') !== false;
     }
 
     /**
@@ -1809,6 +2089,50 @@ class HtmlMin implements HtmlMinInterface
         $dom->getDocument()->normalizeDocument();
 
         return $dom;
+    }
+
+    /**
+     * Remove comments from html-string using the DOM and keep all other content untouched.
+     *
+     * @param string $html
+     *
+     * @return string
+     */
+    private function removeCommentsOnlyFromHtmlString(string $html): string
+    {
+        $dom = new HtmlDomParser();
+        $dom->useKeepBrokenHtml($this->keepBrokenHtml);
+
+        if ($this->templateLogicSyntaxInSpecialScriptTags !== null) {
+            $dom->overwriteTemplateLogicSyntaxInSpecialScriptTags($this->templateLogicSyntaxInSpecialScriptTags);
+        }
+
+        if ($this->specialScriptTags !== null) {
+            $dom->overwriteSpecialScriptTags($this->specialScriptTags);
+        }
+
+        $dom->loadHtml($html);
+
+        foreach ($dom->findMulti('//comment()') as $commentWrapper) {
+            $comment = $commentWrapper->getNode();
+            $commentValue = $comment->nodeValue;
+            if (
+                $this->isConditionalComment($commentValue)
+                ||
+                $this->isSpecialComment($commentValue)
+            ) {
+                continue;
+            }
+
+            $parentNode = $comment->parentNode;
+            if ($parentNode !== null) {
+                $parentNode->removeChild($comment);
+            }
+        }
+
+        $dom->getDocument()->normalizeDocument();
+
+        return $dom->fixHtmlOutput($dom->html());
     }
 
     /**
@@ -1857,7 +2181,7 @@ class HtmlMin implements HtmlMinInterface
      */
     private function restoreProtectedHtml($matches): string
     {
-        \preg_match('/.*"(?<id>\d*)"/', $matches['attributes'], $matchesInner);
+        \preg_match('/=["\']*(?<id>\d+)/', $matches['attributes'], $matchesInner);
 
         return $this->protectedChildNodes[$matchesInner['id']] ?? '';
     }
