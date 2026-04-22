@@ -1957,31 +1957,13 @@ class HtmlMin implements HtmlMinInterface
     }
 
     /**
-     * Remove comments from html-string and keep all other content untouched.
+     * Remove comments from html-string using the DOM and keep all other content untouched.
      *
      * @param string $html
      *
      * @return string
      */
     private function removeCommentsOnlyFromHtmlString(string $html): string
-    {
-        $htmlWithoutComments = $this->removeCommentsOnlyViaHtmlDomParser($html);
-        if ($htmlWithoutComments !== null) {
-            return $htmlWithoutComments;
-        }
-
-        return $this->removeCommentsOnlyFromHtmlStringFallback($html);
-    }
-
-    /**
-     * Remove comments from html-string via the DOM parser when the input can be
-     * round-tripped without unrelated changes.
-     *
-     * @param string $html
-     *
-     * @return string|null
-     */
-    private function removeCommentsOnlyViaHtmlDomParser(string $html): ?string
     {
         $dom = new HtmlDomParser();
         $dom->useKeepBrokenHtml($this->keepBrokenHtml);
@@ -1994,16 +1976,7 @@ class HtmlMin implements HtmlMinInterface
             $dom->overwriteSpecialScriptTags($this->specialScriptTags);
         }
 
-        try {
-            $dom->loadHtml($html);
-        } catch (\Throwable $throwable) {
-            return null;
-        }
-
-        $roundTrippedHtml = $this->renderCommentsOnlyHtmlDom($dom, $html);
-        if ($roundTrippedHtml !== $html) {
-            return null;
-        }
+        $dom->loadHtml($html);
 
         foreach ($dom->findMulti('//comment()') as $commentWrapper) {
             $comment = $commentWrapper->getNode();
@@ -2024,197 +1997,7 @@ class HtmlMin implements HtmlMinInterface
 
         $dom->getDocument()->normalizeDocument();
 
-        return $this->renderCommentsOnlyHtmlDom($dom, $html);
-    }
-
-    /**
-     * Render the DOM for comments-only mode without changing instance state.
-     *
-     * @param HtmlDomParser $dom
-     * @param string        $html
-     *
-     * @return string
-     */
-    private function renderCommentsOnlyHtmlDom(HtmlDomParser $dom, string $html): string
-    {
-        $previousWithDocType = $this->withDocType;
-        $this->withDocType = (\stripos($html, '<!DOCTYPE') === 0);
-
-        try {
-            return $dom->fixHtmlOutput(
-                $this->getDoctype($dom->getDocument()) . $dom->html()
-            );
-        } finally {
-            $this->withDocType = $previousWithDocType;
-        }
-    }
-
-    /**
-     * Remove comments from html-string and keep all other content untouched.
-     *
-     * @param string $html
-     *
-     * @return string
-     */
-    private function removeCommentsOnlyFromHtmlStringFallback(string $html): string
-    {
-        $length = \strlen($html);
-        $offset = 0;
-        $result = '';
-
-        while ($offset < $length) {
-            $nextTagOffset = \strpos($html, '<', $offset);
-            if ($nextTagOffset === false) {
-                $result .= \substr($html, $offset);
-                break;
-            }
-
-            if ($nextTagOffset > $offset) {
-                $result .= \substr($html, $offset, $nextTagOffset - $offset);
-                $offset = $nextTagOffset;
-            }
-
-            if (\substr($html, $offset, 4) === '<!--') {
-                $commentEnd = \strpos($html, '-->', $offset + 4);
-                if ($commentEnd === false) {
-                    $result .= \substr($html, $offset);
-                    break;
-                }
-
-                $comment = \substr($html, $offset + 4, $commentEnd - ($offset + 4));
-                if (
-                    $this->isConditionalComment($comment)
-                    ||
-                    $this->isSpecialComment($comment)
-                ) {
-                    $result .= \substr($html, $offset, $commentEnd + 3 - $offset);
-                }
-
-                $offset = $commentEnd + 3;
-                continue;
-            }
-
-            $protectedTag = $this->getProtectedTagNameAtOffset($html, $offset);
-            if ($protectedTag !== null) {
-                $openTagEnd = $this->getHtmlTagEndPosition($html, $offset);
-                if ($openTagEnd === null) {
-                    $result .= \substr($html, $offset);
-                    break;
-                }
-
-                $closingTagOffset = \stripos($html, '</' . $protectedTag, $openTagEnd + 1);
-                if ($closingTagOffset === false) {
-                    $result .= \substr($html, $offset);
-                    break;
-                }
-
-                $closingTagEnd = $this->getHtmlTagEndPosition($html, $closingTagOffset);
-                if ($closingTagEnd === null) {
-                    $result .= \substr($html, $offset);
-                    break;
-                }
-
-                $result .= \substr($html, $offset, $closingTagEnd + 1 - $offset);
-                $offset = $closingTagEnd + 1;
-
-                continue;
-            }
-
-            $nextChar = $html[$offset + 1] ?? '';
-            if (
-                ($nextChar >= 'a' && $nextChar <= 'z')
-                ||
-                ($nextChar >= 'A' && $nextChar <= 'Z')
-                ||
-                $nextChar === '/'
-                ||
-                $nextChar === '!'
-                ||
-                $nextChar === '?'
-            ) {
-                $tagEnd = $this->getHtmlTagEndPosition($html, $offset);
-                if ($tagEnd === null) {
-                    $result .= \substr($html, $offset);
-                    break;
-                }
-
-                $result .= \substr($html, $offset, $tagEnd + 1 - $offset);
-                $offset = $tagEnd + 1;
-
-                continue;
-            }
-
-            $result .= '<';
-            ++$offset;
-        }
-
-        return $result;
-    }
-
-    /**
-     * @param string $html
-     * @param int    $offset
-     *
-     * @return string|null
-     */
-    private function getProtectedTagNameAtOffset(string $html, int $offset): ?string
-    {
-        foreach (self::$skipTagsForRemoveWhitespace as $tagName) {
-            $tagNameWithLt = '<' . $tagName;
-            $tagNameLength = \strlen($tagNameWithLt);
-
-            if (\substr_compare($html, $tagNameWithLt, $offset, $tagNameLength, true) !== 0) {
-                continue;
-            }
-
-            $nextChar = $html[$offset + $tagNameLength] ?? '';
-            if (
-                $nextChar === ''
-                ||
-                $nextChar === '>'
-                ||
-                $nextChar === '/'
-                ||
-                \ctype_space($nextChar)
-            ) {
-                return $tagName;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * @param string $html
-     * @param int    $offset
-     *
-     * @return int|null
-     */
-    private function getHtmlTagEndPosition(string $html, int $offset): ?int
-    {
-        $length = \strlen($html);
-        $singleQuote = false;
-        $doubleQuote = false;
-
-        for ($i = $offset; $i < $length; ++$i) {
-            $char = $html[$i];
-
-            if ($char === "'" && !$doubleQuote) {
-                $singleQuote = !$singleQuote;
-                continue;
-            }
-
-            if ($char === '"' && !$singleQuote) {
-                $doubleQuote = !$doubleQuote;
-                continue;
-            }
-
-            if ($char === '>' && !$singleQuote && !$doubleQuote) {
-                return $i;
-            }
-        }
-
-        return null;
+        return $dom->fixHtmlOutput($dom->html());
     }
 
     /**

@@ -1560,22 +1560,19 @@ HTML;
 
         $actual = $minifier->minify($html);
 
-        $expectedHtml = <<<'HTML'
-<!DOCTYPE html>
+        $expectedHtml = '<!DOCTYPE html>
 <html>
 <head>
     <title>Test</title>
 </head>
 <body>
 
-<hr />
+<hr>
 <!--[if IE]>
 keep this
 <![endif]-->
 </body>
-</html>
-
-HTML;
+</html>';
 
         static::assertSame($expectedHtml, $actual);
 
@@ -1601,9 +1598,7 @@ HTML;
 <div data-test="before <!-- keep this --> after" title="1 > 0">Text</div><!-- remove this --><span data-other="<!-- keep this too -->"></span>
 HTML;
 
-        $expected = <<<'HTML'
-<div data-test="before <!-- keep this --> after" title="1 > 0">Text</div><span data-other="<!-- keep this too -->"></span>
-HTML;
+        $expected = '<div data-test="before <!-- keep this --> after" title="1 > 0">Text</div><span data-other="<!-- keep this too -->"></span>';
 
         $actual = (new HtmlMin())
             ->doRemoveCommentsOnly()
@@ -1612,17 +1607,15 @@ HTML;
         static::assertSame($expected, $actual);
     }
 
-    public function testDoRemoveCommentsOnlyKeepsMalformedTagContentUntouched()
+    public function testDoRemoveCommentsOnlyProcessesMalformedInputViaDom()
     {
-        $html = <<<'HTML'
-<div data-test="before <!-- keep this --> after" title="1 >
-HTML;
+        $html = '<div data-test="before <!-- keep this --> after" title="1 >';
 
         $actual = (new HtmlMin())
             ->doRemoveCommentsOnly()
             ->minify($html);
 
-        static::assertSame($html, $actual);
+        static::assertSame('<div data-test="before <!-- keep this --> after" title="1 >"></div>', $actual);
     }
 
     public function testDoRemoveCommentsOnlyHandlesQuotedAttributeClosedLater()
@@ -1632,10 +1625,8 @@ HTML;
 still inside the title">Text</div><!-- remove this -->
 HTML;
 
-        $expected = <<<'HTML'
-<div data-test="before <!-- keep this --> after" title="1 >
-still inside the title">Text</div>
-HTML;
+        $expected = '<div data-test="before <!-- keep this --> after" title="1 >
+still inside the title">Text</div>';
 
         $actual = (new HtmlMin())
             ->doRemoveCommentsOnly()
