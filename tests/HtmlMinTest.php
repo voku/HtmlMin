@@ -1625,6 +1625,25 @@ HTML;
         static::assertSame($html, $actual);
     }
 
+    public function testDoRemoveCommentsOnlyHandlesQuotedAttributeClosedLater()
+    {
+        $html = <<<'HTML'
+<div data-test="before <!-- keep this --> after" title="1 >
+still inside the title">Text</div><!-- remove this -->
+HTML;
+
+        $expected = <<<'HTML'
+<div data-test="before <!-- keep this --> after" title="1 >
+still inside the title">Text</div>
+HTML;
+
+        $actual = (new HtmlMin())
+            ->doRemoveCommentsOnly()
+            ->minify($html);
+
+        static::assertSame($expected, $actual);
+    }
+
     public function testSelfClosingInput()
     {
         $html = '
