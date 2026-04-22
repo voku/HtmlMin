@@ -1,3 +1,22 @@
+# Changelog 4.5.1..master
+
+- add `doRemoveCommentsOnly()` for removing regular HTML comments without applying other minification changes
+- add opt-in inline JavaScript minification via `doMinifyJavaScript()` (uses `tedivm/jshrink`)
+- add `doRemoveDataAttributes()` option to drop all `data-*` attributes (disabled by default)
+- improve same-domain URL handling: `doMakeSameDomainsLinksRelative()` now accepts a plain `true` flag; use the new fluent `setLocalDomains(array)` helper to configure domains separately
+- fix PHP 8.5 deprecation warnings: replace `SplObjectStorage`-based observer registration with an array-keyed map to avoid duplicates
+- fix `<script type="application/ld+json">` whitespace minification preserving valid JSON
+- fix nested protected child-node restoration (nocompress blocks, special script tags)
+- fix whitespace around inline tags (`<b>`, `<em>`, `<i>`, `<strong>`, `<u>`) not being preserved correctly
+- fix standalone `<head>` and `<body>` fragment closing-tag omission
+- fix UTF-8 non-breaking space characters being incorrectly stripped
+- fix PHP 8.3 `id` attribute handling triggering a type error
+- fix `text/html` script-template tags leaking internal simple_html_dom placeholders
+- fix `xml:lang` attribute being lost and trim script-tag whitespace for PHP 7.x compatibility
+- internal: extract `patchSimpleHtmlDomPlaceholders()` as an idempotent Reflection-based method for simple_html_dom v5 compatibility
+- upgrade `voku/simple_html_dom` dependency to `^5.0`; add `tedivm/jshrink ^1.8.1`; require PHP `>=7.1`
+- update CI matrix to cover PHP 7.1 – 8.5; refresh GitHub Actions (checkout v6, cache v5, upload-artifact v7, codecov v6)
+
 # Changelog 4.5.1 (2024-05-25)
 
 - "fix SimpleHtmlDom::__construct(): Argument #1 ($node) must be of type DOMNode, null given" (thanks @frugan-dev)
