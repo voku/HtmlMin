@@ -981,19 +981,19 @@ class HtmlMin implements HtmlMinInterface
             $tag_name === 'rp'
             &&
             (
-               $nextSibling === null
-               ||
-               (
-                   $nextSibling instanceof \DOMElement
-                   &&
-                   (
-                       $nextSibling->tagName === 'rp'
-                       ||
-                       $nextSibling->tagName === 'rt'
-                   )
-               )
-           )
-       )
+                $nextSibling === null
+                ||
+                (
+                    $nextSibling instanceof \DOMElement
+                    &&
+                    (
+                        $nextSibling->tagName === 'rp'
+                        ||
+                        $nextSibling->tagName === 'rt'
+                    )
+                )
+            )
+        )
        ||
        (
            $tag_name === 'tr'
@@ -1092,8 +1092,8 @@ class HtmlMin implements HtmlMinInterface
                         $nextSibling->tagName === 'option'
                         ||
                         $nextSibling->tagName === 'optgroup'
-                   )
-               )
+                    )
+                )
            )
        )
        ||
@@ -1101,11 +1101,11 @@ class HtmlMin implements HtmlMinInterface
            $tag_name === 'p'
            &&
            (
-                (
-                    $nextSibling === null
-                    &&
-                    $node->parentNode !== null
-                    &&
+               (
+                   $nextSibling === null
+                   &&
+                   $node->parentNode !== null
+                   &&
                    !\in_array(
                        $node->parentNode->nodeName,
                        [
@@ -1117,50 +1117,50 @@ class HtmlMin implements HtmlMinInterface
                            'noscript',
                            'video',
                         ],
-                        true
-                    )
-                    &&
-                    \strpos($node->parentNode->nodeName, '-') === false
-                )
-                ||
-                (
-                    $nextSibling instanceof \DOMElement
+                       true
+                   )
+                   &&
+                   \strpos($node->parentNode->nodeName, '-') === false
+               )
+               ||
+               (
+                   $nextSibling instanceof \DOMElement
                    &&
                    \in_array(
                        $nextSibling->tagName,
-                        [
-                            'address',
-                            'article',
-                            'aside',
-                            'blockquote',
-                            'details',
-                            'dialog',
-                            'div',
-                            'dl',
-                            'fieldset',
-                            'figcaption',
-                            'figure',
-                            'footer',
-                            'form',
-                            'h1',
-                           'h2',
-                           'h3',
-                           'h4',
-                           'h5',
-                           'h6',
-                            'header',
-                            'hgroup',
-                            'hr',
-                            'main',
-                            'menu',
-                            'nav',
-                            'ol',
-                            'p',
-                            'pre',
-                            'search',
-                            'section',
-                            'table',
-                            'ul',
+                       [
+                           'address',
+                           'article',
+                           'aside',
+                           'blockquote',
+                           'details',
+                           'dialog',
+                           'div',
+                           'dl',
+                           'fieldset',
+                           'figcaption',
+                           'figure',
+                           'footer',
+                           'form',
+                           'h1',
+                          'h2',
+                          'h3',
+                          'h4',
+                          'h5',
+                          'h6',
+                           'header',
+                           'hgroup',
+                           'hr',
+                           'main',
+                           'menu',
+                           'nav',
+                           'ol',
+                           'p',
+                           'pre',
+                           'search',
+                           'section',
+                           'table',
+                           'ul',
                        ],
                        true
                    )
@@ -1263,9 +1263,9 @@ class HtmlMin implements HtmlMinInterface
                    $this->domNodeClosingTagOptional($node)
                    &&
                    !(
-                        $previousSibling instanceof \DOMElement
-                        &&
-                        $previousSibling->tagName === 'colgroup'
+                       $previousSibling instanceof \DOMElement
+                       &&
+                       $previousSibling->tagName === 'colgroup'
                        &&
                        $this->domNodeClosingTagOptional($previousSibling)
                    );
@@ -1291,9 +1291,9 @@ class HtmlMin implements HtmlMinInterface
                    $this->domNodeClosingTagOptional($node)
                    &&
                    !(
-                        $previousSibling instanceof \DOMElement
-                        &&
-                        \in_array(
+                       $previousSibling instanceof \DOMElement
+                       &&
+                       \in_array(
                            $previousSibling->tagName,
                            [
                                'tbody',
