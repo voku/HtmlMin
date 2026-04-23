@@ -65,7 +65,6 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
             if ($htmlMin->isDoMakeSameDomainsLinksRelative()) {
                 $localDomains = $htmlMin->getLocalDomains();
                 foreach ($localDomains as $localDomain) {
-                    /** @noinspection InArrayCanBeUsedInspection */
                     if (
                         (
                             $attrName === 'href'
@@ -83,9 +82,7 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
                         &&
                         \stripos($attrValue, $localDomain) !== false
                     ) {
-                        $localDomainEscaped = \preg_quote($localDomain, '/');
-
-                        $attrValue = (string) \preg_replace("/^(?:(?:https?:)?\/\/)?{$localDomainEscaped}(?!\w)(?:\/?)/i", '/', $attrValue);
+                        $attrValue = (string) \preg_replace("/^(?:(?:https?:)?\/\/)?" . \preg_quote($localDomain, '/') . "(?!\w)\/?/i", '/', $attrValue);
                     }
                 }
             }
@@ -298,17 +295,11 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
         }
 
         // remove all "data-*" attributes
-        if (
-            $htmlMin->isDoRemoveDataAttributes()
-            &&
-            \strpos($attrName, 'data-') === 0
-            &&
-            $tag !== 'html-min--voku--saved-content'
-        ) {
-            return true;
-        }
-
-        return false;
+        return $htmlMin->isDoRemoveDataAttributes()
+               &&
+               $tag !== 'html-min--voku--saved-content'
+               &&
+               \strpos($attrName, 'data-') === 0;
     }
 
     /**
@@ -331,7 +322,6 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
         string $tagName,
         HtmlMinInterface $htmlMin
     ): string {
-        /** @noinspection InArrayCanBeUsedInspection */
         if (
             !(isset($attributes['rel']) && $attributes['rel'] === 'external')
             &&

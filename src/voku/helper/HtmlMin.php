@@ -2128,7 +2128,7 @@ class HtmlMin implements HtmlMinInterface
         $hasXmlLang = \stripos($html, 'xml:lang') !== false;
         if ($hasXmlLang) {
             $html = (string) \preg_replace_callback(
-                '/<([a-zA-Z][^>]*)\s+xml:lang=(["\']?)([^"\'>\s]+)\2([^>]*)>/si',
+                '/<([a-zA-Z][^>]*)\s+xml:lang=(["\']?)([^"\'>\s]+)\2([^>]*)>/i',
                 static function ($m) {
                     $attrsBefore = $m[1];
                     $quote       = $m[2];
