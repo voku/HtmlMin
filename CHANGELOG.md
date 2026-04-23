@@ -3,8 +3,11 @@
 - add `doRemoveCommentsOnly()` for removing regular HTML comments without applying other minification changes
 - add opt-in inline JavaScript minification via `doMinifyJavaScript()` (uses `tedivm/jshrink`)
 - add `doRemoveDataAttributes()` option to drop all `data-*` attributes (disabled by default)
+- expand `doRemoveOmittedHtmlTags()` to cover more WHATWG optional-tag rules (`html`, `head`, `body`, `colgroup`, `tbody`, `rt`, newer `p` followers, and `hr` handling for `option` / `optgroup`)
 - improve same-domain URL handling: `doMakeSameDomainsLinksRelative()` now accepts a plain `true` flag; use the new fluent `setLocalDomains(array)` helper to configure domains separately
 - fix PHP 8.5 deprecation warnings: replace `SplObjectStorage`-based observer registration with an array-keyed map to avoid duplicates
+- fix optional-tag omission around comments, protected comments, autonomous custom elements, and blocked `body` starts (`meta`, `link`, `noscript`, `script`, `style`, `template`)
+- fix optional-tag omission when preserving inter-tag whitespace or comments so table sections and sibling tags still round-trip to the same DOM
 - fix `<script type="application/ld+json">` whitespace minification preserving valid JSON
 - fix nested protected child-node restoration (nocompress blocks, special script tags)
 - fix whitespace around inline tags (`<b>`, `<em>`, `<i>`, `<strong>`, `<u>`) not being preserved correctly
