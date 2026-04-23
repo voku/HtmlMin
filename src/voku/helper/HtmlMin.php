@@ -823,276 +823,491 @@ class HtmlMin implements HtmlMinInterface
         }
 
         $nextSibling = $this->getNextSiblingOfTypeDOMElement($node);
+        $nextNode = $node->nextSibling;
 
-        // https://html.spec.whatwg.org/multipage/syntax.html#syntax-tag-omission
+        if (
+            $tag_name === 'html'
+            &&
+            $parent_node instanceof \DOMDocument
+        ) {
+            return !$this->isCommentLikeNode($nextNode);
+        }
 
-        // Implemented:
-        //
-        // A <p> element's end tag may be omitted if the p element is immediately followed by an address, article, aside, blockquote, details, div, dl, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hgroup, hr, main, menu, nav, ol, p, pre, section, table, or ul element, or if there is no more content in the parent element and the parent element is an HTML element that is not an a, audio, del, ins, map, noscript, or video element, or an autonomous custom element.
-        // An <li> element's end tag may be omitted if the li element is immediately followed by another li element or if there is no more content in the parent element.
-        // A <td> element's end tag may be omitted if the td element is immediately followed by a td or th element, or if there is no more content in the parent element.
-        // An <option> element's end tag may be omitted if the option element is immediately followed by another option element, or if it is immediately followed by an optgroup element, or if there is no more content in the parent element.
-        // A <tr> element's end tag may be omitted if the tr element is immediately followed by another tr element, or if there is no more content in the parent element.
-        // A <th> element's end tag may be omitted if the th element is immediately followed by a td or th element, or if there is no more content in the parent element.
-        // A <dt> element's end tag may be omitted if the dt element is immediately followed by another dt element or a dd element.
-        // A <dd> element's end tag may be omitted if the dd element is immediately followed by another dd element or a dt element, or if there is no more content in the parent element.
-        // An <rp> element's end tag may be omitted if the rp element is immediately followed by an rt or rp element, or if there is no more content in the parent element.
-        // An <optgroup> element's end tag may be omitted if the optgroup element is immediately followed by another optgroup element, or if there is no more content in the parent element.
+        if (
+            $tag_name === 'head'
+            &&
+            $parent_tag_name === 'html'
+        ) {
+            return !$this->isCommentLikeNode($nextNode)
+                   &&
+                   (
+                       !$this->isAsciiWhitespaceTextNode($nextNode)
+                       ||
+                       $this->isIgnorableHtmlDirectChildWhitespace($nextNode)
+                   );
+        }
 
-        /**
-         * @noinspection TodoComment
-         *
-         * TODO: Not Implemented
-         */
-        //
-        // <html> may be omitted if first thing inside is not comment
-        // <head> may be omitted if first thing inside is an element
-        // <body> may be omitted if first thing inside is not space, comment, <meta>, <link>, <script>, <style> or <template>
-        // <colgroup> may be omitted if first thing inside is <col>
-        // <tbody> may be omitted if first thing inside is <tr>
-        // A <colgroup> element's start tag may be omitted if the first thing inside the colgroup element is a col element, and if the element is not immediately preceded by another colgroup element whose end tag has been omitted. (It can't be omitted if the element is empty.)
-        // A <colgroup> element's end tag may be omitted if the colgroup element is not immediately followed by ASCII whitespace or a comment.
-        // A <caption> element's end tag may be omitted if the caption element is not immediately followed by ASCII whitespace or a comment.
-        // A <thead> element's end tag may be omitted if the thead element is immediately followed by a tbody or tfoot element.
-        // A <tbody> element's start tag may be omitted if the first thing inside the tbody element is a tr element, and if the element is not immediately preceded by a tbody, thead, or tfoot element whose end tag has been omitted. (It can't be omitted if the element is empty.)
-        // A <tbody> element's end tag may be omitted if the tbody element is immediately followed by a tbody or tfoot element, or if there is no more content in the parent element.
-        // A <tfoot> element's end tag may be omitted if there is no more content in the parent element.
-        //
-        // <-- However, a start tag must never be omitted if it has any attributes.
+        if (
+            $tag_name === 'body'
+            &&
+            $parent_tag_name === 'html'
+        ) {
+            return !$this->isCommentLikeNode($nextNode);
+        }
 
-        return (
-            \in_array($tag_name, self::$optional_end_tags, true)
+        if (
+            $tag_name === 'colgroup'
+            ||
+            $tag_name === 'caption'
+        ) {
+            return !$this->isCommentLikeNode($nextNode) && !$this->isAsciiWhitespaceTextNode($nextNode);
+        }
+
+        if (
+            $this->hasPreservedInterTagWhitespaceAfter($node)
+            &&
+            \in_array(
+                $tag_name,
+                [
+                    'dd',
+                    'dt',
+                    'li',
+                    'optgroup',
+                    'option',
+                    'p',
+                    'rp',
+                    'rt',
+                    'source',
+                    'tbody',
+                    'td',
+                    'tfoot',
+                    'th',
+                    'thead',
+                    'tr',
+                ],
+                true
+            )
+        ) {
+            return false;
+        }
+
+        if (
+            $tag_name === 'thead'
+            &&
+            $nextSibling instanceof \DOMElement
             &&
             (
-                (
-                    $tag_name === 'head'
-                    &&
-                    $parent_tag_name === 'html'
-                )
+                $nextSibling->tagName === 'tbody'
+                ||
+                $nextSibling->tagName === 'tfoot'
+            )
+        ) {
+            return true;
+        }
+
+        if ($tag_name === 'tbody') {
+            return $nextSibling === null
+                   ||
+                   (
+                       $nextSibling instanceof \DOMElement
+                       &&
+                       (
+                           $nextSibling->tagName === 'tbody'
+                           ||
+                           $nextSibling->tagName === 'tfoot'
+                       )
+                   );
+        }
+
+        if (
+            $tag_name === 'tfoot'
+            &&
+            $nextSibling === null
+        ) {
+            return true;
+        }
+
+        return (
+            $tag_name === 'li'
+            &&
+            (
+                $nextSibling === null
                 ||
                 (
-                    $tag_name === 'body'
+                    $nextSibling instanceof \DOMElement
                     &&
-                    $parent_tag_name === 'html'
-                )
-                ||
-                (
-                    $tag_name === 'html'
-                    &&
-                    $parent_node instanceof \DOMDocument
+                    $nextSibling->tagName === 'li'
                 )
             )
         )
+       ||
+        (
+            $tag_name === 'optgroup'
+            &&
+            (
+                $nextSibling === null
+               ||
+                (
+                    $nextSibling instanceof \DOMElement
+                    &&
+                    (
+                        $nextSibling->tagName === 'hr'
+                        ||
+                        $nextSibling->tagName === 'optgroup'
+                    )
+                )
+            )
+        )
+        ||
+        (
+            $tag_name === 'rt'
+            &&
+            (
+                $nextSibling === null
+                ||
+                (
+                    $nextSibling instanceof \DOMElement
+                    &&
+                    (
+                        $nextSibling->tagName === 'rp'
+                        ||
+                        $nextSibling->tagName === 'rt'
+                    )
+                )
+            )
+        )
+       ||
+        (
+            $tag_name === 'rp'
+            &&
+            (
+               $nextSibling === null
                ||
                (
-                   $tag_name === 'li'
+                   $nextSibling instanceof \DOMElement
                    &&
                    (
-                       $nextSibling === null
+                       $nextSibling->tagName === 'rp'
                        ||
-                       (
-                           $nextSibling instanceof \DOMElement
-                           &&
-                           $nextSibling->tagName === 'li'
-                       )
+                       $nextSibling->tagName === 'rt'
                    )
                )
+           )
+       )
+       ||
+       (
+           $tag_name === 'tr'
+           &&
+           (
+               $nextSibling === null
                ||
                (
-                   $tag_name === 'optgroup'
+                   $nextSibling instanceof \DOMElement
+                   &&
+                   $nextSibling->tagName === 'tr'
+               )
+           )
+       )
+       ||
+       (
+           $tag_name === 'source'
+           &&
+           (
+               $parent_tag_name === 'audio'
+               ||
+               $parent_tag_name === 'video'
+               ||
+               $parent_tag_name === 'picture'
+               ||
+               $parent_tag_name === 'source'
+           )
+           &&
+           (
+               $nextSibling === null
+               ||
+               (
+                   $nextSibling instanceof \DOMElement
+                   &&
+                   $nextSibling->tagName === 'source'
+               )
+           )
+       )
+       ||
+       (
+           (
+               $tag_name === 'td'
+               ||
+               $tag_name === 'th'
+           )
+           &&
+           (
+               $nextSibling === null
+               ||
+               (
+                   $nextSibling instanceof \DOMElement
                    &&
                    (
-                       $nextSibling === null
+                       $nextSibling->tagName === 'td'
                        ||
-                       (
-                           $nextSibling instanceof \DOMElement
-                           &&
-                           $nextSibling->tagName === 'optgroup'
-                       )
+                       $nextSibling->tagName === 'th'
                    )
                )
+           )
+       )
+       ||
+       (
+           (
+               $tag_name === 'dd'
+               ||
+               $tag_name === 'dt'
+           )
+           &&
+           (
+               $nextSibling === null
                ||
                (
-                   $tag_name === 'rp'
+                   $nextSibling instanceof \DOMElement
                    &&
                    (
-                       $nextSibling === null
+                       $nextSibling->tagName === 'dd'
                        ||
-                       (
-                           $nextSibling instanceof \DOMElement
-                           &&
-                           (
-                               $nextSibling->tagName === 'rp'
-                               ||
-                               $nextSibling->tagName === 'rt'
-                           )
-                       )
+                       $nextSibling->tagName === 'dt'
                    )
                )
+           )
+       )
+       ||
+       (
+           $tag_name === 'option'
+           &&
+           (
+               $nextSibling === null
                ||
-               (
-                   $tag_name === 'tr'
-                   &&
-                   (
-                       $nextSibling === null
-                       ||
-                       (
-                           $nextSibling instanceof \DOMElement
-                           &&
-                           $nextSibling->tagName === 'tr'
-                       )
+                (
+                    $nextSibling instanceof \DOMElement
+                    &&
+                    (
+                        $nextSibling->tagName === 'hr'
+                        ||
+                        $nextSibling->tagName === 'option'
+                        ||
+                        $nextSibling->tagName === 'optgroup'
                    )
                )
-               ||
-               (
-                   $tag_name === 'source'
+           )
+       )
+       ||
+       (
+           $tag_name === 'p'
+           &&
+           (
+                (
+                    $nextSibling === null
+                    &&
+                    $node->parentNode !== null
+                    &&
+                   !\in_array(
+                       $node->parentNode->nodeName,
+                       [
+                           'a',
+                           'audio',
+                           'del',
+                           'ins',
+                           'map',
+                           'noscript',
+                           'video',
+                        ],
+                        true
+                    )
+                    &&
+                    \strpos($node->parentNode->nodeName, '-') === false
+                )
+                ||
+                (
+                    $nextSibling instanceof \DOMElement
                    &&
-                   (
-                       $parent_tag_name === 'audio'
-                       ||
-                       $parent_tag_name === 'video'
-                       ||
-                       $parent_tag_name === 'picture'
-                       ||
-                       $parent_tag_name === 'source'
-                   )
-                   &&
-                   (
-                       $nextSibling === null
-                       ||
-                       (
-                           $nextSibling instanceof \DOMElement
-                           &&
-                           $nextSibling->tagName === 'source'
-                       )
+                   \in_array(
+                       $nextSibling->tagName,
+                        [
+                            'address',
+                            'article',
+                            'aside',
+                            'blockquote',
+                            'details',
+                            'dialog',
+                            'div',
+                            'dl',
+                            'fieldset',
+                            'figcaption',
+                            'figure',
+                            'footer',
+                            'form',
+                            'h1',
+                           'h2',
+                           'h3',
+                           'h4',
+                           'h5',
+                           'h6',
+                            'header',
+                            'hgroup',
+                            'hr',
+                            'main',
+                            'menu',
+                            'nav',
+                            'ol',
+                            'p',
+                            'pre',
+                            'search',
+                            'section',
+                            'table',
+                            'ul',
+                       ],
+                       true
                    )
                )
-               ||
-               (
+           )
+       );
+    }
+
+    /**
+     * @param \DOMNode $node
+     *
+     * @return bool
+     */
+    private function domNodeOpeningTagOptional(\DOMNode $node): bool
+    {
+        if (
+            !($node instanceof \DOMElement)
+            ||
+            $node->hasAttributes()
+        ) {
+            return false;
+        }
+
+        /** @var \DOMNode|null $parent_node - false-positive error from phpstan */
+        $parent_node = $node->parentNode;
+        $parent_tag_name = $parent_node ? $parent_node->nodeName : null;
+        $firstChild = $node->firstChild;
+        $previousSibling = $node->previousSibling;
+
+        if (
+            $node->tagName === 'html'
+            &&
+            $parent_node instanceof \DOMDocument
+        ) {
+            return !$this->isCommentLikeNode($firstChild);
+        }
+
+        if (
+            $node->tagName === 'head'
+            &&
+            $parent_tag_name === 'html'
+        ) {
+            return $firstChild === null
+                   ||
                    (
-                       $tag_name === 'td'
-                       ||
-                       $tag_name === 'th'
-                   )
+                       $firstChild instanceof \DOMElement
+                       &&
+                       !$this->isCommentLikeNode($firstChild)
+                   );
+        }
+
+        if (
+            $node->tagName === 'body'
+            &&
+            $parent_tag_name === 'html'
+        ) {
+            if ($firstChild === null) {
+                return true;
+            }
+
+            if ($this->isCommentLikeNode($firstChild)) {
+                return false;
+            }
+
+            if ($firstChild instanceof \DOMText) {
+                return !$this->startsWithAsciiWhitespace($firstChild);
+            }
+
+            return !\in_array(
+                $firstChild->tagName,
+                [
+                    'meta',
+                    'link',
+                    'noscript',
+                    'script',
+                    'style',
+                    'template',
+                ],
+                true
+            );
+        }
+
+        if (
+            $node->tagName === 'colgroup'
+            &&
+            $parent_tag_name === 'table'
+        ) {
+            if (
+                $this->hasPreservedInterTagWhitespaceBefore($node)
+                ||
+                $this->isCommentLikeNode($previousSibling)
+            ) {
+                return false;
+            }
+
+            return $firstChild instanceof \DOMElement
                    &&
-                   (
-                       $nextSibling === null
-                       ||
-                       (
-                           $nextSibling instanceof \DOMElement
-                           &&
-                           (
-                               $nextSibling->tagName === 'td'
-                               ||
-                               $nextSibling->tagName === 'th'
-                           )
-                       )
-                   )
-               )
-               ||
-               (
-                   (
-                       $tag_name === 'dd'
-                       ||
-                       $tag_name === 'dt'
-                   )
+                   $firstChild->tagName === 'col'
                    &&
-                   (
-                       $nextSibling === null
-                       ||
-                       (
-                           $nextSibling instanceof \DOMElement
-                           &&
-                           (
-                               $nextSibling->tagName === 'dd'
-                               ||
-                               $nextSibling->tagName === 'dt'
-                           )
-                       )
-                   )
-               )
-               ||
-               (
-                   $tag_name === 'option'
+                   $this->domNodeClosingTagOptional($node)
                    &&
-                   (
-                       $nextSibling === null
-                       ||
-                       (
-                           $nextSibling instanceof \DOMElement
-                           &&
-                           (
-                               $nextSibling->tagName === 'option'
-                               ||
-                               $nextSibling->tagName === 'optgroup'
-                           )
-                       )
-                   )
-               )
-               ||
-               (
-                   $tag_name === 'p'
+                   !(
+                        $previousSibling instanceof \DOMElement
+                        &&
+                        $previousSibling->tagName === 'colgroup'
+                       &&
+                       $this->domNodeClosingTagOptional($previousSibling)
+                   );
+        }
+
+        if (
+            $node->tagName === 'tbody'
+            &&
+            $parent_tag_name === 'table'
+        ) {
+            if (
+                $this->hasPreservedInterTagWhitespaceBefore($node)
+                ||
+                $this->isCommentLikeNode($previousSibling)
+            ) {
+                return false;
+            }
+
+            return $firstChild instanceof \DOMElement
                    &&
-                   (
-                       (
-                           $nextSibling === null
-                           &&
-                           $node->parentNode !== null
-                           &&
-                           !\in_array(
-                               $node->parentNode->nodeName,
-                               [
-                                   'a',
-                                   'audio',
-                                   'del',
-                                   'ins',
-                                   'map',
-                                   'noscript',
-                                   'video',
-                               ],
-                               true
-                           )
+                   $firstChild->tagName === 'tr'
+                   &&
+                   $this->domNodeClosingTagOptional($node)
+                   &&
+                   !(
+                        $previousSibling instanceof \DOMElement
+                        &&
+                        \in_array(
+                           $previousSibling->tagName,
+                           [
+                               'tbody',
+                               'thead',
+                               'tfoot',
+                           ],
+                           true
                        )
-                       ||
-                       (
-                           $nextSibling instanceof \DOMElement
-                           &&
-                           \in_array(
-                               $nextSibling->tagName,
-                               [
-                                   'address',
-                                   'article',
-                                   'aside',
-                                   'blockquote',
-                                   'dir',
-                                   'div',
-                                   'dl',
-                                   'fieldset',
-                                   'footer',
-                                   'form',
-                                   'h1',
-                                   'h2',
-                                   'h3',
-                                   'h4',
-                                   'h5',
-                                   'h6',
-                                   'header',
-                                   'hgroup',
-                                   'hr',
-                                   'menu',
-                                   'nav',
-                                   'ol',
-                                   'p',
-                                   'pre',
-                                   'section',
-                                   'table',
-                                   'ul',
-                               ],
-                               true
-                           )
-                       )
-                   )
-               );
+                       &&
+                       $this->domNodeClosingTagOptional($previousSibling)
+                   );
+        }
+
+        return false;
     }
 
     protected function domNodeToString(\DOMNode $node): string
@@ -1109,8 +1324,19 @@ class HtmlMin implements HtmlMinInterface
             }
 
             if ($child instanceof \DOMElement) {
-                $html .= \rtrim('<' . $child->tagName . ' ' . $this->domNodeAttributesToString($child));
-                $html .= '>' . $this->domNodeToString($child);
+                $omitOpeningTag = $this->doRemoveOmittedHtmlTags
+                                  &&
+                                  !$this->isHTML4
+                                  &&
+                                  !$this->isXHTML
+                                  &&
+                                  $this->domNodeOpeningTagOptional($child);
+
+                if (!$omitOpeningTag) {
+                    $html .= \rtrim('<' . $child->tagName . ' ' . $this->domNodeAttributesToString($child)) . '>';
+                }
+
+                $html .= $this->domNodeToString($child);
 
                 if (
                     !(
@@ -1134,6 +1360,10 @@ class HtmlMin implements HtmlMinInterface
                         &&
                         $nextSiblingTmp->wholeText === ' '
                     ) {
+                        if ($this->isIgnorableHtmlDirectChildWhitespace($nextSiblingTmp)) {
+                            continue;
+                        }
+
                         if (
                             $emptyStringTmp !== 'last_was_empty'
                             &&
@@ -1153,6 +1383,10 @@ class HtmlMin implements HtmlMinInterface
                     }
                 }
             } elseif ($child instanceof \DOMText) {
+                if ($this->isIgnorableHtmlDirectChildWhitespace($child)) {
+                    continue;
+                }
+
                 if ($child->isElementContentWhitespace()) {
                     if (
                         (
@@ -1207,6 +1441,101 @@ class HtmlMin implements HtmlMinInterface
         }
 
         return $html;
+    }
+
+    /**
+     * @param \DOMNode|null $node
+     *
+     * @return bool
+     */
+    private function isAsciiWhitespaceTextNode(?\DOMNode $node): bool
+    {
+        return $node instanceof \DOMText && (bool) \preg_match('/^[\t\n\f\r ]+$/', $node->textContent);
+    }
+
+    /**
+     * @param \DOMNode|null $node
+     *
+     * @return bool
+     */
+    private function isIgnorableHtmlDirectChildWhitespace(?\DOMNode $node): bool
+    {
+        return $this->isAsciiWhitespaceTextNode($node)
+               &&
+               $node !== null
+               &&
+               $node->parentNode instanceof \DOMElement
+               &&
+               $node->parentNode->nodeName === 'html';
+    }
+
+    /**
+     * @param \DOMNode $node
+     *
+     * @return bool
+     */
+    private function hasPreservedInterTagWhitespaceAfter(\DOMNode $node): bool
+    {
+        $nextNode = $node->nextSibling;
+
+        return !$this->doRemoveWhitespaceAroundTags
+               &&
+               $this->isAsciiWhitespaceTextNode($nextNode)
+               &&
+               !$this->isIgnorableHtmlDirectChildWhitespace($nextNode);
+    }
+
+    /**
+     * @param \DOMNode $node
+     *
+     * @return bool
+     */
+    private function hasPreservedInterTagWhitespaceBefore(\DOMNode $node): bool
+    {
+        $previousNode = $node->previousSibling;
+
+        return !$this->doRemoveWhitespaceAroundTags
+               &&
+               $this->isAsciiWhitespaceTextNode($previousNode)
+               &&
+               !$this->isIgnorableHtmlDirectChildWhitespace($previousNode);
+    }
+
+    /**
+     * @param \DOMNode|null $node
+     *
+     * @return bool
+     */
+    private function isCommentLikeNode(?\DOMNode $node): bool
+    {
+        if ($node instanceof \DOMComment) {
+            return true;
+        }
+
+        if (
+            !($node instanceof \DOMElement)
+            ||
+            $node->tagName !== $this->protectedChildNodesHelper
+        ) {
+            return false;
+        }
+
+        $id = $node->getAttribute('data-' . $this->protectedChildNodesHelper);
+        if ($id === '' || !isset($this->protectedChildNodes[$id])) {
+            return false;
+        }
+
+        return \strpos($this->protectedChildNodes[$id], '<!--') === 0;
+    }
+
+    /**
+     * @param \DOMText $node
+     *
+     * @return bool
+     */
+    private function startsWithAsciiWhitespace(\DOMText $node): bool
+    {
+        return (bool) \preg_match('/^[\t\n\f\r ]/', $node->textContent);
     }
 
     /**
@@ -1616,7 +1945,7 @@ class HtmlMin implements HtmlMinInterface
             $html
         );
 
-        // self closing tags, don't need a trailing slash ...
+        // self-closing tags, don't need a trailing slash ...
         $replace = [];
         $replacement = [];
         foreach (self::$selfClosingTags as $selfClosingTag) {
@@ -1664,6 +1993,10 @@ class HtmlMin implements HtmlMinInterface
                 &&
                 $nodeTmp->tagName === $this->protectedChildNodesHelper
             ) {
+                if ($this->isCommentLikeNode($nodeTmp)) {
+                    return $nodeTmp;
+                }
+
                 $node = $nodeTmp;
 
                 continue;

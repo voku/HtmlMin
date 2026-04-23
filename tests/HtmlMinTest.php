@@ -50,15 +50,15 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         return [
             [
                 '<html>  <body>          <h1>h  oi</h1>                         </body></html>',
-                '<html><body><h1>h oi</h1>',
+                '<body><h1>h oi</h1>',
             ],
             [
                 '<html>   </html>',
-                '<html>',
+                '',
             ],
             [
                 "<html><body>  pre \r\n  suf\r\n  </body></html>",
-                '<html><body> pre suf',
+                '<body> pre suf',
             ],
         ];
     }
@@ -104,6 +104,493 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         static::assertSame('<body class=main>this is a test</body>', $minifier->minify('<body class="main">this is a test</body>'));
     }
 
+    public function testEmptyHeadStartTagCanBeOmitted()
+    {
+        $minifier = new HtmlMin();
+
+        $html = '<!DOCTYPE html><html><head></head><body><p>x</p></body></html>';
+        $expected = '<!DOCTYPE html><p>x';
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    public function testEmptyBodyStartTagCanBeOmitted()
+    {
+        $minifier = new HtmlMin();
+
+        $html = '<!DOCTYPE html><html><head><title>Test</title></head><body></body></html>';
+        $expected = '<!DOCTYPE html><title>Test</title>';
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    public function testBodyStartTagStaysBeforeNoscript()
+    {
+        $minifier = new HtmlMin();
+
+        $html = '<!DOCTYPE html><html><head><title>Test</title></head><body><noscript>x</noscript></body></html>';
+        $expected = '<!DOCTYPE html><title>Test</title><body><noscript>x</noscript>';
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    /**
+     * @return array
+     */
+    public function providerBodyStartTagBlockedElements(): array
+    {
+        return [
+            [
+                '<script>var x=1;</script>',
+                '<!DOCTYPE html><title>Test</title><body><script>var x=1;</script>',
+            ],
+            [
+                '<meta charset="utf-8"><p>x</p>',
+                '<!DOCTYPE html><title>Test</title><body><meta charset=utf-8><p>x',
+            ],
+            [
+                '<link rel="stylesheet" href="a.css"><p>x</p>',
+                '<!DOCTYPE html><title>Test</title><body><link href=a.css rel=stylesheet><p>x',
+            ],
+            [
+                '<style>p{color:red}</style>',
+                '<!DOCTYPE html><title>Test</title><body><style>p{color:red}</style>',
+            ],
+            [
+                '<template><p>x</p></template>',
+                '<!DOCTYPE html><title>Test</title><body><template><p>x</template>',
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider providerBodyStartTagBlockedElements
+     *
+     * @param string $bodyContent
+     * @param string $expected
+     */
+    public function testBodyStartTagStaysBeforeBlockedElements(string $bodyContent, string $expected)
+    {
+        $minifier = new HtmlMin();
+
+        $html = '<!DOCTYPE html><html><head><title>Test</title></head><body>' . $bodyContent . '</body></html>';
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    public function testBodyStartTagStaysBeforeLeadingWhitespace()
+    {
+        $minifier = new HtmlMin();
+
+        $html = '<!DOCTYPE html><html><head><title>Test</title></head><body> <p>x</p></body></html>';
+        $expected = '<!DOCTYPE html><title>Test</title><body><p>x';
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    public function testPrettyPrintedEmptyDocumentDoesNotLeaveStrayHeadEndTag()
+    {
+        $minifier = new HtmlMin();
+
+        $html = "<!DOCTYPE html>\n<html>\n<head></head>\n<body></body>\n</html>";
+        $expected = '<!DOCTYPE html>';
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    public function testStrayHeadEndTagIsDropped()
+    {
+        $minifier = new HtmlMin();
+
+        $html = '<!DOCTYPE html></head>';
+        $expected = '<!DOCTYPE html>';
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    public function testHeadEndTagCanBeOmittedAcrossIgnorableHtmlWhitespace()
+    {
+        $minifier = new HtmlMin();
+
+        $html = '<!DOCTYPE html><html><head data-test="1"><title>Test</title></head> <body><p>x</p></body></html>';
+        $expected = '<!DOCTYPE html><head data-test=1><title>Test</title><p>x';
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    public function testProtectedSpecialCommentsBlockDocumentTagOmission()
+    {
+        $minifier = new HtmlMin();
+        $minifier->setSpecialHtmlComments(['INT_']);
+
+        $html = '<!DOCTYPE html><html><!--INT_HTML--><head><!--INT_HEAD--><title>Test</title></head><body><!--INT_BODY--><p>x</p></body></html>';
+        $expected = '<!DOCTYPE html><html><!--INT_HTML--><head><!--INT_HEAD--><title>Test</title><body><!--INT_BODY--><p>x';
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    public function testPlainCommentKeepsHtmlStartTag()
+    {
+        $minifier = new HtmlMin();
+        $minifier->doRemoveComments(false);
+
+        $html = '<!DOCTYPE html><html><!--x--><head><title>Test</title></head><body><p>x</p></body></html>';
+        $expected = '<!DOCTYPE html><html><!--x--><title>Test</title><p>x';
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    public function testPlainCommentKeepsHeadEndTag()
+    {
+        $minifier = new HtmlMin();
+        $minifier->doRemoveComments(false);
+
+        $html = '<!DOCTYPE html><html><head><title>Test</title></head><!--x--><body><p>x</p></body></html>';
+        $expected = '<!DOCTYPE html><title>Test</title></head><!--x--><p>x';
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    public function testProtectedSpecialCommentKeepsHeadEndTag()
+    {
+        $minifier = new HtmlMin();
+        $minifier->setSpecialHtmlComments(['INT_']);
+
+        $html = '<!DOCTYPE html><html><head><title>Test</title></head><!--INT_AFTER_HEAD--><body><p>x</p></body></html>';
+        $expected = '<!DOCTYPE html><title>Test</title></head><!--INT_AFTER_HEAD--><p>x';
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    public function testProtectedSpecialCommentKeepsBodyEndTag()
+    {
+        $minifier = new HtmlMin();
+        $minifier->setSpecialHtmlComments(['INT_']);
+
+        $html = '<!DOCTYPE html><html><head><title>Test</title></head><body><p>x</p></body><!--INT_AFTER_BODY--></html>';
+        $expected = '<!DOCTYPE html><title>Test</title><p>x</body><!--INT_AFTER_BODY-->';
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    public function testBodyEndTagStaysBeforeCommentsInsideHtml()
+    {
+        $minifier = new HtmlMin();
+        $minifier->doRemoveComments(false);
+
+        $html = '<!DOCTYPE html><html lang="en"><head><title>Test</title></head><body class="main"><p>x</p></body><!--inside-html--></html><!--after-html-->';
+        $expected = '<!DOCTYPE html><html lang=en><title>Test</title><body class=main><p>x</body><!--inside-html--><!--after-html-->';
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    public function testEmptyHtmlFragmentCanMinifyToEmptyString()
+    {
+        $minifier = new HtmlMin();
+
+        static::assertSame('', $minifier->minify('<html>   </html>'));
+    }
+
+    public function testHtmlWrapperCanBeOmittedAroundSimpleBodyContent()
+    {
+        $minifier = new HtmlMin();
+
+        $html = '<html><body><h1>h  oi</h1></body></html>';
+        $expected = '<h1>h oi</h1>';
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    /**
+     * @return array
+     */
+    public function providerOptionalEndTagsStayWhenInterTagWhitespaceIsPreserved(): array
+    {
+        return [
+            [
+                '<div><p>A</p> <div>B</div></div>',
+                '<div><p>A</p> <div>B</div></div>',
+            ],
+            [
+                '<table><tr><td>A</td> <td>B</td></tr></table>',
+                '<table><tr><td>A</td> <td>B</table>',
+            ],
+            [
+                '<select><option>A</option> <option>B</option></select>',
+                '<select><option>A</option> <option>B</select>',
+            ],
+            [
+                '<!DOCTYPE html><html><head><title>T</title></head><body><table><thead><tr><th>A</th></tr></thead> <tbody><tr><td>B</td></tr></tbody></table></body></html>',
+                '<!DOCTYPE html><title>T</title><table><thead><tr><th>A</thead> <tbody><tr><td>B</table>',
+            ],
+            [
+                '<!DOCTYPE html><html><head><title>T</title></head><body><table><colgroup><col></colgroup> <tbody><tr><td>B</td></tr></tbody></table></body></html>',
+                '<!DOCTYPE html><title>T</title><table><colgroup><col></colgroup> <tbody><tr><td>B</table>',
+            ],
+            [
+                '<!DOCTYPE html><html><head><title>T</title></head><body><table><tbody><tr><td>B</td></tr></tbody> <tfoot><tr><td>C</td></tr></tfoot></table></body></html>',
+                '<!DOCTYPE html><title>T</title><table><tbody><tr><td>B</tbody> <tfoot><tr><td>C</table>',
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider providerOptionalEndTagsStayWhenInterTagWhitespaceIsPreserved
+     *
+     * @param string $html
+     * @param string $expected
+     */
+    public function testOptionalEndTagsStayWhenInterTagWhitespaceIsPreserved(string $html, string $expected)
+    {
+        $minifier = new HtmlMin();
+        $minifier->doRemoveWhitespaceAroundTags(false);
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    /**
+     * @return array
+     */
+    public function providerOptionalEndTagsStayBeforeComments(): array
+    {
+        return [
+            [
+                '<ul><li>A</li><!--x--><li>B</li></ul>',
+                '<ul><li>A</li><!--x--><li>B</ul>',
+            ],
+            [
+                '<dl><dt>A</dt><!--x--><dd>B</dd></dl>',
+                '<dl><dt>A</dt><!--x--><dd>B</dl>',
+            ],
+            [
+                '<select><option>A</option><!--x--><option>B</option></select>',
+                '<select><option>A</option><!--x--><option>B</select>',
+            ],
+            [
+                '<div><p>A</p><!--x--><div>B</div></div>',
+                '<div><p>A</p><!--x--><div>B</div></div>',
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider providerOptionalEndTagsStayBeforeComments
+     *
+     * @param string $html
+     * @param string $expected
+     */
+    public function testOptionalEndTagsStayBeforeComments(string $html, string $expected)
+    {
+        $minifier = new HtmlMin();
+        $minifier->doRemoveComments(false);
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    /**
+     * @return array
+     */
+    public function providerOptionalEndTagsStayBeforeInterveningWhitespace(): array
+    {
+        return [
+            [
+                '<ul><li>A</li> <li>B</li></ul>',
+                '<ul><li>A</li> <li>B</ul>',
+            ],
+            [
+                '<dl><dt>A</dt> <dd>B</dd></dl>',
+                '<dl><dt>A</dt> <dd>B</dl>',
+            ],
+            [
+                '<select><option>A</option> <option>B</option></select>',
+                '<select><option>A</option> <option>B</select>',
+            ],
+            [
+                '<div><p>A</p> <div>B</div></div>',
+                '<div><p>A</p> <div>B</div></div>',
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider providerOptionalEndTagsStayBeforeInterveningWhitespace
+     *
+     * @param string $html
+     * @param string $expected
+     */
+    public function testOptionalEndTagsStayBeforeInterveningWhitespace(string $html, string $expected)
+    {
+        $minifier = new HtmlMin();
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    /**
+     * @return array
+     */
+    public function providerOptionalStartTagsStayAfterComments(): array
+    {
+        return [
+            [
+                '<table><thead><tr><th>A</th></tr></thead><!--x--><tbody><tr><td>B</td></tr></tbody></table>',
+                '<table><thead><tr><th>A</thead><!--x--><tbody><tr><td>B</table>',
+            ],
+            [
+                '<table><tbody><tr><td>A</td></tr></tbody><!--x--><tbody><tr><td>B</td></tr></tbody></table>',
+                '<table><tbody><tr><td>A</tbody><!--x--><tbody><tr><td>B</table>',
+            ],
+            [
+                '<table><colgroup><col></colgroup><!--x--><colgroup><col></colgroup></table>',
+                '<table><colgroup><col></colgroup><!--x--><colgroup><col></table>',
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider providerOptionalStartTagsStayAfterComments
+     *
+     * @param string $html
+     * @param string $expected
+     */
+    public function testOptionalStartTagsStayAfterComments(string $html, string $expected)
+    {
+        $minifier = new HtmlMin();
+        $minifier->doRemoveComments(false);
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    public function testPTagMayBeOmittedBeforeAllCurrentSpecBlockFollowers()
+    {
+        $minifier = new HtmlMin();
+
+        $html = '<div><p>a</p><details>b</details><p>c</p><dialog>d</dialog><p>e</p><figcaption>f</figcaption><p>g</p><figure>h</figure><p>i</p><main>j</main><p>k</p><search>l</search></div>';
+        $expected = '<div><p>a<details>b</details><p>c<dialog>d</dialog><p>e<figcaption>f</figcaption><p>g<figure>h</figure><p>i<main>j</main><p>k<search>l</search></div>';
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    public function testPTagStaysInsideAutonomousCustomElement()
+    {
+        $minifier = new HtmlMin();
+
+        $html = '<x-box><p>x</p></x-box>';
+        $expected = '<x-box><p>x</p></x-box>';
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    public function testRtEndTagCanBeOmitted()
+    {
+        $minifier = new HtmlMin();
+
+        $html = '<ruby><rt>a</rt><rt>b</rt></ruby>';
+        $expected = '<ruby><rt>a<rt>b</ruby>';
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    public function testOptgroupEndTagCanBeOmittedBeforeHr()
+    {
+        $minifier = new HtmlMin();
+
+        $html = '<select><optgroup label="A"><option>1</option></optgroup><hr><optgroup label="B"><option>2</option></optgroup></select>';
+        $expected = '<select><optgroup label=A><option>1<hr><optgroup label=B><option>2</select>';
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    public function testOptionEndTagCanBeOmittedBeforeHr()
+    {
+        $minifier = new HtmlMin();
+
+        $html = '<select><option>1</option><hr><option>2</option></select>';
+        $expected = '<select><option>1<hr><option>2</select>';
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    public function testOptionalDocumentAndTableSectionTags()
+    {
+        $minifier = new HtmlMin();
+
+        $html = '<!DOCTYPE html><html><head><title>Test</title></head><body><table><caption>Cap</caption><colgroup><col><col></colgroup><thead><tr><th>A</th></tr></thead><tbody><tr><td>B</td></tr></tbody><tfoot><tr><td>C</td></tr></tfoot></table></body></html>';
+
+        $expected = '<!DOCTYPE html><title>Test</title><table><caption>Cap<col><col><thead><tr><th>A<tbody><tr><td>B<tfoot><tr><td>C</table>';
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    public function testTbodyStartTagCanBeOmitted()
+    {
+        $minifier = new HtmlMin();
+
+        $html = '<!DOCTYPE html><html><head><title>Test</title></head><body><table><caption>Cap</caption><tbody><tr><td>A</td></tr></tbody></table></body></html>';
+
+        $expected = '<!DOCTYPE html><title>Test</title><table><caption>Cap<tr><td>A</table>';
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    public function testSecondTbodyKeepsItsStartTagAfterAnOmittedTbody()
+    {
+        $minifier = new HtmlMin();
+
+        $html = '<!DOCTYPE html><html><head><title>Test</title></head><body><table><tbody><tr><td>A</td></tr></tbody><tbody><tr><td>B</td></tr></tbody></table></body></html>';
+        $expected = '<!DOCTYPE html><title>Test</title><table><tr><td>A<tbody><tr><td>B</table>';
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    public function testSecondColgroupKeepsItsStartTagAfterAnOmittedColgroup()
+    {
+        $minifier = new HtmlMin();
+
+        $html = '<!DOCTYPE html><html><head><title>Test</title></head><body><table><colgroup><col></colgroup><colgroup><col></colgroup></table></body></html>';
+
+        $expected = '<!DOCTYPE html><title>Test</title><table><col><colgroup><col></table>';
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    public function testOptionalStartTagsAreKeptWhenAttributesArePresent()
+    {
+        $minifier = new HtmlMin();
+
+        $html = '<!DOCTYPE html><html lang="en"><head data-test="1"><title>Test</title></head><body class="main"><table><colgroup class="cg"><col><col></colgroup><tbody class="body"><tr><td>A</td></tr></tbody></table></body></html>';
+
+        $expected = '<!DOCTYPE html><html lang=en><head data-test=1><title>Test</title><body class=main><table><colgroup class=cg><col><col><tbody class=body><tr><td>A</table>';
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    public function testCaptionAndColgroupEndTagsStayBeforeComments()
+    {
+        $minifier = new HtmlMin();
+        $minifier->doRemoveComments(false);
+
+        $html = '<!DOCTYPE html><html><head><title>Test</title></head><body><table><caption>Cap</caption><!--cap--><colgroup class="cg"><col></colgroup><!--col--><tbody><tr><td>A</td></tr></tbody></table></body></html>';
+
+        $expected = '<!DOCTYPE html><title>Test</title><table><caption>Cap</caption><!--cap--><colgroup class=cg><col></colgroup><!--col--><tbody><tr><td>A</table>';
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
+    public function testOptionalDocumentStartTagsStayWhenCommentsWouldBlockOmission()
+    {
+        $minifier = new HtmlMin();
+        $minifier->doRemoveComments(false);
+
+        $html = <<<'HTML'
+<!DOCTYPE html>
+<html><!--html--><head><!--head--><title>Test</title></head><body><!--body--><p>x</p></body></html>
+HTML;
+
+        $expected = '<!DOCTYPE html><html><!--html--><head><!--head--><title>Test</title><body><!--body--><p>x';
+
+        static::assertSame($expected, $minifier->minify($html));
+    }
+
     public function testIssue63()
     {
         $html = '
@@ -122,7 +609,7 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
 
         $compressedHtml = $htmlMin->minify($html);
 
-        $expectd = '<p>foo <code>bar</code>. ZIiiii  zzz <code>1.1</code> Lorem ipsum dolor sit amet, consectetur adipiscing elit. <p><h3>Vestibulum eget velit arcu.</h3>
+        $expectd = '<p>foo <code>bar</code>. ZIiiii  zzz <code>1.1</code> Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p> <p><h3>Vestibulum eget velit arcu.</h3>
 
 	Vestibulum eget velit arcu. Phasellus eget scelerisque dui, nec elementum ante. <code>aoaoaoao</code>';
 
@@ -134,7 +621,7 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         $html = '<html></html>';
         $htmlMin = new HtmlMin();
 
-        static::assertSame('<html>', $htmlMin->minify($html));
+        static::assertSame('', $htmlMin->minify($html));
     }
 
     /**
@@ -145,15 +632,15 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         return [
             [
                 "<html>\r\t<body>\n\t\t<h1>hoi</h1>\r\n\t</body>\r\n</html>",
-                '<html><body><h1>hoi</h1>',
+                '<body><h1>hoi</h1>',
             ],
             [
                 "<html>\r\t<h1>hoi</h1>\r\n\t\r\n</html>",
-                '<html><h1>hoi</h1>',
+                '<h1>hoi</h1>',
             ],
             [
                 "<html><p>abc\r\ndef</p></html>",
-                '<html><p>abc def',
+                '<p>abc def',
             ],
         ];
     }
@@ -166,11 +653,11 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         return [
             [
                 '<html> <body> <h1>hoi</h1>   </body> </html>',
-                '<html><body><h1>hoi</h1>',
+                '<body><h1>hoi</h1>',
             ],
             [
                 '<html>  a',
-                '<html> a',
+                'a',
             ],
         ];
     }
@@ -183,11 +670,11 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         return [
             [
                 '<html> <body>   <h1>hoi</h1></body> </html> ',
-                '<html><body><h1>hoi</h1>',
+                '<body><h1>hoi</h1>',
             ],
             [
                 '<html> a',
-                '<html> a',
+                'a',
             ],
         ];
     }
@@ -215,7 +702,7 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
               \r\n\t
             </html>
             ",
-                '<html><body><ul><li class=foo style="display: inline;"> à <li class=foo style="display: inline;"> á </ul>',
+                '<body><ul><li class=foo style="display: inline;"> à </li> <li class=foo style="display: inline;"> á </li></ul>',
             ],
         ];
     }
@@ -247,7 +734,7 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         $minifier = new HtmlMin();
 
         $html = '<!doctype html><html><body><form>' . $input . '</form></body></html>';
-        $expected = '<!DOCTYPE html><html><body><form><input autofocus checked type=checkbox></form>';
+        $expected = '<!DOCTYPE html><form><input autofocus checked type=checkbox></form>';
 
         $actual = $minifier->minify($html);
         static::assertSame($expected, $actual);
@@ -255,7 +742,7 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         // ---
 
         $html = '<html><body><form>' . $input . '</form></body></html>';
-        $expected = '<html><body><form><input autofocus checked type=checkbox></form>';
+        $expected = '<form><input autofocus checked type=checkbox></form>';
 
         $actual = $minifier->minify($html);
         static::assertSame($expected, $actual);
@@ -307,7 +794,7 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         </html>
         ';
 
-        $expected = '<!DOCTYPE html><html lang=fr><head><title>Test</title> <body> A Body <script id=elements-image-1 type=text/html><div class="badge-carte place">Place du Village<br>250m - 2mn à pied</div> <div class="badge-carte telecabine">Télécabine du Chamois<br>250m - 2mn à pied</div> <div class="badge-carte situation"><img alt="" src=https://domain.tld/assets/frontOffice/kneiss/template-assets/assets/dist/img/08ecd8a.png></div></script> <script id=elements-image-2 type=text/html><div class="badge-carte place">Place du Village<br>250m - 2mn à pied</div> <div class="badge-carte telecabine">Télécabine du Chamois<br>250m - 2mn à pied</div> <div class="badge-carte situation"><img alt="" src=https://domain.tld/assets/frontOffice/kneiss/template-assets/assets/dist/img/08ecd8a.png></div></script> <script class=foobar type=text/html><div class="badge-carte place">Place du Village<br>250m - 2mn à pied</div> <div class="badge-carte telecabine">Télécabine du Chamois<br>250m - 2mn à pied</div> <div class="badge-carte situation"><img alt="" src=https://domain.tld/assets/frontOffice/kneiss/template-assets/assets/dist/img/08ecd8a.png></div></script> <script class=foobar type=text/html><div class="badge-carte place">Place du Village<br>250m - 2mn à pied</div> <div class="badge-carte telecabine">Télécabine du Chamois<br>250m - 2mn à pied</div> <div class="badge-carte situation"><img alt="" src=https://domain.tld/assets/frontOffice/kneiss/template-assets/assets/dist/img/08ecd8a.png></div></script>';
+        $expected = '<!DOCTYPE html><html lang=fr><head><title>Test</title><body> A Body <script id=elements-image-1 type=text/html><div class="badge-carte place">Place du Village<br>250m - 2mn à pied</div> <div class="badge-carte telecabine">Télécabine du Chamois<br>250m - 2mn à pied</div> <div class="badge-carte situation"><img alt="" src=https://domain.tld/assets/frontOffice/kneiss/template-assets/assets/dist/img/08ecd8a.png></div></script> <script id=elements-image-2 type=text/html><div class="badge-carte place">Place du Village<br>250m - 2mn à pied</div> <div class="badge-carte telecabine">Télécabine du Chamois<br>250m - 2mn à pied</div> <div class="badge-carte situation"><img alt="" src=https://domain.tld/assets/frontOffice/kneiss/template-assets/assets/dist/img/08ecd8a.png></div></script> <script class=foobar type=text/html><div class="badge-carte place">Place du Village<br>250m - 2mn à pied</div> <div class="badge-carte telecabine">Télécabine du Chamois<br>250m - 2mn à pied</div> <div class="badge-carte situation"><img alt="" src=https://domain.tld/assets/frontOffice/kneiss/template-assets/assets/dist/img/08ecd8a.png></div></script> <script class=foobar type=text/html><div class="badge-carte place">Place du Village<br>250m - 2mn à pied</div> <div class="badge-carte telecabine">Télécabine du Chamois<br>250m - 2mn à pied</div> <div class="badge-carte situation"><img alt="" src=https://domain.tld/assets/frontOffice/kneiss/template-assets/assets/dist/img/08ecd8a.png></div></script>';
 
         $htmlMin = new HtmlMin();
 
@@ -627,7 +1114,7 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
           </body>
         </html>';
 
-        $expected = '<html><body><div data-json=\'{"key":"value"}\'></div>';
+        $expected = '<body><div data-json=\'{"key":"value"}\'></div>';
 
         static::assertSame(
             \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
@@ -838,7 +1325,7 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
 </body>
 </html>';
 
-        $expected = '<!DOCTYPE html><html lang=fr><head><title>Test</title> <body><p>Visitez notre boutique <strong>eBay</strong> : <a href=https://foo.bar/lall target=_blank>https://foo.bar/lall</a> <p><strong>ID Vintage</strong>, spécialiste de la vente de pièces et accessoires pour motos tout- terrain classiques :<a href=https://foo.bar/123 target=_blank>https://foo.bar/123</a> <p>Magazine <strong>Café-Racer</strong> : <a href=https://foo.bar/321 target=_blank>https://foo.bar/321</a> <p><strong>Julien Lecointe</strong> : <a href=https://foo.bar/123456 target=_blank>https://foo.bar/123456</a>';
+        $expected = '<!DOCTYPE html><html lang=fr><title>Test</title><body><p>Visitez notre boutique <strong>eBay</strong> : <a href=https://foo.bar/lall target=_blank>https://foo.bar/lall</a></p> <p><strong>ID Vintage</strong>, spécialiste de la vente de pièces et accessoires pour motos tout- terrain classiques :<a href=https://foo.bar/123 target=_blank>https://foo.bar/123</a></p> <p>Magazine <strong>Café-Racer</strong> : <a href=https://foo.bar/321 target=_blank>https://foo.bar/321</a></p> <p><strong>Julien Lecointe</strong> : <a href=https://foo.bar/123456 target=_blank>https://foo.bar/123456</a></p>';
 
         $htmlMin = new voku\helper\HtmlMin();
 
@@ -869,7 +1356,7 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
 </body>
 </html>';
 
-        $expected = '<html lang=fr><head><title>Test</title> <body><article class=row itemscope itemtype=http://schema.org/Product><a class="col-sm-3 overlay product-image" href=//www.gmp-classic.com/echappement_311_echappement-cafe-racer-bobber-classique-etc_paire-de-silencieux-type-megaton-lg-440-mm-__gmp11114.html itemprop=url tabindex=-1><img alt="PAIRE DE SILENCIEUX  TYPE MEGATON Lg 440 mm" class=img-responsive height=170 itemprop=image sizes="(max-width: 768x) 354px, (max-width: 992px) 305px, 212px" src=//cdn.gmp-classic.com/cache/images/product/93c869f20df68d3e531f7e9c3e603e5e-p1000223_3800.jpg srcset="//cdn.gmp-classic.com/cache/images/product/5ee4535311159aaf1c4ae44fbebd83c2-p1000223_3800.jpg 768w, //cdn.gmp-classic.com/cache/images/product/82e8bafbecab56f932720490e7fc2f85-p1000223_3800.jpg 992w, //cdn.gmp-classic.com/cache/images/product/93c869f20df68d3e531f7e9c3e603e5e-p1000223_3800.jpg 1200w" width=212> </a> </article>';
+        $expected = '<html lang=fr><title>Test</title><body><article class=row itemscope itemtype=http://schema.org/Product><a class="col-sm-3 overlay product-image" href=//www.gmp-classic.com/echappement_311_echappement-cafe-racer-bobber-classique-etc_paire-de-silencieux-type-megaton-lg-440-mm-__gmp11114.html itemprop=url tabindex=-1><img alt="PAIRE DE SILENCIEUX  TYPE MEGATON Lg 440 mm" class=img-responsive height=170 itemprop=image sizes="(max-width: 768x) 354px, (max-width: 992px) 305px, 212px" src=//cdn.gmp-classic.com/cache/images/product/93c869f20df68d3e531f7e9c3e603e5e-p1000223_3800.jpg srcset="//cdn.gmp-classic.com/cache/images/product/5ee4535311159aaf1c4ae44fbebd83c2-p1000223_3800.jpg 768w, //cdn.gmp-classic.com/cache/images/product/82e8bafbecab56f932720490e7fc2f85-p1000223_3800.jpg 992w, //cdn.gmp-classic.com/cache/images/product/93c869f20df68d3e531f7e9c3e603e5e-p1000223_3800.jpg 1200w" width=212> </a> </article>';
 
         $htmlMin = new voku\helper\HtmlMin();
         $htmlMin->doRemoveHttpPrefixFromAttributes();
@@ -916,7 +1403,7 @@ foo
 
         $htmlMin = new voku\helper\HtmlMin();
 
-        $expected = '<select><optgroup label="Gruppe 1"><option>Option 1.1 <optgroup label="Gruppe 2"><option>Option 2.1 <option>Option 2.2 <optgroup disabled label="Gruppe 3"><option>Option 3.1 <option>Option 3.2 <option>Option 3.3</select>';
+        $expected = '<select><optgroup label="Gruppe 1"><option>Option 1.1</option> </optgroup> <optgroup label="Gruppe 2"><option>Option 2.1</option> <option>Option 2.2</option></optgroup> <optgroup disabled label="Gruppe 3"><option>Option 3.1</option> <option>Option 3.2</option> <option>Option 3.3</option></optgroup></select>';
 
         static::assertSame($expected, $htmlMin->minify($html));
     }
@@ -965,7 +1452,7 @@ foo
         $htmlMin = new voku\helper\HtmlMin();
         $htmlMin->overwriteTemplateLogicSyntaxInSpecialScriptTags(['{%']);
 
-        $expected = '<script type=text/html><p>Foo <div class="alert alert-success"> Bar </div> {{foo}} {{bar}} {{hello}} </script>';
+        $expected = '<script type=text/html><p>Foo</p> <div class="alert alert-success"> Bar </div> {{foo}} {{bar}} {{hello}} </script>';
 
         static::assertSame($expected, $htmlMin->minify($html));
     }
@@ -1018,7 +1505,7 @@ HTML;
         $htmlMin = new voku\helper\HtmlMin();
         $htmlMin->overwriteSpecialScriptTags(['text/x-custom']);
         $expected = <<<HTML
-<!DOCTYPE html><html lang=nl><head> <body><script type=text/x-custom>
+<!DOCTYPE html><html lang=nl><body><script type=text/x-custom>
         <ul class="prices-tier items">
           <% _.each(tierPrices, function(item, key) { %>
           <%  var priceStr = '<span class="price-container price-tier_price">'
@@ -1095,7 +1582,7 @@ HTML;
         $htmlMin = new voku\helper\HtmlMin();
         $result = $htmlMin->minify($html);
 
-        $expected = '<div><p><span>First Paragraph</span> </p> Loose Text <p>Another Paragraph </div>';
+        $expected = '<div><p><span>First Paragraph</span> </p> Loose Text <p>Another Paragraph</p> </div>';
 
         static::assertSame($expected, $result);
     }
@@ -1155,7 +1642,7 @@ HTML;
         <body>lall</body></html>
         ';
 
-        $expected = '<!DOCTYPE html><!--[if IE 8]> <html lang="en" class="ie8"> <![endif]--><!--[if IE 9]> <html lang="en" class="ie9"> <![endif]--><!--[if !IE]><!--><html prefix="og: http://ogp.me/ns#" lang=ru><!--<![endif]--> <head><title>test</title> <body>lall';
+        $expected = '<!DOCTYPE html><!--[if IE 8]> <html lang="en" class="ie8"> <![endif]--><!--[if IE 9]> <html lang="en" class="ie9"> <![endif]--><!--[if !IE]><!--><html prefix="og: http://ogp.me/ns#" lang=ru><!--<![endif]--><head><title>test</title>lall';
 
         static::assertSame($expected, $htmlMin->minify($html));
     }
@@ -1260,9 +1747,9 @@ HTML;
     </html>
     ';
 
-        $expected = '<html ⚡><head> <body><p id=text class=foo>
+        $expected = '<html ⚡><head><body><p id=text class=foo>
         foo
-      </p> <br> <ul><li><p class=foo>lall </ul>';
+      </p> <br> <ul><li><p class=foo>lall</p> </ul>';
 
         static::assertSame(
             \str_replace(["\r\n", "\r", "\n"], "\n", $expected),
@@ -1346,7 +1833,7 @@ HTML;
             </html>
             ";
 
-        $expected = '<!DOCTYPE html><html lang=nl><head> <body><div class="price-box price-tier_price" data-price-box=product-id-1563 data-product-id=1563 data-role=priceBox></div> <script id=tier-prices-template type=text/x-custom-template>
+        $expected = '<!DOCTYPE html><html lang=nl><head><body><div class="price-box price-tier_price" data-price-box=product-id-1563 data-product-id=1563 data-role=priceBox></div> <script id=tier-prices-template type=text/x-custom-template>
                 <ul class="prices-tier items">
                     <% _.each(tierPrices, function(item, key) { %>
                     <%  var priceStr = \'<span class="price-container price-tier_price">\'
@@ -1411,7 +1898,7 @@ HTML;
     </html>
     ';
 
-        $expected = '<html><head><body><p class=foo id=text> foo </p><br><ul><li><p class="foo foo2">lall</ul>';
+        $expected = '<head><body><p class=foo id=text> foo </p><br><ul><li><p class="foo foo2">lall</ul>';
 
         static::assertSame($expected, $htmlMin->minify($html));
     }
@@ -1454,7 +1941,7 @@ HTML;
     </html>
     ';
 
-        $expected = '<html><head> <body><p class=foo id=text>foo</p> <br> <ul><li><p class=foo>lall </ul> <ul><li>1 <li>2 <li>3</ul> <table><tr><th>1 <th>2 <tr><td>foo <td><dl><dt>Coffee <dd>Black hot drink <dt>Milk <dd>White cold drink</dl> </table>';
+        $expected = '<head><body><p class=foo id=text>foo</p> <br> <ul><li><p class=foo>lall</p> </ul> <ul><li>1</li> <li>2</li> <li>3</li></ul> <table><tr><th>1</th> <th>2</th></tr> <tr><td>foo</td> <td><dl><dt>Coffee</dt> <dd>Black hot drink</dd> <dt>Milk</dt> <dd>White cold drink</dd></dl> </td></tr></table>';
 
         static::assertSame($expected, $htmlMin->minify($html));
     }
@@ -1510,7 +1997,7 @@ h1 {
 
         $html = '<p><!--INT_SCRIPT test1 --> lall <!-- test2 --></p> <!-- test2 END_INI_SCRIPT-->';
 
-        $expected = '<p><!--INT_SCRIPT test1--> lall <!--test2 END_INI_SCRIPT-->';
+        $expected = '<p><!--INT_SCRIPT test1--> lall </p> <!--test2 END_INI_SCRIPT-->';
 
         static::assertSame($expected, $htmlMin->minify($html));
     }
@@ -1572,7 +2059,7 @@ h1 {
     </html>
     ';
 
-        $expected = '<html><head></head> <body><p class="foo" id="text">foo</p> <br> <ul><li><p class="foo">lall</p> </li></ul> <ul><li>1</li> <li>2</li> <li>3</li></ul> <table><tr><th>1</th> <th>2</th></tr> <tr><td>foo</td> <td><dl><dt>Coffee</dt> <dd>Black hot drink</dd> <dt>Milk</dt> <dd>White cold drink</dd></dl> </td></tr></table></body></html>';
+        $expected = '<html><head></head><body><p class="foo" id="text">foo</p> <br> <ul><li><p class="foo">lall</p> </li></ul> <ul><li>1</li> <li>2</li> <li>3</li></ul> <table><tr><th>1</th> <th>2</th></tr> <tr><td>foo</td> <td><dl><dt>Coffee</dt> <dd>Black hot drink</dd> <dt>Milk</dt> <dd>White cold drink</dd></dl> </td></tr></table></body></html>';
 
         static::assertSame($expected, $htmlMin->minify($html));
     }
@@ -1593,7 +2080,7 @@ h1 {
   </body>
 </html>';
 
-        $expected = '<!DOCTYPE html><html lang=de><head><meta charset=utf-8><meta content="width=device-width, initial-scale=1.0" name=viewport><title>aussagekräftiger Titel der Seite</title> <body><p>Sehen Sie sich den Quellcode dieser Seite an. <kbd>(Kontextmenu: Seitenquelltext anzeigen)</kbd>';
+        $expected = '<!DOCTYPE html><html lang=de><head><meta charset=utf-8><meta content="width=device-width, initial-scale=1.0" name=viewport><title>aussagekräftiger Titel der Seite</title><body><p>Sehen Sie sich den Quellcode dieser Seite an. <kbd>(Kontextmenu: Seitenquelltext anzeigen)</kbd></p>';
 
         $htmlMin = new HtmlMin();
         static::assertSame($expected, $htmlMin->minify($html));
@@ -1615,7 +2102,7 @@ h1 {
   </body>
 </html><whatIsThat>???</whatIsThat>';
 
-        $expected = '<!DOCTYPE html><html lang=de><head><meta charset=utf-8><meta content="width=device-width, initial-scale=1.0" name=viewport><title>aussagekräftiger Titel der Seite</title> <body><p>Sehen Sie sich den Quellcode dieser Seite an. <kbd>(Kontextmenu: Seitenquelltext anzeigen)</kbd> <whatisthat>???</whatisthat>';
+        $expected = '<!DOCTYPE html><html lang=de><head><meta charset=utf-8><meta content="width=device-width, initial-scale=1.0" name=viewport><title>aussagekräftiger Titel der Seite</title><body><p>Sehen Sie sich den Quellcode dieser Seite an. <kbd>(Kontextmenu: Seitenquelltext anzeigen)</kbd></p> <whatisthat>???</whatisthat>';
 
         $htmlMin = new HtmlMin();
         static::assertSame($expected, $htmlMin->minify($html));
@@ -1719,7 +2206,7 @@ HTML;
         $actual = $minifier->minify($html);
 
         $expectedHtml = <<<'HTML'
-<!DOCTYPE html><html><head><title>Test</title> <body><!-- do not remove comment --> <hr> <!--
+<!DOCTYPE html><head><title>Test</title><body><!-- do not remove comment --> <hr> <!--
 do not remove comment
 -->
 HTML;
@@ -1970,7 +2457,7 @@ still inside the title">Text</div>';
         // --
 
         $html = '<html><head><link href="http://www.example.com/"></head><body><a href="http://www.example.com/">No remove</a><img src="http://www.example.com/" /></body></html>';
-        $expected = '<html><head><link href=//www.example.com/><body><a href=http://www.example.com/>No remove</a><img src=//www.example.com/>';
+        $expected = '<link href=//www.example.com/><a href=http://www.example.com/>No remove</a><img src=//www.example.com/>';
 
         $htmlMin = new HtmlMin();
         $htmlMin->doRemoveHttpPrefixFromAttributes();
@@ -1990,7 +2477,7 @@ still inside the title">Text</div>';
         // --
 
         $html = '<html><head><link href="http://www.example.com/"></head><body><a target="_blank" href="http://www.example.com/">No remove</a><img src="http://www.example.com/" /></body></html>';
-        $expected = '<html><head><link href=//www.example.com/><body><a href=http://www.example.com/ target=_blank>No remove</a><img src=//www.example.com/>';
+        $expected = '<link href=//www.example.com/><a href=http://www.example.com/ target=_blank>No remove</a><img src=//www.example.com/>';
 
         $htmlMin = new HtmlMin();
         $htmlMin->doRemoveHttpPrefixFromAttributes();
@@ -2010,7 +2497,7 @@ still inside the title">Text</div>';
         // --
 
         $html = '<html><head><link href="http://www.example.com/"></head><body><a href="http://www.example.com/">No remove</a><img src="http://www.example.com/" /></body></html>';
-        $expected = '<html><head><link href=//www.example.com/><body><a href=//www.example.com/>No remove</a><img src=//www.example.com/>';
+        $expected = '<link href=//www.example.com/><a href=//www.example.com/>No remove</a><img src=//www.example.com/>';
 
         $htmlMin = new HtmlMin();
         $htmlMin->doRemoveHttpPrefixFromAttributes();
@@ -2030,7 +2517,7 @@ still inside the title">Text</div>';
         // --
 
         $html = '<html><head><link href="http://www.example.com/"></head><body><a target="_blank" href="http://www.example.com/">No remove</a><img src="http://www.example.com/" /></body></html>';
-        $expected = '<html><head><link href=//www.example.com/><body><a href=http://www.example.com/ target=_blank>No remove</a><img src=//www.example.com/>';
+        $expected = '<link href=//www.example.com/><a href=http://www.example.com/ target=_blank>No remove</a><img src=//www.example.com/>';
 
         $htmlMin = new HtmlMin();
         $htmlMin->doRemoveHttpPrefixFromAttributes();
