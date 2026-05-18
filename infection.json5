@@ -1,0 +1,11 @@
+{
+    "$schema": "https://infection.github.io/schema.json",
+    "source": {
+        "directories": [
+            "src"
+        ]
+    },
+    "logs": {
+        "summary": "build/logs/infection-summary.log"
+    }
+}

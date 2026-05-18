@@ -21,6 +21,47 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         static::assertSame('', (new HtmlMin())->minify(''));
     }
 
+    public function testAttachObserverToTheDomLoopDoesNotTriggerDeprecation()
+    {
+        $observer = new class implements \voku\helper\HtmlMinDomObserverInterface {
+            /** @var int */
+            public $beforeCalls = 0;
+
+            /** @var int */
+            public $afterCalls = 0;
+
+            public function domElementBeforeMinification(\voku\helper\SimpleHtmlDomInterface $element, \voku\helper\HtmlMinInterface $htmlMin)
+            {
+                ++$this->beforeCalls;
+            }
+
+            public function domElementAfterMinification(\voku\helper\SimpleHtmlDomInterface $element, \voku\helper\HtmlMinInterface $htmlMin)
+            {
+                ++$this->afterCalls;
+            }
+        };
+
+        \set_error_handler(static function (int $severity, string $message, string $file, int $line): bool {
+            if (($severity & \E_DEPRECATED) !== 0) {
+                throw new \ErrorException($message, 0, $severity, $file, $line);
+            }
+
+            return false;
+        });
+
+        try {
+            $minifier = new HtmlMin();
+            $minifier->attachObserverToTheDomLoop($observer);
+
+            static::assertSame('<div class="a b">test</div>', $minifier->minify('<div class="b a">test</div>'));
+        } finally {
+            \restore_error_handler();
+        }
+
+        static::assertGreaterThan(0, $observer->beforeCalls);
+        static::assertGreaterThan(0, $observer->afterCalls);
+    }
+
     /**
      * @return array
      */
