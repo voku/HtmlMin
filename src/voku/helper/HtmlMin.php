@@ -23,7 +23,7 @@ class HtmlMin implements HtmlMinInterface
     /**
      * @var string
      */
-    private static $regExSpace = "/[[:space:]]{2,}|[\r\n]/u";
+    private static $regExSpace = "/[ \t\f\r\n]{2,}|[\r\n]/";
 
     /**
      * @var string[]
