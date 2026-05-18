@@ -1072,6 +1072,16 @@ HTML;
         );
     }
 
+    public function testDefaultConfigPreservesNonBreakingSpaceCharacters()
+    {
+        $htmlMin = new HtmlMin();
+        $nbsp = \html_entity_decode('&nbsp;', \ENT_QUOTES | \ENT_HTML5, 'UTF-8');
+
+        $html = '<span>' . $nbsp . ' ' . $nbsp . '</span>';
+
+        static::assertSame($html, $htmlMin->minify($html));
+    }
+
     public function testSelfClosingTagHr()
     {
         // init
