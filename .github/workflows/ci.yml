@@ -58,7 +58,7 @@ jobs:
       - name: Install dependencies
         run: |
           if [[ "${{ matrix.php }}" == "8.5" ]]; then
-            composer require --dev phpstan/phpstan --no-update
+            composer require --dev phpstan/phpstan:^2.1 --no-update
           fi;
 
           if [[ "${{ matrix.composer }}" == "lowest" ]]; then
@@ -77,7 +77,6 @@ jobs:
           php vendor/bin/phpunit -c phpunit.xml --coverage-clover=build/logs/clover.xml
 
       - name: Run phpstan
-        continue-on-error: true
         if: ${{ matrix.php == '8.5' }}
         run: |
           php vendor/bin/phpstan analyse

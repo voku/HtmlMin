@@ -162,7 +162,7 @@ final class HtmlMinDomObserverOptimizeAttributes implements HtmlMinDomObserverIn
      * @param string           $tag
      * @param string           $attrName
      * @param string           $attrValue
-     * @param array            $allAttr
+     * @param array<string, string> $allAttr
      * @param HtmlMinInterface $htmlMin
      *
      * @return bool

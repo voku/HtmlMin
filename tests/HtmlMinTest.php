@@ -62,6 +62,22 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
         static::assertGreaterThan(0, $observer->afterCalls);
     }
 
+    public function testOverwriteTemplateLogicSyntaxInSpecialScriptTagsRejectsNonStringValues()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('setTemplateLogicSyntaxInSpecialScriptTags only allows string[]');
+
+        (new HtmlMin())->overwriteTemplateLogicSyntaxInSpecialScriptTags(['{%', 123]);
+    }
+
+    public function testOverwriteSpecialScriptTagsRejectsNonStringValues()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('SpecialScriptTags only allows string[]');
+
+        (new HtmlMin())->overwriteSpecialScriptTags(['text/html', 123]);
+    }
+
     /**
      * @return array
      */
