@@ -65,7 +65,7 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
     public function testOverwriteTemplateLogicSyntaxInSpecialScriptTagsRejectsNonStringValues()
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('setTemplateLogicSyntaxInSpecialScriptTags only allows string[]');
+        $this->expectExceptionMessage('overwriteTemplateLogicSyntaxInSpecialScriptTags only allows string[]');
 
         (new HtmlMin())->overwriteTemplateLogicSyntaxInSpecialScriptTags(['{%', 123]);
     }
@@ -73,7 +73,7 @@ final class HtmlMinTest extends \PHPUnit\Framework\TestCase
     public function testOverwriteSpecialScriptTagsRejectsNonStringValues()
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('SpecialScriptTags only allows string[]');
+        $this->expectExceptionMessage('overwriteSpecialScriptTags only allows string[]');
 
         (new HtmlMin())->overwriteSpecialScriptTags(['text/html', 123]);
     }

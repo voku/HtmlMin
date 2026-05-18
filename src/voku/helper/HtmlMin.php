@@ -2609,7 +2609,7 @@ class HtmlMin implements HtmlMinInterface
         $validatedTemplateLogicSyntaxInSpecialScriptTags = [];
         foreach ($templateLogicSyntaxInSpecialScriptTags as $tmp) {
             if (!\is_string($tmp)) {
-                throw new \InvalidArgumentException('setTemplateLogicSyntaxInSpecialScriptTags only allows string[]');
+                throw new \InvalidArgumentException('overwriteTemplateLogicSyntaxInSpecialScriptTags only allows string[]');
             }
 
             $validatedTemplateLogicSyntaxInSpecialScriptTags[] = $tmp;
@@ -2631,7 +2631,7 @@ class HtmlMin implements HtmlMinInterface
         $validatedSpecialScriptTags = [];
         foreach ($specialScriptTags as $tag) {
             if (!\is_string($tag)) {
-                throw new \InvalidArgumentException('SpecialScriptTags only allows string[]');
+                throw new \InvalidArgumentException('overwriteSpecialScriptTags only allows string[]');
             }
 
             $validatedSpecialScriptTags[] = $tag;
