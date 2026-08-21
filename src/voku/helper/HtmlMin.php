@@ -30,17 +30,6 @@ class HtmlMin implements HtmlMinInterface
      *
      * @psalm-var list<string>
      */
-    private static $optional_end_tags = [
-        'html',
-        'head',
-        'body',
-    ];
-
-    /**
-     * @var string[]
-     *
-     * @psalm-var list<string>
-     */
     private static $selfClosingTags = [
         'area',
         'base',
@@ -91,7 +80,7 @@ class HtmlMin implements HtmlMinInterface
     ];
 
     /**
-     * @var array
+     * @var array<string, string>
      */
     private static $booleanAttributes = [
         'allowfullscreen' => '',
@@ -138,7 +127,7 @@ class HtmlMin implements HtmlMinInterface
     ];
 
     /**
-     * @var array
+     * @var list<string>
      */
     private static $skipTagsForRemoveWhitespace = [
         'code',
@@ -149,7 +138,7 @@ class HtmlMin implements HtmlMinInterface
     ];
 
     /**
-     * @var array
+     * @var array<int, string>
      */
     private $protectedChildNodes = [];
 
@@ -375,7 +364,7 @@ class HtmlMin implements HtmlMinInterface
      */
     public function attachObserverToTheDomLoop(HtmlMinDomObserverInterface $observer)
     {
-        $this->domLoopObservers[$observer] = $observer;
+        $this->domLoopObservers->offsetSet($observer, $observer);
     }
 
     /**
@@ -1230,7 +1219,7 @@ class HtmlMin implements HtmlMinInterface
             }
 
             return !\in_array(
-                $firstChild->tagName,
+                $firstChild->nodeName,
                 [
                     'meta',
                     'link',
@@ -1586,7 +1575,7 @@ class HtmlMin implements HtmlMinInterface
     }
 
     /**
-     * @return array
+     * @return string[]
      */
     public function getDomainsToRemoveHttpPrefixFromAttributes(): array
     {
@@ -2266,9 +2255,9 @@ class HtmlMin implements HtmlMinInterface
             }
 
             $parentNode = $element->parentNode();
-            if ($parentNode !== null && $parentNode->nodeValue !== null) {
+            if ($parentNode !== null && $parentNode->getNode()->nodeValue !== null) {
                 $this->protectedChildNodes[$this->protected_tags_counter] = $parentNode->innerHtml();
-                $parentNode->nodeValue = '<' . $this->protectedChildNodesHelper . ' data-' . $this->protectedChildNodesHelper . '="' . $this->protected_tags_counter . '"></' . $this->protectedChildNodesHelper . '>';
+                $parentNode->getNode()->nodeValue = '<' . $this->protectedChildNodesHelper . ' data-' . $this->protectedChildNodesHelper . '="' . $this->protected_tags_counter . '"></' . $this->protectedChildNodesHelper . '>';
             }
 
             ++$this->protected_tags_counter;
@@ -2301,7 +2290,7 @@ class HtmlMin implements HtmlMinInterface
                 }
             }
 
-            $innerHtml = $element->innerhtml;
+            $innerHtml = $element->innerHtml();
 
             // On PHP < 8.0 the simplevokubroken-hash mechanism restores content
             // (including surrounding newlines/spaces) AFTER fixHtmlOutput's trim
@@ -2338,7 +2327,8 @@ class HtmlMin implements HtmlMinInterface
             ) {
                 $originalInnerHtml = $innerHtml;
                 try {
-                    $innerHtml = \JShrink\Minifier::minify($innerHtml);
+                    $minifiedInnerHtml = \JShrink\Minifier::minify($innerHtml);
+                    $innerHtml = \is_string($minifiedInnerHtml) ? $minifiedInnerHtml : $originalInnerHtml;
                 } catch (\Exception $e) {
                     $innerHtml = $originalInnerHtml;
                 }
@@ -2411,6 +2401,9 @@ class HtmlMin implements HtmlMinInterface
         foreach ($dom->findMulti('//comment()') as $commentWrapper) {
             $comment = $commentWrapper->getNode();
             $val = $comment->nodeValue;
+            if ($val === null) {
+                continue;
+            }
             if (\strpos($val, '[') === false) {
                 $parentNode = $comment->parentNode;
                 if ($parentNode !== null) {
@@ -2449,6 +2442,9 @@ class HtmlMin implements HtmlMinInterface
         foreach ($dom->findMulti('//comment()') as $commentWrapper) {
             $comment = $commentWrapper->getNode();
             $commentValue = $comment->nodeValue;
+            if ($commentValue === null) {
+                continue;
+            }
             if (
                 $this->isConditionalComment($commentValue)
                 ||
@@ -2508,7 +2504,7 @@ class HtmlMin implements HtmlMinInterface
     /**
      * Callback function for preg_replace_callback use.
      *
-     * @param array $matches PREG matches
+     * @param array<string, string> $matches PREG matches
      *
      * @return string
      */
@@ -2516,7 +2512,7 @@ class HtmlMin implements HtmlMinInterface
     {
         \preg_match('/=["\']*(?<id>\d+)/', $matches['attributes'], $matchesInner);
 
-        return $this->protectedChildNodes[$matchesInner['id']] ?? '';
+        return isset($matchesInner['id']) ? ($this->protectedChildNodes[(int) $matchesInner['id']] ?? '') : '';
     }
 
     /**
@@ -2574,6 +2570,10 @@ class HtmlMin implements HtmlMinInterface
                 continue;
             }
 
+            if ($text_node->nodeValue === null) {
+                continue;
+            }
+
             $nodeValueTmp = \preg_replace(self::$regExSpace, ' ', $text_node->nodeValue);
             if ($nodeValueTmp !== null) {
                 $text_node->nodeValue = $nodeValueTmp;
@@ -2600,38 +2600,44 @@ class HtmlMin implements HtmlMinInterface
     }
 
     /**
-     * @param string[] $templateLogicSyntaxInSpecialScriptTags
+     * @param array<int, mixed> $templateLogicSyntaxInSpecialScriptTags
      *
      * @return HtmlMin
      */
     public function overwriteTemplateLogicSyntaxInSpecialScriptTags(array $templateLogicSyntaxInSpecialScriptTags): self
     {
+        $validatedTemplateLogicSyntaxInSpecialScriptTags = [];
         foreach ($templateLogicSyntaxInSpecialScriptTags as $tmp) {
             if (!\is_string($tmp)) {
-                throw new \InvalidArgumentException('setTemplateLogicSyntaxInSpecialScriptTags only allows string[]');
+                throw new \InvalidArgumentException('overwriteTemplateLogicSyntaxInSpecialScriptTags only allows string[]');
             }
+
+            $validatedTemplateLogicSyntaxInSpecialScriptTags[] = $tmp;
         }
 
-        $this->templateLogicSyntaxInSpecialScriptTags = $templateLogicSyntaxInSpecialScriptTags;
+        $this->templateLogicSyntaxInSpecialScriptTags = $validatedTemplateLogicSyntaxInSpecialScriptTags;
 
         return $this;
     }
 
 
     /**
-     * @param string[] $specialScriptTags
+     * @param array<int, mixed> $specialScriptTags
      *
-     * @return HtmlDomParser
+     * @return HtmlMin
      */
     public function overwriteSpecialScriptTags(array $specialScriptTags): self
     {
+        $validatedSpecialScriptTags = [];
         foreach ($specialScriptTags as $tag) {
             if (!\is_string($tag)) {
-                throw new \InvalidArgumentException('SpecialScriptTags only allows string[]');
+                throw new \InvalidArgumentException('overwriteSpecialScriptTags only allows string[]');
             }
+
+            $validatedSpecialScriptTags[] = $tag;
         }
 
-        $this->specialScriptTags = $specialScriptTags;
+        $this->specialScriptTags = $validatedSpecialScriptTags;
 
         return $this;
     }

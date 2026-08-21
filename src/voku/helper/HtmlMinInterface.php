@@ -163,7 +163,7 @@ interface HtmlMinInterface
     public function getLocalDomains(): array;
 
     /**
-     * @return array
+     * @return string[]
      */
     public function getDomainsToRemoveHttpPrefixFromAttributes(): array;
 }

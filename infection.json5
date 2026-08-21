@@ -1,0 +1,12 @@
+{
+    "$schema": "https://infection.github.io/schema.json",
+    "staticAnalysisTool": "phpstan",
+    "source": {
+        "directories": [
+            "src"
+        ]
+    },
+    "logs": {
+        "summary": "build/logs/infection-summary.log"
+    }
+}
